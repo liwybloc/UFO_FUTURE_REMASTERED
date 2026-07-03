@@ -5,14 +5,15 @@ import appeng.me.cluster.implementations.CraftingCPUCluster;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
-import java.util.List;
 
 @Mixin(value = CraftingCPUCluster.class, priority = 3000, remap = false)
 public abstract class MixinCraftingCPUCluster {
-    @Shadow private List<CraftingBlockEntity> blockEntities;
+    private static final int UFO_MAX_SAFE_COPROCESSORS = Integer.MAX_VALUE - 1;
+
     @Shadow private int accelerator;
 
     /**
@@ -20,34 +21,15 @@ public abstract class MixinCraftingCPUCluster {
      * into addBlockEntity, but bypass the hard per-block 16 thread exception
      * for UFO's larger crafting units.
      */
-    @Inject(
-            method = "addBlockEntity",
-            at = @At(value = "NEW", target = "java/lang/IllegalArgumentException"),
-            cancellable = true
-    )
-    private void ufo$allowLargeCoProcessors(CraftingBlockEntity te, CallbackInfo ci) {
-        if (te.getAcceleratorThreads() > 16) {
-            this.accelerator = ufo$getSaturatedThreadSum();
-            ci.cancel();
-        }
+    @ModifyConstant(method = "addBlockEntity", constant = @Constant(intValue = 16))
+    private int ufo$allowLargeCoProcessors(int original) {
+        return Integer.MAX_VALUE;
     }
 
     @Inject(method = "addBlockEntity", at = @At("TAIL"))
     private void ufo$clampThreadTotal(CraftingBlockEntity te, CallbackInfo ci) {
-        this.accelerator = ufo$getSaturatedThreadSum();
-    }
-
-    private int ufo$getSaturatedThreadSum() {
-        long total = 0L;
-        for (CraftingBlockEntity blockEntity : this.blockEntities) {
-            int threads = blockEntity.getAcceleratorThreads();
-            if (threads > 0) {
-                total += threads;
-                if (total >= Integer.MAX_VALUE) {
-                    return Integer.MAX_VALUE;
-                }
-            }
+        if (this.accelerator < 0 || this.accelerator == Integer.MAX_VALUE) {
+            this.accelerator = UFO_MAX_SAFE_COPROCESSORS;
         }
-        return (int) total;
     }
 }
