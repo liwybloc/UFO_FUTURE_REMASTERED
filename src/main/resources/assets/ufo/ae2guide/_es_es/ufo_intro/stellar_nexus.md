@@ -12,7 +12,7 @@ El **Stellar Nexus** es el multibloque final de simulacion estelar.
 ## Mecanicas Base
 
 - Lee inputs directamente desde la ME
-- Carga un buffer interno de **20B AE**
+- Carga un buffer interno de **200B AE**
 - Consume combustible al iniciar
 - Consume coolant durante la operacion
 - Exige un item input hatch, un item output hatch, un fluid output hatch y un AE energy input hatch

@@ -115,6 +115,8 @@ public class DimensionalMatterAssemblerBlockEntity extends AENetworkedPoweredBlo
     private int overloadTimer = -1;
     private int localMaxPower = MAX_POWER_STORAGE;
     private int thermalTicker = 0; // Tick counter for smooth heat/cool transitions
+    private int productiveThermalTicks = 0;
+    private int productiveHeatRemainder = 0;
 
     public DimensionalMatterAssemblerBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState blockState) {
         super(type, pos, blockState);
@@ -205,16 +207,20 @@ public class DimensionalMatterAssemblerBlockEntity extends AENetworkedPoweredBlo
             return;
         }
 
-        // 1. Heat Generation: smooth +1 HU every 4 ticks while working (= +5 HU/s)
-        // scaled by upgrades
-        if (this.isWorking()) {
-            if (this.thermalTicker % 4 == 0) {
-                int generationAmount = (int) Math.max(1, Math.round(1 * this.currentHeatMultiplier));
+        // 1. Heat Generation: only productive crafting ticks create heat.
+        // External block tick accelerators should not heat the DMA unless the AE2
+        // crafting tick also advanced recipe progress.
+        if (this.productiveThermalTicks > 0) {
+            this.productiveHeatRemainder += this.productiveThermalTicks;
+            this.productiveThermalTicks = 0;
+            while (this.productiveHeatRemainder >= 4) {
+                int generationAmount = (int) Math.max(0, Math.round(this.currentHeatMultiplier));
                 this.temperature += generationAmount;
+                this.productiveHeatRemainder -= 4;
             }
         } else {
             // 2. Passive Cooling: -1 HU every 40 ticks when idle (= -0.5 HU/s)
-            if (this.temperature > 0 && this.thermalTicker % 40 == 0) {
+            if (!this.isWorking() && this.temperature > 0 && this.thermalTicker % 40 == 0) {
                 this.temperature -= 1;
             }
         }
@@ -489,7 +495,7 @@ public class DimensionalMatterAssemblerBlockEntity extends AENetworkedPoweredBlo
             } else if ("matterflow".equals(firstCatalyst.getFamily())) {
                 powerMult *= 0.5; // Huge power discount
             } else if ("quantum".equals(firstCatalyst.getFamily())) {
-                // Future use
+                bonusDropChance += 0.5;
             }
         }
 
@@ -613,7 +619,8 @@ public class DimensionalMatterAssemblerBlockEntity extends AENetworkedPoweredBlo
             for (int i = 0; i < task.getFluidOutputs().size(); i++) {
                 var outStack = task.getFluidOutputs().get(i);
                 if (outStack.what() instanceof AEFluidKey fluidKey) {
-                    if (!this.fluidInv.canAdd(i, fluidKey, (int) outStack.amount())) {
+                    int outputAmount = getOutputAmountWithMaxBonus(outStack.amount());
+                    if (!this.fluidInv.canAdd(i, fluidKey, outputAmount)) {
                         return false;
                     }
                 }
@@ -776,7 +783,7 @@ public class DimensionalMatterAssemblerBlockEntity extends AENetworkedPoweredBlo
 
                 final int speedFactor = this.hasCreativeCatalyst
                         ? Math.max(1, recipeTime)
-                        : Math.min(10, Math.max(1, (int) (baseSpeedFactor * this.currentSpeedMultiplier)));
+                        : Math.min(Math.max(1, recipeTime), Math.max(1, Mth.ceil((float) (baseSpeedFactor * this.currentSpeedMultiplier))));
                 final int progressReq = recipeTime - this.getProcessingTime();
                 final float powerRatio = progressReq < speedFactor ? (float) progressReq / speedFactor : 1;
                 final int requiredTicks = Mth.ceil((float) recipeTime / speedFactor);
@@ -843,6 +850,9 @@ public class DimensionalMatterAssemblerBlockEntity extends AENetworkedPoweredBlo
                 }
             });
             this.setWorking(didWork[0]);
+            if (didWork[0]) {
+                this.productiveThermalTicks++;
+            }
 
             if (this.getProcessingTime() >= this.getMaxProcessingTime()) {
                 this.setProcessingTime(0);
@@ -864,7 +874,7 @@ public class DimensionalMatterAssemblerBlockEntity extends AENetworkedPoweredBlo
                     for (int i = 0; i < out.getFluidOutputs().size(); i++) {
                         if (out.getFluidOutputs().get(i) != null
                                 && out.getFluidOutputs().get(i).what() instanceof AEFluidKey fluidKey) {
-                            int outAmount = (int) out.getFluidOutputs().get(i).amount();
+                            int outAmount = getOutputAmountWithRolledBonus(out.getFluidOutputs().get(i).amount());
                             this.fluidInv.add(i, fluidKey, outAmount);
                         }
                     }
@@ -1021,6 +1031,7 @@ public class DimensionalMatterAssemblerBlockEntity extends AENetworkedPoweredBlo
         // Persist thermal state
         data.putInt("temperature", this.temperature);
         data.putInt("overloadTimer", this.overloadTimer);
+        data.putInt("productiveHeatRemainder", this.productiveHeatRemainder);
     }
 
     @Override
@@ -1045,6 +1056,8 @@ public class DimensionalMatterAssemblerBlockEntity extends AENetworkedPoweredBlo
             this.temperature = data.getInt("temperature");
         if (data.contains("overloadTimer"))
             this.overloadTimer = data.getInt("overloadTimer");
+        if (data.contains("productiveHeatRemainder"))
+            this.productiveHeatRemainder = data.getInt("productiveHeatRemainder");
 
         // Recalculate upgrade bonuses (maxTemperature, maxPower) from loaded upgrades
         recalculateUpgrades();

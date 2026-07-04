@@ -1,12 +1,12 @@
 {
   "parent": "block/cube",
   "textures": {
-    "particle": "ufo:block/quantum_pattern_hatch_base",
-    "down": "ufo:block/quantum_pattern_hatch_alternate",
-    "up": "ufo:block/quantum_pattern_hatch_alternate_front",
-    "north": "ufo:block/quantum_pattern_hatch_alternate_arrow",
-    "south": "ufo:block/quantum_pattern_hatch_back",
-    "east": "ufo:block/quantum_pattern_hatch_alternate_arrow",
-    "west": "ufo:block/quantum_pattern_hatch_alternate_arrow"
+    "particle": "ufo:block/quantum_pattern_hatch",
+    "down": "ufo:block/quantum_pattern_hatch",
+    "up": "ufo:block/quantum_pattern_hatch",
+    "north": "ufo:block/quantum_pattern_hatch",
+    "south": "ufo:block/quantum_pattern_hatch",
+    "east": "ufo:block/quantum_pattern_hatch",
+    "west": "ufo:block/quantum_pattern_hatch"
   }
 }

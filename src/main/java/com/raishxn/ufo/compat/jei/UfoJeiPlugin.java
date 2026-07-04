@@ -24,19 +24,32 @@ import net.pedroksl.ae2addonlib.recipes.IngredientStack;
 
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
+import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
+import mezz.jei.api.runtime.IJeiRuntime;
 
 @JeiPlugin
 public class UfoJeiPlugin implements IModPlugin {
     private static final ResourceLocation ID = UfoMod.id("jei_plugin");
+    private static IJeiRuntime runtime;
 
     public UfoJeiPlugin() {}
 
     @Override
     public ResourceLocation getPluginUid() {
         return ID;
+    }
+
+    @Override
+    public void onRuntimeAvailable(IJeiRuntime jeiRuntime) {
+        runtime = jeiRuntime;
+    }
+
+    @Override
+    public void onRuntimeUnavailable() {
+        runtime = null;
     }
 
     @Override
@@ -130,6 +143,16 @@ public class UfoJeiPlugin implements IModPlugin {
         var quantumCryoforgeController = MultiblockBlocks.QUANTUM_CRYOFORGE_CONTROLLER.get().asItem().getDefaultInstance();
         registration.addRecipeCatalyst(quantumCryoforgeController, UniversalMultiblockRecipeCategory.QUANTUM_CRYOFORGE_RECIPE_TYPE);
         registration.addRecipeCatalyst(quantumCryoforgeController, MultiblockInfoCategory.RECIPE_TYPE);
+    }
+
+    public static ItemStack getHoveredItemStack() {
+        if (runtime == null) {
+            return ItemStack.EMPTY;
+        }
+        return runtime.getRecipesGui().getIngredientUnderMouse(VanillaTypes.ITEM_STACK)
+                .or(() -> runtime.getIngredientListOverlay().getIngredientUnderMouse().flatMap(ingredient -> ingredient.getItemStack()))
+                .map(ItemStack::copy)
+                .orElse(ItemStack.EMPTY);
     }
 
     public static Ingredient stackOf(IngredientStack.Item stack) {

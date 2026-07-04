@@ -12,9 +12,11 @@ import com.raishxn.ufo.block.entity.pattern.QuantumCryoforgePatternFactory;
 import com.raishxn.ufo.block.entity.pattern.QuantumSlicerPatternFactory;
 import com.raishxn.ufo.block.entity.pattern.StellarNexusPatternFactory;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.DirectionalBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.List;
@@ -87,6 +89,16 @@ public final class MultiblockControllerDefinitions {
             return Optional.of(getPreviewEntries().get(4).definition());
         }
         return Optional.empty();
+    }
+
+    public static Direction getPatternFacing(BlockEntity be, BlockState state) {
+        Direction facing = state.hasProperty(DirectionalBlock.FACING)
+                ? state.getValue(DirectionalBlock.FACING)
+                : Direction.NORTH;
+        if (be instanceof QuantumCryoforgeControllerBE) {
+            return facing.getOpposite();
+        }
+        return facing;
     }
 
     public static boolean isSupportedController(BlockState state) {

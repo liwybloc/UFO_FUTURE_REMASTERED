@@ -10,6 +10,7 @@ import com.raishxn.ufo.api.multiblock.MultiblockControllerDefinitions;
 import com.raishxn.ufo.api.multiblock.MultiblockPattern;
 import com.raishxn.ufo.block.entity.UniversalDisplayedRecipe;
 import com.raishxn.ufo.client.render.StructureHighlightRenderer;
+import com.raishxn.ufo.client.tutorial.UfoTutorialScreens;
 import com.raishxn.ufo.network.ModPackets;
 import com.raishxn.ufo.network.packet.PacketScanUniversalStructure;
 import com.raishxn.ufo.network.packet.PacketToggleUniversalOverclock;
@@ -27,7 +28,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.DirectionalBlock;
 import net.neoforged.neoforge.fluids.FluidStack;
 
 import java.util.ArrayList;
@@ -43,6 +43,7 @@ public abstract class AbstractUniversalMultiblockControllerScreen<M extends Abst
     private Button safeModeButton;
     private Button overclockButton;
     private Button scanButton;
+    private Button tutorialButton;
     private List<UniversalDisplayedRecipe> cachedDisplayedRecipes = List.of();
     private List<GroupedRecipe> cachedGroupedRecipes = List.of();
     private int cachedRecipeSignature = 0;
@@ -66,6 +67,12 @@ public abstract class AbstractUniversalMultiblockControllerScreen<M extends Abst
                 })
                 .bounds(this.leftPos + this.imageWidth - 88, this.topPos + this.imageHeight - 24, 42, 20)
                 .tooltip(Tooltip.create(Component.literal("Force a multiblock scan and report missing blocks")))
+                .build());
+
+        this.tutorialButton = this.addRenderableWidget(Button.builder(Component.literal("?"), btn ->
+                        UfoTutorialScreens.openFor(this.menu.getBlockEntity()))
+                .bounds(this.leftPos + this.imageWidth - 110, this.topPos + this.imageHeight - 24, 20, 20)
+                .tooltip(Tooltip.create(Component.translatable("ufo.tutorial.open")))
                 .build());
 
         this.safeModeButton = this.addRenderableWidget(Button.builder(Component.literal("Safe"), btn ->
@@ -479,11 +486,8 @@ public abstract class AbstractUniversalMultiblockControllerScreen<M extends Abst
             return;
         }
 
-        Direction facing = Direction.NORTH;
         var state = this.minecraft.level.getBlockState(pos);
-        if (state.hasProperty(DirectionalBlock.FACING)) {
-            facing = state.getValue(DirectionalBlock.FACING);
-        }
+        Direction facing = MultiblockControllerDefinitions.getPatternFacing(blockEntity, state);
 
         MultiblockPattern.MatchResult result = definition.get().pattern().match(this.minecraft.level, pos, facing);
         if (result.isValid()) {

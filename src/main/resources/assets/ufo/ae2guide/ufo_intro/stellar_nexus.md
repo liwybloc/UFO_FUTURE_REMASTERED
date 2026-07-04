@@ -16,7 +16,7 @@ The **Stellar Nexus** is the endgame stellar simulation multiblock.
 ## Core Mechanics
 
 - Reads inputs directly from the ME network
-- Charges a **20B AE** internal buffer while assembled
+- Charges a **200B AE** internal buffer while assembled
 - Consumes fuel on start
 - Consumes coolant while running
 - Generates heat continuously during operation

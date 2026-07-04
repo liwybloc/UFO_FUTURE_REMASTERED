@@ -2,10 +2,13 @@ package com.raishxn.ufo.block;
 
 import appeng.block.crafting.PatternProviderBlock;
 import com.raishxn.ufo.api.multiblock.IMultiblockController;
+import com.raishxn.ufo.block.entity.AbstractSimpleMultiblockControllerBE;
 import com.raishxn.ufo.block.entity.QuantumPatternHatchBE;
+import com.raishxn.ufo.block.entity.StellarNexusControllerBE;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class QuantumPatternHatchBlock extends PatternProviderBlock {
@@ -32,9 +35,20 @@ public class QuantumPatternHatchBlock extends PatternProviderBlock {
         super.neighborChanged(state, level, pos, block, fromPos, isMoving);
         if (!level.isClientSide() && level.getBlockEntity(pos) instanceof QuantumPatternHatchBE hatch) {
             var controllerPos = hatch.getControllerPos();
-            if (controllerPos != null && level.getBlockEntity(controllerPos) instanceof IMultiblockController controller) {
-                controller.scanStructure(level);
+            if (controllerPos != null) {
+                markControllerDirty(level, controllerPos);
             }
+        }
+    }
+
+    private static void markControllerDirty(Level level, BlockPos controllerPos) {
+        BlockEntity entity = level.getBlockEntity(controllerPos);
+        if (entity instanceof AbstractSimpleMultiblockControllerBE controller) {
+            controller.markStructureDirty();
+        } else if (entity instanceof StellarNexusControllerBE controller) {
+            controller.markStructureDirty();
+        } else if (entity instanceof IMultiblockController controller) {
+            controller.scanStructure(level);
         }
     }
 }

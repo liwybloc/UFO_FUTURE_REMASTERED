@@ -4,6 +4,8 @@ package com.raishxn.ufo;
 import com.mojang.logging.LogUtils;
 import com.raishxn.ufo.block.ModBlocks;
 import com.raishxn.ufo.block.MultiblockBlocks;
+import com.raishxn.ufo.client.tutorial.screen.UfoTutorialScreen;
+import com.raishxn.ufo.client.tutorial.UfoTutorialScreens;
 import com.raishxn.ufo.datagen.ModDataComponents;
 import com.raishxn.ufo.event.ModKeyBindings;
 import com.raishxn.ufo.init.ModBlockEntities;
@@ -30,6 +32,7 @@ import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.neoforged.neoforge.client.event.InputEvent;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
@@ -39,6 +42,9 @@ import org.slf4j.Logger;
 public class UfoMod {
     public static final String MOD_ID = "ufo";
     public static final Logger LOGGER = LogUtils.getLogger();
+    private static final int TUTORIAL_HOLD_TICKS = 12;
+    private int tutorialHoldTicks;
+    private boolean tutorialHoldOpened;
     public static ResourceLocation id(String path) {
         return ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
     }
@@ -109,6 +115,30 @@ public class UfoMod {
         if (ModKeyBindings.TOGGLE_AUTO_SMELT.consumeClick()) {
             ModPackets.sendToServer(new ToggleAutoSmeltPacket());
         }
+    }
+
+    @SubscribeEvent
+    public void onClientTick(ClientTickEvent.Post event) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null || mc.screen == null || mc.screen instanceof UfoTutorialScreen) {
+            resetTutorialHold();
+            return;
+        }
+
+        if (!ModKeyBindings.OPEN_UFO_TUTORIAL.isDown()) {
+            resetTutorialHold();
+            return;
+        }
+
+        this.tutorialHoldTicks++;
+        if (!this.tutorialHoldOpened && this.tutorialHoldTicks >= TUTORIAL_HOLD_TICKS) {
+            this.tutorialHoldOpened = UfoTutorialScreens.openFromCurrentContext();
+        }
+    }
+
+    private void resetTutorialHold() {
+        this.tutorialHoldTicks = 0;
+        this.tutorialHoldOpened = false;
     }
     private void onRegisterKeyMappings(RegisterKeyMappingsEvent event) {
         event.register(ModKeyBindings.CYCLE_TOOL_FORWARD);

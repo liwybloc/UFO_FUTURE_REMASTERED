@@ -140,6 +140,10 @@ public class UniversalMultiblockRecipeCategory implements IRecipeCategory<Univer
         guiGraphics.fill(9, 81, 100, 91, 0xFF101010);
 
         var font = net.minecraft.client.Minecraft.getInstance().font;
+        String tierText = "MK" + recipe.getRequiredTier();
+        int tierX = CONTROLLER_X + 8 - font.width(tierText) / 2;
+        guiGraphics.drawString(font, tierText, tierX, CONTROLLER_Y + 18, 0xFFFFD966, true);
+
         String energyText = "AE " + formatEnergy(recipe.getEnergy());
         guiGraphics.fillGradient(
                 ENERGY_BAR_X,
@@ -175,9 +179,10 @@ public class UniversalMultiblockRecipeCategory implements IRecipeCategory<Univer
         }
 
         if (mouseX >= CONTROLLER_X && mouseX <= CONTROLLER_X + 16
-                && mouseY >= CONTROLLER_Y && mouseY <= CONTROLLER_Y + 16) {
+                && mouseY >= CONTROLLER_Y && mouseY <= CONTROLLER_Y + 28) {
             return List.of(
                     Component.literal("Controller"),
+                    Component.literal("Required Machine Tier: MK" + recipe.getRequiredTier()),
                     Component.literal("Click the controller to open Multiblock Info")
             );
         }

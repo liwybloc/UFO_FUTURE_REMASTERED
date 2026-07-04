@@ -772,7 +772,7 @@ public class ModRecipeProvider extends RecipeProvider {
                 .outputItem(ModItems.COSMIC_STRING_COMPONENT_MATRIX.get(), 1)
                 .energy(1200000000L)
                 .time(19200)
-                .requiredTier(3)
+                .requiredTier(2)
                 .save(c);
 
         UniversalMultiblockRecipeBuilder.create("universal/qmf/matterflow_catalyst_t3_batch", UniversalMultiblockMachineKind.QMF)

@@ -373,35 +373,35 @@ public class ModItems {
     // ---------- Stages de matter ----------
     public static final DeferredItem<Item> PROTO_MATTER = ITEMS.register("proto_matter",
             () -> new Item(new Item.Properties()
-                    .stacksTo(16)
+                    .stacksTo(8)
                     .rarity(Rarity.UNCOMMON)));
 
     public static final DeferredItem<Item> CORPOREAL_MATTER = ITEMS.register("corporeal_matter",
             () -> new Item(new Item.Properties()
-                    .stacksTo(4)
+                    .stacksTo(8)
                     .rarity(Rarity.RARE)));
 
     public static final DeferredItem<Item> WHITE_DWARF_MATTER = ITEMS.register("white_dwarf_matter",
             () -> new Item(new Item.Properties()
-                    .stacksTo(1)
+                    .stacksTo(8)
                     .rarity(Rarity.EPIC)
                     .fireResistant()));
 
     public static final DeferredItem<Item> NEUTRON_STAR_MATTER = ITEMS.register("neutron_star_matter",
             () -> new Item(new Item.Properties()
-                    .stacksTo(1)
+                    .stacksTo(8)
                     .rarity(Rarity.EPIC)
                     .fireResistant()));
 
     public static final DeferredItem<Item> PULSAR_MATTER = ITEMS.register("pulsar_matter",
             () -> new Item(new Item.Properties()
-                    .stacksTo(1)
+                    .stacksTo(8)
                     .rarity(Rarity.EPIC)
                     .fireResistant()));
 
     public static final DeferredItem<Item> DARK_MATTER = ITEMS.register("dark_matter",
             () -> new Item(new Item.Properties()
-                    .stacksTo(1)
+                    .stacksTo(8)
                     .rarity(Rarity.EPIC)
                     .fireResistant()));
 
@@ -413,7 +413,7 @@ public class ModItems {
 
     public static final DeferredItem<Item> UU_MATTER_CRYSTAL = ITEMS.register("uu_matter_crystal",
             () -> new Item(new Item.Properties()
-                    .stacksTo(16)
+                    .stacksTo(8)
                     .rarity(Rarity.RARE)));
 
     public static final DeferredItem<Item> DUST_CRYOTHEUM = ITEMS.register("dust_cryotheum",
@@ -428,7 +428,7 @@ public class ModItems {
 
     public static final DeferredItem<Item> UNSTABLE_WHITE_HOLE_MATTER = ITEMS.register("unstable_white_hole_matter",
             () -> new Item(new Item.Properties()
-                    .stacksTo(1)
+                    .stacksTo(8)
                     .rarity(Rarity.EPIC)
                     .fireResistant()));
     public static final DeferredItem<Item> AETHER_CONTAINMENT_CAPSULE = ITEMS.register("aether_containment_capsule",

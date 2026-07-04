@@ -1,4 +1,4 @@
-// 1.21.1	2026-05-04T23:30:53.7663707	Recipes
+// 1.21.1	2026-05-12T14:03:01.4212753	Recipes
 623466a712bf2b54aad620b471840892932161d4 data/ufo/advancement/recipes/misc/ae_energy_input_hatch.json
 a25a6bd915843952e3b74014247693fdda691447 data/ufo/advancement/recipes/misc/bismuth.json
 a1f0792f9fc46d8107fb77d82b3129e97aec9e05 data/ufo/advancement/recipes/misc/coprocessor_150m.json
@@ -268,7 +268,7 @@ b72b5aef08d41fcc0beed07ffbb3ee24e54a8026 data/ufo/recipe/universal/qmf/bulk/whit
 9a0f3566f6e77551d5b108ebd82f4137aaccfb13 data/ufo/recipe/universal/qmf/bulk/white_dwarf_fragment_rod.json
 dd6c62b23c514aec0ca20d38d7b951d0ba8eb828 data/ufo/recipe/universal/qmf/chrono_catalyst_t3_batch.json
 86760e653a154b9bd91dc8a988df52410d176eb5 data/ufo/recipe/universal/qmf/corporeal_matter_batch.json
-46fef2c51de41b4e1b24c834043b5f31b28c9499 data/ufo/recipe/universal/qmf/cosmic_string_component_matrix_batch.json
+7e13e2c7e19d8939005ad546f00970c184cd2eb3 data/ufo/recipe/universal/qmf/cosmic_string_component_matrix_batch.json
 ff5e4f735b354c5a81f027dd819df96e643dc961 data/ufo/recipe/universal/qmf/dark_matter_batch.json
 f6a4aed48f79fe5219be3f0da20788f2fc78793d data/ufo/recipe/universal/qmf/dimensional_catalyst.json
 acab75593d35868bb0b717cc44c904739732c203 data/ufo/recipe/universal/qmf/event_horizon_component_matrix_batch.json

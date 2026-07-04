@@ -11,6 +11,7 @@ import com.raishxn.ufo.network.packet.PacketToggleStellarSafeMode;
 import com.raishxn.ufo.network.packet.PacketToggleStellarAutoStart;
 import com.raishxn.ufo.network.packet.PacketToggleStellarLock;
 import com.raishxn.ufo.network.packet.PacketToggleStellarOverclock;
+import com.raishxn.ufo.client.tutorial.UfoTutorialScreens;
 import com.raishxn.ufo.recipe.StellarSimulationRecipe;
 
 import net.minecraft.client.gui.GuiGraphics;
@@ -42,6 +43,7 @@ public class StellarNexusControllerScreen extends AbstractContainerScreen<Stella
     private Button autoStartButton;
     private Button lockButton;
     private Button overclockButton;
+    private Button tutorialButton;
 
     public StellarNexusControllerScreen(StellarNexusControllerMenu pMenu, Inventory pPlayerInventory, Component pTitle) {
         super(pMenu, pPlayerInventory, pTitle);
@@ -157,6 +159,12 @@ public class StellarNexusControllerScreen extends AbstractContainerScreen<Stella
                 })
                 .bounds(this.leftPos - 52, this.topPos + this.imageHeight - 18, 50, 16).build());
         this.scanButton.setTooltip(Tooltip.create(Component.literal("§e\uD83D\uDD0D Scan Structure\n§7Force re-scan the multiblock.\n§7Missing blocks will be reported.")));
+
+        this.tutorialButton = this.addRenderableWidget(Button.builder(
+                Component.literal("?"), btn -> UfoTutorialScreens.openFor(this.menu.getBlockEntity()))
+                .bounds(this.leftPos - 24, this.topPos + this.imageHeight - 108, 22, 16)
+                .tooltip(Tooltip.create(Component.translatable("ufo.tutorial.open")))
+                .build());
 
         updateButtonTooltips();
     }

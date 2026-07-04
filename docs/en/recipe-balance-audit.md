@@ -45,7 +45,7 @@ Important implementation facts confirmed during audit:
 
 - Stellar Nexus safe mode multiplies energy, fuel, and coolant cost by `2.5x`.
 - Stellar Nexus overclock multiplies startup energy by `10x`, fuel and coolant by `5x`, heat by `5x`, and progress by `5x`.
-- Stellar Nexus global energy capacity is `20,000,000,000 AE`.
+- Stellar Nexus global energy capacity is `200,000,000,000 AE`.
 - DMA base internal buffer is `500,000 AE`.
 - DMA catalyst stacking already has strong thermal tradeoffs and 4-stack synergy.
 

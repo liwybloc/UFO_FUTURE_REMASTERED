@@ -39,12 +39,14 @@ public class ModTools {
     public static final DeferredItem<ShovelItem> UFO_SHOVEL = ITEMS.register("ufo_shovel",
             () -> new UfoEnergyShovelItem(ModToolTiers.UFO, unbreakableToolProperties()
                     .attributes(ShovelItem.createAttributes(ModToolTiers.UFO, 1.5F, -3.0f))
-                    .component(ModDataComponents.TOOL_MODE_INDEX.get(), 0).stacksTo(1)));
+                    .component(ModDataComponents.TOOL_MODE_INDEX.get(), 0)
+                    .component(ModDataComponents.FAST_MODE.get(), false).stacksTo(1)));
 
     public static final DeferredItem<AxeItem> UFO_AXE = ITEMS.register("ufo_axe",
             () -> new UfoEnergyAxeItem(ModToolTiers.UFO, unbreakableToolProperties()
                     .attributes(AxeItem.createAttributes(ModToolTiers.UFO, 6.0F, -3.2f))
-                    .component(ModDataComponents.TOOL_MODE_INDEX.get(), 0).stacksTo(1)));
+                    .component(ModDataComponents.TOOL_MODE_INDEX.get(), 0)
+                    .component(ModDataComponents.FAST_MODE.get(), false).stacksTo(1)));
 
     public static final DeferredItem<HoeItem> UFO_HOE = ITEMS.register("ufo_hoe",
             () -> new UfoEnergyHoeItem(ModToolTiers.UFO, unbreakableToolProperties()

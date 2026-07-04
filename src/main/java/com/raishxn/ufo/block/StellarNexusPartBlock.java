@@ -14,6 +14,7 @@ import org.jetbrains.annotations.Nullable;
 
 import com.raishxn.ufo.api.multiblock.IMultiblockController;
 import com.raishxn.ufo.block.entity.EntropicConvergenceCalculator;
+import com.raishxn.ufo.block.entity.StellarNexusControllerBE;
 import com.raishxn.ufo.block.entity.StellarNexusPartBE;
 import com.raishxn.ufo.init.ModBlockEntities;
 
@@ -76,13 +77,22 @@ public class StellarNexusPartBlock extends Block implements net.minecraft.world.
         super.neighborChanged(state, level, pos, changedBlock, changedPos, isMoving);
         if (!level.isClientSide() && level.getBlockEntity(pos) instanceof StellarNexusPartBE part) {
             BlockPos controllerPos = part.getControllerPos();
-            if (controllerPos != null && level.getBlockEntity(controllerPos) instanceof IMultiblockController controller) {
-                controller.scanStructure(level);
+            if (controllerPos != null) {
+                markControllerDirty(level, controllerPos);
             }
             EntropicMachineLocator.markNearbyDirty(level, pos);
             if (level instanceof net.minecraft.server.level.ServerLevel serverLevel) {
                 EntropicConvergenceCalculator.markNearbyDirty(serverLevel, pos);
             }
+        }
+    }
+
+    private static void markControllerDirty(Level level, BlockPos controllerPos) {
+        BlockEntity entity = level.getBlockEntity(controllerPos);
+        if (entity instanceof StellarNexusControllerBE controller) {
+            controller.markStructureDirty();
+        } else if (entity instanceof IMultiblockController controller) {
+            controller.scanStructure(level);
         }
     }
 }

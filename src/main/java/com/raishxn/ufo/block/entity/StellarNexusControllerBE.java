@@ -49,7 +49,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Block Entity for the Stellar Nexus Controller.
@@ -84,7 +86,7 @@ public class StellarNexusControllerBE extends BlockEntity implements IMultiblock
     // Energy buffer — AE power charged passively from AE2 network via Energy Input
     // Hatch
     private long energyBuffer = 0;
-    private static final long GLOBAL_ENERGY_CAPACITY = 20_000_000_000L; // 2 Billion AE global buffer
+    private static final long GLOBAL_ENERGY_CAPACITY = 200_000_000_000L; // 200 Billion AE global buffer
     private long energyCapacity = GLOBAL_ENERGY_CAPACITY;
 
     // Thermal system
@@ -325,6 +327,9 @@ public class StellarNexusControllerBE extends BlockEntity implements IMultiblock
             for (BlockPos partPos : this.parts) {
                 if (level.getBlockEntity(partPos) instanceof IMultiblockPart part) {
                     part.linkToController(this.worldPosition);
+                    if (part instanceof MassiveOutputHatchBE hatch) {
+                        hatch.refreshGridConnection();
+                    }
                 }
             }
         }
@@ -577,28 +582,11 @@ public class StellarNexusControllerBE extends BlockEntity implements IMultiblock
         if (this.isOverclocked) fuelMultiplier *= 5.0;
         long effectiveFuelAmount = (long) (recipe.getFuelAmount() * fuelMultiplier);
 
-        // Extract fuel liquid from ME storage (if required)
-        if (!recipe.getFuelFluid().isEmpty() && recipe.getFuelAmount() > 0) {
-            ResourceLocation fuelRL = ResourceLocation.parse(recipe.getFuelFluid());
-            Fluid fuelFluid = BuiltInRegistries.FLUID.get(fuelRL);
-            if (fuelFluid == null || fuelFluid == net.minecraft.world.level.material.Fluids.EMPTY) {
-                return List.of(Component.literal("§c✗ Invalid fuel fluid type: " + fuelRL));
-            }
-            AEFluidKey fuelKey = AEFluidKey.of(fuelFluid);
-            long extracted = storage.extract(fuelKey, effectiveFuelAmount, Actionable.MODULATE, src);
-            if (extracted < effectiveFuelAmount) {
-                if (extracted > 0) {
-                    storage.insert(fuelKey, extracted, Actionable.MODULATE, src);
-                }
-                String fluidName = formatFluidName(fuelRL.getPath());
-                return List.of(Component.literal("§c✗ Failed to extract fuel: " + fluidName));
-            }
-        }
-
-        // Extract item/fluid inputs
-        if (!extractInputs(recipe, storage, src)) {
+        ResourceReservation reservation = reserveStartResources(recipe, storage, src, effectiveFuelAmount);
+        if (reservation == null) {
             return List.of(Component.literal("§c✗ Failed to extract inputs"));
         }
+        extractReservation(reservation, storage, src);
 
         // Consume AE energy (with safe mode multiplier)
         this.energyBuffer -= effectiveEnergyCost;
@@ -638,39 +626,36 @@ public class StellarNexusControllerBE extends BlockEntity implements IMultiblock
     }
 
     private void processMachineTick() {
-        if (this.activeRecipeId == null)
+        boolean changed = false;
+        if (this.energyCapacity != GLOBAL_ENERGY_CAPACITY) {
+            this.energyCapacity = GLOBAL_ENERGY_CAPACITY;
+            changed = true;
+        }
+
+        AENetworkedBlockEntity nodeBE = getConnectedNetworkNode();
+        changed |= chargeEnergyFromNetwork(nodeBE);
+
+        if (this.activeRecipeId == null) {
+            if (changed) {
+                this.setChanged();
+            }
             return;
+        }
 
         var recipeOpt = this.level.getRecipeManager().byKey(this.activeRecipeId);
         if (recipeOpt.isEmpty() || !(recipeOpt.get().value() instanceof StellarSimulationRecipe recipe)) {
+            if (changed) {
+                this.setChanged();
+            }
             return;
         }
 
         // Cache the time for UI
         this.maxProgress = recipe.getTime();
-        this.energyCapacity = GLOBAL_ENERGY_CAPACITY; // Ensure it stays global
-
-        AENetworkedBlockEntity nodeBE = getConnectedNetworkNode();
-
-        // ── AE energy charging (Always active) ──
-        if (nodeBE != null && nodeBE.getActionableNode() != null) {
-            IGridNode node = nodeBE.getActionableNode();
-            if (node.getGrid() != null) {
-                IEnergyService energy = node.getGrid().getEnergyService();
-                long chargeRate = this.fieldLevel >= 1 && this.fieldLevel <= 3
-                        ? ENERGY_RATE_BY_TIER[this.fieldLevel]
-                        : 0;
-                long spaceLeft = this.energyCapacity - this.energyBuffer;
-                long toCharge = Math.min(chargeRate, spaceLeft);
-                if (toCharge > 0) {
-                    double extracted = energy.extractAEPower(toCharge, Actionable.MODULATE, PowerMultiplier.CONFIG);
-                    this.energyBuffer += (long) extracted;
-                }
-            }
-        }
-
         if (!this.running) {
-            this.setChanged();
+            if (changed) {
+                this.setChanged();
+            }
             return;
         }
 
@@ -732,6 +717,37 @@ public class StellarNexusControllerBE extends BlockEntity implements IMultiblock
             }
         }
         this.setChanged();
+    }
+
+    private boolean chargeEnergyFromNetwork(@Nullable AENetworkedBlockEntity nodeBE) {
+        if (nodeBE == null || nodeBE.getActionableNode() == null || this.fieldLevel < 1 || this.fieldLevel > 3) {
+            return false;
+        }
+
+        IGridNode node = nodeBE.getActionableNode();
+        if (node.getGrid() == null) {
+            return false;
+        }
+
+        long spaceLeft = this.energyCapacity - this.energyBuffer;
+        if (spaceLeft <= 0L) {
+            return false;
+        }
+
+        long toCharge = Math.min(ENERGY_RATE_BY_TIER[this.fieldLevel], spaceLeft);
+        if (toCharge <= 0L) {
+            return false;
+        }
+
+        IEnergyService energy = node.getGrid().getEnergyService();
+        double extracted = energy.extractAEPower(toCharge, Actionable.MODULATE, PowerMultiplier.CONFIG);
+        long accepted = Math.min(spaceLeft, (long) extracted);
+        if (accepted <= 0L) {
+            return false;
+        }
+
+        this.energyBuffer += accepted;
+        return true;
     }
 
     private void triggerStellarExplosion() {
@@ -1074,6 +1090,91 @@ public class StellarNexusControllerBE extends BlockEntity implements IMultiblock
         return true;
     }
 
+    @Nullable
+    private ResourceReservation reserveStartResources(StellarSimulationRecipe recipe, MEStorage storage, IActionSource src, long effectiveFuelAmount) {
+        Map<AEItemKey, Long> itemReservations = new HashMap<>();
+        Map<AEFluidKey, Long> fluidReservations = new HashMap<>();
+
+        if (!recipe.getFuelFluid().isEmpty() && recipe.getFuelAmount() > 0) {
+            ResourceLocation fuelRL = ResourceLocation.parse(recipe.getFuelFluid());
+            Fluid fuelFluid = BuiltInRegistries.FLUID.get(fuelRL);
+            if (fuelFluid == null || fuelFluid == net.minecraft.world.level.material.Fluids.EMPTY) {
+                return null;
+            }
+            if (!reserveFluid(AEFluidKey.of(fuelFluid), effectiveFuelAmount, fluidReservations, storage, src)) {
+                return null;
+            }
+        }
+
+        for (var req : recipe.getItemInputs()) {
+            if (!req.isEmpty() && !reserveItem(req, itemReservations, storage, src)) {
+                return null;
+            }
+        }
+        for (var req : recipe.getFluidInputs()) {
+            if (!req.isEmpty() && !reserveFluid(req, fluidReservations, storage, src)) {
+                return null;
+            }
+        }
+
+        return new ResourceReservation(itemReservations, fluidReservations);
+    }
+
+    private boolean reserveItem(IngredientStack.Item req, Map<AEItemKey, Long> reservations, MEStorage storage, IActionSource src) {
+        long amount = req.getAmount();
+        for (ItemStack match : req.getIngredient().getItems()) {
+            AEItemKey key = AEItemKey.of(match);
+            long reserved = reservations.getOrDefault(key, 0L);
+            long neededWithReservation = saturatedAdd(reserved, amount);
+            long available = storage.extract(key, neededWithReservation, Actionable.SIMULATE, src);
+            if (available >= neededWithReservation) {
+                reservations.put(key, neededWithReservation);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean reserveFluid(IngredientStack.Fluid req, Map<AEFluidKey, Long> reservations, MEStorage storage, IActionSource src) {
+        long amount = req.getAmount();
+        for (FluidStack match : req.getIngredient().getStacks()) {
+            if (reserveFluid(AEFluidKey.of(match.getFluid()), amount, reservations, storage, src)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean reserveFluid(AEFluidKey key, long amount, Map<AEFluidKey, Long> reservations, MEStorage storage, IActionSource src) {
+        if (amount <= 0L) {
+            return true;
+        }
+        long reserved = reservations.getOrDefault(key, 0L);
+        long neededWithReservation = saturatedAdd(reserved, amount);
+        long available = storage.extract(key, neededWithReservation, Actionable.SIMULATE, src);
+        if (available < neededWithReservation) {
+            return false;
+        }
+        reservations.put(key, neededWithReservation);
+        return true;
+    }
+
+    private void extractReservation(ResourceReservation reservation, MEStorage storage, IActionSource src) {
+        for (var entry : reservation.itemReservations().entrySet()) {
+            storage.extract(entry.getKey(), entry.getValue(), Actionable.MODULATE, src);
+        }
+        for (var entry : reservation.fluidReservations().entrySet()) {
+            storage.extract(entry.getKey(), entry.getValue(), Actionable.MODULATE, src);
+        }
+    }
+
+    private long saturatedAdd(long a, long b) {
+        if (b > 0L && a > Long.MAX_VALUE - b) {
+            return Long.MAX_VALUE;
+        }
+        return a + b;
+    }
+
     private long simulateExtractItem(IngredientStack.Item req, MEStorage storage, IActionSource src) {
         long extracted = 0;
         long needed = req.getAmount();
@@ -1127,6 +1228,9 @@ public class StellarNexusControllerBE extends BlockEntity implements IMultiblock
         for (GenericStack out : recipe.getFluidOutputs()) {
             storage.insert(out.what(), out.amount(), Actionable.MODULATE, src);
         }
+    }
+
+    private record ResourceReservation(Map<AEItemKey, Long> itemReservations, Map<AEFluidKey, Long> fluidReservations) {
     }
 
     public void markStructureDirty() {

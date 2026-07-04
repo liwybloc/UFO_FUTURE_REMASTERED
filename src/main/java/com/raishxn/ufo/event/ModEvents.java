@@ -10,12 +10,12 @@ import net.minecraft.core.registries.Registries; // Novo Import
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Enemy;
-import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeType;
@@ -126,7 +126,7 @@ public class ModEvents {
             ItemStack stack = player.getMainHandItem();
 
             // 1. Sword Logic
-            if (stack.getItem() instanceof UfoEnergySwordItem) {
+            if (stack.getItem() instanceof UfoEnergySwordItem || stack.getItem() instanceof UfoEnergyGreatswordItem) {
                 int kills = stack.getOrDefault(ModDataComponents.KILL_COUNT.get(), 0);
                 float extraDmg = kills * 2.0f;
 
@@ -148,7 +148,9 @@ public class ModEvents {
                 stack.set(ModDataComponents.LAST_HIT_TIME.get(), time);
 
                 event.setAmount(event.getAmount() + extraDmg);
-                event.getEntity().addEffect(new MobEffectInstance(MobEffects.POISON, 60, 2));
+                if (stack.getItem() instanceof UfoEnergySwordItem) {
+                    event.getEntity().addEffect(new MobEffectInstance(MobEffects.POISON, 60, 2));
+                }
             }
 
             // 2. Greatsword Logic
@@ -190,9 +192,7 @@ public class ModEvents {
             }
 
             // 2. Anti-Kill Command / Absolute Damage
-            if (event.getSource().is(DamageTypes.GENERIC_KILL) ||
-                    event.getAmount() >= Float.MAX_VALUE ||
-                    (event.getSource().is(DamageTypes.FELL_OUT_OF_WORLD) && event.getAmount() > 10000f)) {
+            if (isExtremeDamage(event.getSource(), event.getAmount())) {
 
                 if (consumeArmorEnergyDirect(player, 100000)) {
                     event.setCanceled(true);
@@ -219,13 +219,17 @@ public class ModEvents {
         // Sword Logic
         if (event.getSource().getEntity() instanceof Player attacker) {
             ItemStack stack = attacker.getMainHandItem();
-            if (stack.getItem() instanceof UfoEnergySwordItem) {
+            if (stack.getItem() instanceof UfoEnergySwordItem || stack.getItem() instanceof UfoEnergyGreatswordItem) {
                 if (event.getEntity() instanceof Enemy) {
                     int kills = stack.getOrDefault(ModDataComponents.KILL_COUNT.get(), 0);
                     stack.set(ModDataComponents.KILL_COUNT.get(), kills + 1);
-                } else if (event.getEntity() instanceof Villager || !(event.getEntity() instanceof Enemy)) {
-                    stack.set(ModDataComponents.KILL_COUNT.get(), 0);
-                    attacker.sendSystemMessage(Component.literal("The sword's curse has reset your power...").withStyle(ChatFormatting.RED));
+                } else {
+                    int kills = stack.getOrDefault(ModDataComponents.KILL_COUNT.get(), 0);
+                    int newKills = Math.max(0, kills - 1);
+                    stack.set(ModDataComponents.KILL_COUNT.get(), newKills);
+                    if (kills > newKills) {
+                        attacker.sendSystemMessage(Component.literal("The sword's power weakens after a non-hostile kill.").withStyle(ChatFormatting.RED));
+                    }
                 }
             }
         }
@@ -233,7 +237,7 @@ public class ModEvents {
         // Armor Logic
         if (event.getEntity() instanceof ServerPlayer player) {
             if (isFullUfoArmor(player)) {
-                if (consumeArmorEnergyDirect(player, 200000)) {
+                if (isExtremeDamage(event.getSource(), Float.MAX_VALUE) || consumeArmorEnergyDirect(player, 200000)) {
                     event.setCanceled(true);
                     player.setHealth(player.getMaxHealth());
                     player.removeAllEffects();
@@ -250,6 +254,15 @@ public class ModEvents {
             if (!(stack.getItem() instanceof UfoArmorItem)) return false;
         }
         return true;
+    }
+
+    private static boolean isExtremeDamage(DamageSource source, float amount) {
+        String messageId = source.getMsgId();
+        return source.is(DamageTypes.GENERIC_KILL)
+                || amount >= Float.MAX_VALUE
+                || (source.is(DamageTypes.FELL_OUT_OF_WORLD) && amount > 10000f)
+                || messageId.contains("chaos")
+                || messageId.contains("guardian");
     }
 
     private static boolean consumeArmorEnergyDirect(Player player, int amountNeeded) {

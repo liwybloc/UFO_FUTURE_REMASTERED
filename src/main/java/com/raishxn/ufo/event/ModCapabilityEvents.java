@@ -37,6 +37,11 @@ public class ModCapabilityEvents {
                 (be, context) -> (appeng.api.networking.IInWorldGridNodeHost) be
         );
         event.registerBlockEntity(
+                appeng.api.AECapabilities.IN_WORLD_GRID_NODE_HOST,
+                ModBlockEntities.ME_MASSIVE_OUTPUT_HATCH_BE.get(),
+                (be, context) -> (appeng.api.networking.IInWorldGridNodeHost) be
+        );
+        event.registerBlockEntity(
                 appeng.api.AECapabilities.CRAFTING_MACHINE,
                 ModBlockEntities.QMF_CONTROLLER.get(),
                 (be, context) -> be

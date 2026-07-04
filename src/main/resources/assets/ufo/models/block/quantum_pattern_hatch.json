@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:block/cube_all",
   "textures": {
-    "all": "ufo:block/quantum_pattern_hatch_base"
+    "all": "ufo:block/quantum_pattern_hatch"
   }
 }

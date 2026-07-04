@@ -3,6 +3,7 @@ package com.raishxn.ufo.block.entity;
 import com.raishxn.ufo.api.multiblock.IMultiblockController;
 import com.raishxn.ufo.api.multiblock.IMultiblockPart;
 import com.raishxn.ufo.api.multiblock.MultiblockMachineTier;
+import com.raishxn.ufo.api.multiblock.MultiblockControllerDefinitions;
 import com.raishxn.ufo.api.multiblock.MultiblockPattern;
 import appeng.api.upgrades.IUpgradeInventory;
 import appeng.api.upgrades.IUpgradeableObject;
@@ -24,7 +25,6 @@ import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.DirectionalBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -37,6 +37,7 @@ import java.util.Collections;
 import java.util.List;
 
 public abstract class AbstractSimpleMultiblockControllerBE extends BlockEntity implements IMultiblockController, MenuProvider, IUniversalMultiblockController, IUpgradeableObject {
+    private static final int PERIODIC_STRUCTURE_SCAN_TICKS = 200;
 
     protected boolean assembled = false;
     protected boolean structureDirty = true;
@@ -111,10 +112,9 @@ public abstract class AbstractSimpleMultiblockControllerBE extends BlockEntity i
             return;
         }
 
-        this.scanCooldown--;
-        if (this.structureDirty || this.scanCooldown <= 0) {
+        if (this.structureDirty || --this.scanCooldown <= 0) {
             scanStructure(this.level);
-            this.scanCooldown = 40;
+            this.scanCooldown = PERIODIC_STRUCTURE_SCAN_TICKS;
             this.structureDirty = false;
         }
 
@@ -145,11 +145,8 @@ public abstract class AbstractSimpleMultiblockControllerBE extends BlockEntity i
 
     @Override
     public void scanStructure(Level level) {
-        Direction facing = Direction.NORTH;
         BlockState state = level.getBlockState(this.worldPosition);
-        if (state.hasProperty(DirectionalBlock.FACING)) {
-            facing = state.getValue(DirectionalBlock.FACING);
-        }
+        Direction facing = MultiblockControllerDefinitions.getPatternFacing(this, state);
 
         MultiblockPattern.MatchResult result = getControllerPattern().match(level, this.worldPosition, facing);
         boolean wasAssembled = this.assembled;

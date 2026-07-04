@@ -1,6 +1,8 @@
 package com.raishxn.ufo.item.custom;
 
+import com.raishxn.ufo.datagen.ModDataComponents;
 import com.raishxn.ufo.util.EnergyToolHelper;
+import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
@@ -55,6 +57,10 @@ public class UfoEnergyGreatswordItem extends SwordItem implements IEnergyTool {
 
     @Override
     public void appendHoverText(ItemStack pStack, Item.TooltipContext pContext, List<Component> pTooltipComponents, TooltipFlag pTooltipFlag) {
+        int kills = pStack.getOrDefault(ModDataComponents.KILL_COUNT.get(), 0);
+        int bonusDmg = kills * 2;
+        pTooltipComponents.add(Component.literal("Soul Harvest: " + kills + " Kills").withStyle(ChatFormatting.DARK_RED));
+        pTooltipComponents.add(Component.literal("Bonus Dmg: +" + bonusDmg).withStyle(ChatFormatting.RED));
         IEnergyTool.super.appendHoverText(pStack, pContext, pTooltipComponents, pTooltipFlag);
         super.appendHoverText(pStack, pContext, pTooltipComponents, pTooltipFlag);
     }

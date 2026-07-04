@@ -1,7 +1,9 @@
 package com.raishxn.ufo.block;
 
 import com.raishxn.ufo.api.multiblock.IMultiblockController;
+import com.raishxn.ufo.block.entity.AbstractSimpleMultiblockControllerBE;
 import com.raishxn.ufo.block.entity.MassiveOutputHatchBE;
+import com.raishxn.ufo.block.entity.StellarNexusControllerBE;
 import com.raishxn.ufo.init.ModBlockEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -96,10 +98,22 @@ public class MassiveOutputHatchBlock extends DirectionalBlock implements net.min
     public void neighborChanged(BlockState state, Level level, BlockPos pos, Block changedBlock, BlockPos changedPos, boolean isMoving) {
         super.neighborChanged(state, level, pos, changedBlock, changedPos, isMoving);
         if (!level.isClientSide() && level.getBlockEntity(pos) instanceof MassiveOutputHatchBE hatch) {
+            hatch.refreshGridConnection();
             BlockPos controllerPos = hatch.getControllerPos();
-            if (controllerPos != null && level.getBlockEntity(controllerPos) instanceof IMultiblockController controller) {
-                controller.scanStructure(level);
+            if (controllerPos != null) {
+                markControllerDirty(level, controllerPos);
             }
+        }
+    }
+
+    private static void markControllerDirty(Level level, BlockPos controllerPos) {
+        BlockEntity entity = level.getBlockEntity(controllerPos);
+        if (entity instanceof AbstractSimpleMultiblockControllerBE controller) {
+            controller.markStructureDirty();
+        } else if (entity instanceof StellarNexusControllerBE controller) {
+            controller.markStructureDirty();
+        } else if (entity instanceof IMultiblockController controller) {
+            controller.scanStructure(level);
         }
     }
 }

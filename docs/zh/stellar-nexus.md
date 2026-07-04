@@ -6,7 +6,7 @@ The **Stellar Nexus** is the final simulation multiblock in UFO Future. It consu
 
 - Massive multiblock structure
 - Reads items and fluids directly from the ME network
-- Charges a **20B AE** internal buffer
+- Charges a **200B AE** internal buffer
 - Consumes fuel on start and coolant during operation
 - Uses heat, safe mode and overclock as the main risk systems
 - Requires one item input hatch, one item output hatch, one fluid output hatch and one AE energy input hatch

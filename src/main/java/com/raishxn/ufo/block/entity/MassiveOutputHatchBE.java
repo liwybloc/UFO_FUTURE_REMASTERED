@@ -125,12 +125,14 @@ public class MassiveOutputHatchBE extends AENetworkedBlockEntity
     @Override
     public void linkToController(BlockPos controllerPos) {
         this.controllerPos = controllerPos;
+        refreshGridConnection();
         this.setChanged();
     }
 
     @Override
     public void unlinkFromController() {
         this.controllerPos = null;
+        refreshGridConnection();
         this.setChanged();
     }
 
@@ -177,6 +179,15 @@ public class MassiveOutputHatchBE extends AENetworkedBlockEntity
     public Set<Direction> getGridConnectableSides(BlockOrientation orientation) {
         // Allow AE2 cable connections from all 6 sides
         return EnumSet.allOf(Direction.class);
+    }
+
+    public void refreshGridConnection() {
+        if (this.level == null || this.level.isClientSide()) {
+            return;
+        }
+
+        this.getMainNode().setExposedOnSides(EnumSet.allOf(Direction.class));
+        this.onGridConnectableSidesChanged();
     }
 
     // ═══════════════════════════════════════════════════════════

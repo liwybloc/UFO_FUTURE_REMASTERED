@@ -14,7 +14,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.DirectionalBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jetbrains.annotations.NotNull;
 
@@ -48,9 +47,7 @@ public class StructureScannerItem extends Item {
 
         MultiblockControllerDefinition definition = definitionOpt.get();
         var state = level.getBlockState(pos);
-        var facing = state.hasProperty(DirectionalBlock.FACING)
-                ? state.getValue(DirectionalBlock.FACING)
-                : net.minecraft.core.Direction.NORTH;
+        var facing = MultiblockControllerDefinitions.getPatternFacing(be, state);
 
         MultiblockPattern.MatchResult result = definition.pattern().match(level, pos, facing);
 

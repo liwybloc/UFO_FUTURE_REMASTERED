@@ -12,7 +12,7 @@ The **Stellar Nexus** is the final stellar simulation multiblock.
 ## Core Mechanics
 
 - Reads inputs directly from the ME network
-- Charges a **20B AE** internal buffer
+- Charges a **200B AE** internal buffer
 - Consumes fuel on start
 - Consumes coolant during operation
 - Requires one item input hatch, one item output hatch, one fluid output hatch and one AE energy input hatch

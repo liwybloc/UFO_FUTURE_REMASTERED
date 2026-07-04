@@ -16,6 +16,7 @@ The **Quantum Cryoforge** is the universal multiblock dedicated to large-scale c
 - Shares the same controller flow as the other universal multiblocks.
 - Accepts universal hatches in valid casing positions.
 - Focuses on coolant and thermal-fluid throughput.
+- Machine tier comes from the installed Stellar Field Generators.
 
 ## Thermal Profile
 
@@ -29,3 +30,9 @@ The **Quantum Cryoforge** is the universal multiblock dedicated to large-scale c
 - **Gelid Cryotheum** removes **1 HU per 120 mB**, up to **1000 mB/tick**.
 - **Stable Coolant** removes **50 HU per mB**, up to **10 mB/tick**.
 - **Temporal Fluid** removes **100 HU per mB**, up to **10 mB/tick**.
+
+## Stable Coolant Gate
+
+Stable Coolant is a **MK3 Quantum Cryoforge** recipe.
+
+Replace every field generator position with **MK3 Stellar Field Generators** before expecting the Stable Coolant recipe to run. Gelid Cryotheum remains the early coolant path.

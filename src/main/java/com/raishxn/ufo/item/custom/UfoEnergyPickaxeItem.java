@@ -75,6 +75,15 @@ public class UfoEnergyPickaxeItem extends PickaxeItem implements IEnergyTool, IH
     }
 
     @Override
+    public boolean mineBlock(ItemStack pStack, Level pLevel, BlockState pState, BlockPos pPos, LivingEntity pEntityLiving) {
+        if (!pLevel.isClientSide && pState.getDestroySpeed(pLevel, pPos) != 0.0F) {
+            int cost = pStack.getOrDefault(ModDataComponents.FAST_MODE.get(), false) ? ENERGY_COST_FAST : ENERGY_COST_NORMAL;
+            consumeEnergy(pStack, cost);
+        }
+        return super.mineBlock(pStack, pLevel, pState, pPos, pEntityLiving);
+    }
+
+    @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand usedHand) {
         ItemStack stack = player.getItemInHand(usedHand);
         if (!level.isClientSide && player.isShiftKeyDown()) {
@@ -106,4 +115,13 @@ public class UfoEnergyPickaxeItem extends PickaxeItem implements IEnergyTool, IH
     public int getBarColor(ItemStack pStack) { return EnergyToolHelper.getBarColor(pStack); }
     @Override
     public int getEnergyPerUse() { return ENERGY_COST_NORMAL; }
+
+    private boolean consumeEnergy(ItemStack stack, int amount) {
+        IEnergyStorage energy = stack.getCapability(Capabilities.EnergyStorage.ITEM);
+        if (energy != null && energy.getEnergyStored() >= amount) {
+            energy.extractEnergy(amount, false);
+            return true;
+        }
+        return false;
+    }
 }

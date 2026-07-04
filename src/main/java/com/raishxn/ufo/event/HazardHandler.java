@@ -51,6 +51,11 @@ public class HazardHandler {
             return;
         }
 
+        if (hasThermalProtection(player)) {
+            removeHazardEffects(player);
+            return;
+        }
+
         boolean hasHazard = false;
 
         // Verifica inventário principal
@@ -88,5 +93,16 @@ public class HazardHandler {
         if (player instanceof ServerPlayer && player.tickCount % 100 == 0) {
             player.displayClientMessage(Component.literal("WARNING: Dimensional Containment Failed!").withStyle(ChatFormatting.RED), true);
         }
+    }
+
+    private static void removeHazardEffects(Player player) {
+        player.removeEffect(MobEffects.POISON);
+        player.removeEffect(MobEffects.CONFUSION);
+        player.removeEffect(MobEffects.BLINDNESS);
+        player.removeEffect(MobEffects.MOVEMENT_SLOWDOWN);
+        player.removeEffect(MobEffects.DIG_SLOWDOWN);
+        player.removeEffect(MobEffects.HUNGER);
+        player.removeEffect(MobEffects.INFESTED);
+        player.removeEffect(MobEffects.WEAKNESS);
     }
 }

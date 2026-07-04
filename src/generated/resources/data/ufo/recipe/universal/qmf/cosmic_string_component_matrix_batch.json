@@ -41,6 +41,6 @@
   },
   "machine": "qmf",
   "recipe_name": "universal/qmf/cosmic_string_component_matrix_batch",
-  "required_tier": 3,
+  "required_tier": 2,
   "time": 19200
 }

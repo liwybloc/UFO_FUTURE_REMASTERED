@@ -39,8 +39,19 @@ public class GhostHologramRenderer {
         }
 
         activeControllerPos = pos;
-        activeFacing = facing;
+        activeFacing = getPatternFacing(pos, facing);
         rebuildCache();
+    }
+
+    private static net.minecraft.core.Direction getPatternFacing(BlockPos pos, net.minecraft.core.Direction fallbackFacing) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level == null) {
+            return fallbackFacing;
+        }
+
+        BlockEntity be = mc.level.getBlockEntity(pos);
+        BlockState state = mc.level.getBlockState(pos);
+        return MultiblockControllerDefinitions.getPatternFacing(be, state);
     }
 
     public static boolean isActive(BlockPos pos) {
