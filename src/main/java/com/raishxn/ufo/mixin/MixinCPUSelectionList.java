@@ -20,7 +20,7 @@ public class MixinCPUSelectionList {
     @Unique
     private static final long ufo$INFINITE_STORAGE_THRESHOLD = Long.MAX_VALUE - 16;
     @Unique
-    private static final int ufo$INFINITE_THREADS_THRESHOLD = Integer.MAX_VALUE;
+    private static final int ufo$INFINITE_THREADS_THRESHOLD = Integer.MAX_VALUE - 1;
 
     @Redirect(
             method = "getTooltip",

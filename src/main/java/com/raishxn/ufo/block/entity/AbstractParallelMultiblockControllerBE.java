@@ -410,7 +410,7 @@ public abstract class AbstractParallelMultiblockControllerBE extends AbstractSim
                     primaryOutput.item(),
                     primaryOutput.fluid(),
                     label,
-                    getMaximumAdjustedItemOutputAmount(primaryOutput.amount(), catalystProfile),
+                    primaryOutput.item().isEmpty() ? primaryOutput.amount() : getMaximumAdjustedItemOutputAmount(primaryOutput.amount(), catalystProfile),
                     displayedProgress,
                     displayedMaxProgress));
         }
