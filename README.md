@@ -176,6 +176,9 @@ Special thanks to the following projects for texture inspiration and/or texture 
 
 - [AE2 Crystal Science](https://github.com/Frostbite-time/AE2-Crystal-Science)
 - [GT New Horizons Modpack](https://github.com/GTNewHorizons/GT-New-Horizons-Modpack)
+- [GTO Project](https://github.com/GregTech-Odyssey)
+- 
+
 
 ---
 
