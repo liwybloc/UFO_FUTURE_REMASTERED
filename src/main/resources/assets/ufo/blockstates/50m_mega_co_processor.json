@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "formed=false": {
+      "model": "ufo:block/50m_mega_co_processor"
+    },
+    "formed=true": {
+      "model": "ufo:block/50m_mega_co_processor_formed"
+    }
+  }
+}

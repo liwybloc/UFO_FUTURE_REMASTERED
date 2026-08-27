@@ -25,8 +25,8 @@ import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 public class ModTooltipEventHandler {
 
     @SubscribeEvent
-    public static void onTooltip(ItemTooltipEvent event) {
-        ItemStack stack = event.getItemStack();
+    public static void onTooltip(final ItemTooltipEvent event) {
+        final ItemStack stack = event.getItemStack();
         if (MultiblockControllerDefinitions.getPreviewEntries().stream()
                 .anyMatch(entry -> stack.is(entry.iconStack().getItem()))) {
             event.getToolTip().add(Component.translatable(
@@ -35,17 +35,17 @@ public class ModTooltipEventHandler {
             ).withStyle(ChatFormatting.DARK_GRAY));
         }
 
-        if (stack.getItem() instanceof MegaCraftingStorageBlockItem item) {
-            var tier = item.getTier();
-            long capacity = tier.getStorageBytes();
-            MutableComponent capacityLine = Component.translatable(
+        if (stack.getItem() instanceof final MegaCraftingStorageBlockItem item) {
+            final var tier = item.getTier();
+            final long capacity = tier.getStorageBytes();
+            final MutableComponent capacityLine = Component.translatable(
                     "tooltip.ufo.capacity",
                     NumberFormattingUtil.formatBytes(capacity) + "B"
             );
             capacityLine.setStyle(Style.EMPTY.withColor(ChatFormatting.GRAY));
             event.getToolTip().add(capacityLine);
-            if (Screen.hasShiftDown()) {
-                MutableComponent exactCapacityLine = Component.translatable(
+            if (net.minecraft.client.Minecraft.getInstance().hasShiftDown()) {
+                final MutableComponent exactCapacityLine = Component.translatable(
                         "tooltip.ufo.capacity_exact",
                         NumberFormattingUtil.formatNumberWithCommas(capacity) + " Bytes"
                 );
@@ -55,17 +55,17 @@ public class ModTooltipEventHandler {
                 event.getToolTip().add(Component.translatable("tooltip.ufo.press_shift").withStyle(ChatFormatting.DARK_GRAY));
             }
         }
-        else if (stack.getItem() instanceof MegaCoProcessorBlockItem item) {
-            var tier = item.getTier();
-            String formattedThreads = tier.getDisplayName();
-            MutableComponent threadsLine = Component.translatable("tooltip.ufo.accelerator_threads", formattedThreads);
+        else if (stack.getItem() instanceof final MegaCoProcessorBlockItem item) {
+            final var tier = item.getTier();
+            final String formattedThreads = tier.getDisplayName();
+            final MutableComponent threadsLine = Component.translatable("tooltip.ufo.accelerator_threads", formattedThreads);
             threadsLine.setStyle(Style.EMPTY.withColor(ChatFormatting.GRAY));
             event.getToolTip().add(threadsLine);
         }
         else if (stack.is(ModBlocks.QUANTUM_ENERGY_CELL.get().asItem())) {
-            CustomData customData = stack.get(DataComponents.CUSTOM_DATA);
-            boolean chargedPreview = customData != null
-                    && customData.copyTag().getBoolean("ufoQuantumEnergyCellChargedPreview");
+            final CustomData customData = stack.get(DataComponents.CUSTOM_DATA);
+            final boolean chargedPreview = customData != null
+                    && customData.copyTag().getBoolean("ufoQuantumEnergyCellChargedPreview").orElse(false);
             event.getToolTip().add(Component.literal(chargedPreview
                     ? "Creative preview: Charged"
                     : "Creative preview: Discharged").withStyle(ChatFormatting.DARK_GRAY));
@@ -99,7 +99,7 @@ public class ModTooltipEventHandler {
         }
     }
 
-    private static boolean isAeHatch(ItemStack stack) {
+    private static boolean isAeHatch(final ItemStack stack) {
         return stack.is(MultiblockBlocks.ME_MASSIVE_OUTPUT_HATCH.get().asItem())
                 || stack.is(MultiblockBlocks.ME_MASSIVE_FLUID_HATCH.get().asItem())
                 || stack.is(MultiblockBlocks.ME_MASSIVE_INPUT_HATCH.get().asItem())

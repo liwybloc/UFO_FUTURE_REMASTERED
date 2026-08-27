@@ -18,20 +18,18 @@ import java.util.Optional;
 
 public class InfinityGenesisCell extends AEBaseItem {
 
-    public InfinityGenesisCell() {
-        super(new Item.Properties().stacksTo(1).rarity(Rarity.EPIC).fireResistant());
+    public InfinityGenesisCell(final Item.Properties properties) {
+        super(properties.stacksTo(1).rarity(Rarity.EPIC).fireResistant());
     }
-
-    @Override
-    public void appendHoverText(@NotNull ItemStack stack, Item.@NotNull TooltipContext context,
-                                @NotNull List<Component> lines, @NotNull TooltipFlag advancedTooltips) {
-        List<GenericStack> keys = stack.getOrDefault(ModDataComponents.INFINITY_GENESIS_CELL_KEYS.get(), List.of());
+    public void appendHoverText(@NotNull final ItemStack stack, final Item.@NotNull TooltipContext context,
+                                @NotNull final List<Component> lines, @NotNull final TooltipFlag advancedTooltips) {
+        final List<GenericStack> keys = stack.getOrDefault(ModDataComponents.INFINITY_GENESIS_CELL_KEYS.get(), List.of());
         lines.add(Component.translatable("item.ufo.infinity_genesis_cell.tooltip").withStyle(ChatFormatting.LIGHT_PURPLE));
         lines.add(Component.translatable("item.ufo.infinity_genesis_cell.types", keys.size()).withStyle(ChatFormatting.GRAY));
         if (!keys.isEmpty()) {
             lines.add(Component.translatable("item.ufo.infinity_genesis_cell.learned").withStyle(ChatFormatting.DARK_AQUA));
             int shown = 0;
-            for (var key : keys) {
+            for (final var key : keys) {
                 lines.add(Component.literal(" - ").append(key.what().getDisplayName()));
                 if (++shown >= 8) {
                     if (keys.size() > shown) {
@@ -46,9 +44,9 @@ public class InfinityGenesisCell extends AEBaseItem {
 
     @NotNull
     @Override
-    public Optional<TooltipComponent> getTooltipImage(@NotNull ItemStack stack) {
-        List<GenericStack> keys = stack.getOrDefault(ModDataComponents.INFINITY_GENESIS_CELL_KEYS.get(), List.of());
-        var content = keys.stream()
+    public Optional<TooltipComponent> getTooltipImage(@NotNull final ItemStack stack) {
+        final List<GenericStack> keys = stack.getOrDefault(ModDataComponents.INFINITY_GENESIS_CELL_KEYS.get(), List.of());
+        final var content = keys.stream()
                 .limit(5)
                 .map(entry -> new GenericStack(entry.what(), InfinityCell.getAsIntMax(entry.what())))
                 .toList();

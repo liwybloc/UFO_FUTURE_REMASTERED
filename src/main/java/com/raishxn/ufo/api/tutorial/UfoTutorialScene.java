@@ -1,12 +1,12 @@
 package com.raishxn.ufo.api.tutorial;
 
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.List;
 
 public record UfoTutorialScene(
-        ResourceLocation id,
+        Identifier id,
         Component title,
         List<UfoTutorialStep> steps) {
 

@@ -6,7 +6,7 @@ import net.minecraft.world.entity.player.Inventory;
 
 public class QuantumSlicerControllerScreen extends AbstractUniversalMultiblockControllerScreen<QuantumSlicerControllerMenu> {
 
-    public QuantumSlicerControllerScreen(QuantumSlicerControllerMenu menu, Inventory playerInventory, Component title, ScreenStyle style) {
+    public QuantumSlicerControllerScreen(final QuantumSlicerControllerMenu menu, final Inventory playerInventory, final Component title, final ScreenStyle style) {
         super(menu, playerInventory, title, style);
     }
 }

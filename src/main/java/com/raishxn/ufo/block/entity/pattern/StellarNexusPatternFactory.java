@@ -11,7 +11,7 @@ import java.util.HashMap;
 public class StellarNexusPatternFactory {
 
     public static Map<Character, BlockState> getDefaultCreativeStates() {
-        Map<Character, BlockState> map = new HashMap<>();
+        final Map<Character, BlockState> map = new HashMap<>();
         map.put('B', MultiblockBlocks.ENTROPY_SINGULARITY_CASING.get().defaultBlockState());
         map.put('C', MultiblockBlocks.ENTROPY_ASSEMBLER_CORE_CASING.get().defaultBlockState());
         map.put('D', MultiblockBlocks.ENTROPY_COMPUTER_CONDENSATION_MATRIX.get().defaultBlockState());
@@ -22,8 +22,7 @@ public class StellarNexusPatternFactory {
     }
 
     public static MultiblockPattern getPattern() {
-        // Build the pattern using the new 35x34x35 structure
-        MultiblockPattern.Builder builder = new MultiblockPattern.Builder();
+        final MultiblockPattern.Builder builder = new MultiblockPattern.Builder();
         builder.controllerChar('H');
 
         builder.layer(new String[]{
@@ -1319,7 +1318,6 @@ public class StellarNexusPatternFactory {
         });
 
 
-        // Configure the mapping
         builder.where(' ', (state, level, pos) -> true, Component.literal("Any"))
                .where('A', (state, level, pos) -> true, Component.literal("Any"))
                .where('^', (state, level, pos) -> true, Component.literal("Any"))

@@ -25,7 +25,6 @@ public interface IAEBigIntegerCell extends IUpgradeableItem {
 
     double getIdleDrain();
 
-    // Novos métodos adicionados
     StorageTier getTier();
     AEKeyType getKeyType();
 
@@ -33,58 +32,55 @@ public interface IAEBigIntegerCell extends IUpgradeableItem {
     int getMaxTypes(ItemStack stack);
     int getBytesPerType(ItemStack stack);
 
-    default boolean isBlackListed(ItemStack stack, AEKey requestedAddition) {
+    default boolean isBlackListed(final ItemStack stack, final AEKey requestedAddition) {
         return false;
     }
 
-    // === Métodos auxiliares a seguir: migrados de NBT para Componentes de Dados, o comportamento permanece o mesmo ===
-    static BigInteger getUsedBytes(ItemStack stack) {
-        BigInteger v = stack.get(ModDataComponents.CELL_BYTE_USAGE_BIG.get());
+    static BigInteger getUsedBytes(final ItemStack stack) {
+        final BigInteger v = stack.get(ModDataComponents.CELL_BYTE_USAGE_BIG.get());
         return v == null ? BigInteger.ZERO : v;
     }
 
-    static void setUsedBytes(ItemStack stack, BigInteger usedBytes) {
+    static void setUsedBytes(final ItemStack stack, final BigInteger usedBytes) {
         stack.set(ModDataComponents.CELL_BYTE_USAGE_BIG.get(), usedBytes);
     }
 
-    static long getUsedTypes(ItemStack stack) {
-        Long v = stack.get(ModDataComponents.CELL_TYPES_USAGE.get());
+    static long getUsedTypes(final ItemStack stack) {
+        final Long v = stack.get(ModDataComponents.CELL_TYPES_USAGE.get());
         return v == null ? 0L : v;
     }
 
-    static void setUsedTypes(ItemStack stack, long usedTypes) {
+    static void setUsedTypes(final ItemStack stack, final long usedTypes) {
         stack.set(ModDataComponents.CELL_TYPES_USAGE.get(), usedTypes);
     }
 
-    static CellState getCellState(ItemStack stack) {
-        String s = stack.get(ModDataComponents.CELL_STATE.get());
+    static CellState getCellState(final ItemStack stack) {
+        final String s = stack.get(ModDataComponents.CELL_STATE.get());
         if (s == null) return CellState.EMPTY;
         try {
             return CellState.valueOf(s);
-        } catch (IllegalArgumentException ex) {
+        } catch (final IllegalArgumentException ex) {
             return CellState.EMPTY;
         }
     }
 
-    static void setCellState(ItemStack stack, CellState newState) {
+    static void setCellState(final ItemStack stack, final CellState newState) {
         stack.set(ModDataComponents.CELL_STATE.get(), newState.name());
     }
 
-    static List<GenericStack> getTooltipShowStacks(ItemStack stack) {
-        List<GenericStack> raw = stack.get(ModDataComponents.CELL_SHOW_TOOLTIP_STACKS.get());
+    static List<GenericStack> getTooltipShowStacks(final ItemStack stack) {
+        final List<GenericStack> raw = stack.get(ModDataComponents.CELL_SHOW_TOOLTIP_STACKS.get());
         if (raw == null || raw.isEmpty()) return List.of();
-        // Retorna uma cópia imutável para manter a semântica de "visualização somente leitura" da lógica original
         return Collections.unmodifiableList(new ArrayList<>(raw));
     }
 
-    static void setTooltipShowStacks(ItemStack stack, List<GenericStack> showStacks) {
+    static void setTooltipShowStacks(final ItemStack stack, final List<GenericStack> showStacks) {
         if (showStacks == null || showStacks.isEmpty()) {
             stack.remove(ModDataComponents.CELL_SHOW_TOOLTIP_STACKS.get());
             return;
         }
-        // Filtra possíveis nulos para manter a semântica de "pular entradas ruins" da implementação antiga
-        List<GenericStack> cleaned = new ArrayList<>(showStacks.size());
-        for (GenericStack gs : showStacks) {
+        final List<GenericStack> cleaned = new ArrayList<>(showStacks.size());
+        for (final GenericStack gs : showStacks) {
             if (gs != null) cleaned.add(gs);
         }
         if (cleaned.isEmpty()) {

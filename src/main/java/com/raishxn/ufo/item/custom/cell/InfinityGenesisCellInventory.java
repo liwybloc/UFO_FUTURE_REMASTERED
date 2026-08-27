@@ -28,19 +28,19 @@ public class InfinityGenesisCellInventory implements StorageCell {
     private final ItemStack stack;
     private final @Nullable ISaveProvider saveProvider;
 
-    public InfinityGenesisCellInventory(ItemStack stack, @Nullable ISaveProvider saveProvider) {
+    public InfinityGenesisCellInventory(final ItemStack stack, @Nullable final ISaveProvider saveProvider) {
         this.stack = stack;
         this.saveProvider = saveProvider;
     }
 
     @Override
-    public long insert(AEKey what, long amount, Actionable mode, IActionSource source) {
+    public long insert(final AEKey what, final long amount, final Actionable mode, final IActionSource source) {
         if (amount <= 0 || what == null || isStorageCellKey(what)) {
             return 0;
         }
 
         if (mode == Actionable.MODULATE && !contains(what)) {
-            var learned = new ArrayList<>(getLearnedStacks());
+            final var learned = new ArrayList<>(getLearnedStacks());
             learned.add(new GenericStack(what, 1));
             stack.set(ModDataComponents.INFINITY_GENESIS_CELL_KEYS.get(), learned);
             if (saveProvider != null) {
@@ -52,7 +52,7 @@ public class InfinityGenesisCellInventory implements StorageCell {
     }
 
     @Override
-    public long extract(AEKey what, long amount, Actionable mode, IActionSource source) {
+    public long extract(final AEKey what, final long amount, final Actionable mode, final IActionSource source) {
         if (amount <= 0 || what == null) {
             return 0;
         }
@@ -60,14 +60,14 @@ public class InfinityGenesisCellInventory implements StorageCell {
     }
 
     @Override
-    public void getAvailableStacks(KeyCounter out) {
-        for (var stack : getLearnedStacks()) {
+    public void getAvailableStacks(final KeyCounter out) {
+        for (final var stack : getLearnedStacks()) {
             out.add(stack.what(), InfinityCell.getAsIntMax(stack.what()));
         }
     }
 
     @Override
-    public boolean isPreferredStorageFor(AEKey what, IActionSource source) {
+    public boolean isPreferredStorageFor(final AEKey what, final IActionSource source) {
         return what != null && contains(what);
     }
 
@@ -99,8 +99,8 @@ public class InfinityGenesisCellInventory implements StorageCell {
         return stack.getOrDefault(ModDataComponents.INFINITY_GENESIS_CELL_KEYS.get(), List.of());
     }
 
-    private boolean contains(AEKey what) {
-        for (var learned : getLearnedStacks()) {
+    private boolean contains(final AEKey what) {
+        for (final var learned : getLearnedStacks()) {
             if (learned.what().equals(what)) {
                 return true;
             }
@@ -108,8 +108,8 @@ public class InfinityGenesisCellInventory implements StorageCell {
         return false;
     }
 
-    private static boolean isStorageCellKey(AEKey what) {
-        if (what instanceof AEItemKey itemKey) {
+    private static boolean isStorageCellKey(final AEKey what) {
+        if (what instanceof final AEItemKey itemKey) {
             return StorageCells.getCellInventory(itemKey.toStack(), null) != null;
         }
         return false;
@@ -117,12 +117,12 @@ public class InfinityGenesisCellInventory implements StorageCell {
 
     private static class Handler implements ICellHandler {
         @Override
-        public boolean isCell(ItemStack stack) {
+        public boolean isCell(final ItemStack stack) {
             return !stack.isEmpty() && stack.getItem() instanceof InfinityGenesisCell && stack.getCount() == 1;
         }
 
         @Override
-        public @Nullable StorageCell getCellInventory(ItemStack stack, @Nullable ISaveProvider host) {
+        public @Nullable StorageCell getCellInventory(final ItemStack stack, @Nullable final ISaveProvider host) {
             return isCell(stack) ? new InfinityGenesisCellInventory(stack, host) : null;
         }
     }

@@ -27,7 +27,7 @@ import mezz.jei.api.registration.IRecipeRegistration;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
@@ -55,32 +55,32 @@ public class MultiblockInfoCategory extends ModularUIRecipeCategory<MultiblockIn
     private final IDrawable background;
     private final IDrawable icon;
 
-    public MultiblockInfoCategory(IJeiHelpers helpers) {
+    public MultiblockInfoCategory(final IJeiHelpers helpers) {
         super(MultiblockInfoCategory::createUI);
         this.background = helpers.getGuiHelper().createBlankDrawable(WIDTH, HEIGHT);
         this.icon = helpers.getGuiHelper().createDrawableItemStack(
                 MultiblockBlocks.STELLAR_NEXUS_CONTROLLER.get().asItem().getDefaultInstance());
     }
 
-    public static void registerRecipes(IRecipeRegistration registration) {
+    public static void registerRecipes(final IRecipeRegistration registration) {
         registration.addRecipes(RECIPE_TYPE,
                 MultiblockControllerDefinitions.getPreviewEntries().stream()
                         .map(MultiblockInfoWrapper::new)
                         .toList());
     }
 
-    private static ModularUI createUI(MultiblockInfoWrapper recipe) {
-        var state = new PreviewState(recipe);
+    private static ModularUI createUI(final MultiblockInfoWrapper recipe) {
+        final var state = new PreviewState(recipe);
 
-        UIElement root = new UIElement();
+        final UIElement root = new UIElement();
         root.layout(layout -> layout.width(WIDTH).height(HEIGHT));
 
-        UIElement outer = new UIElement();
+        final UIElement outer = new UIElement();
         outer.layout(layout -> layout.positionType(YogaPositionType.ABSOLUTE).left(0).top(0).width(WIDTH).height(HEIGHT));
         outer.style(style -> style.background(new ColorRectTexture(0xFFC6CDD8)));
         root.addChild(outer);
 
-        UIElement inner = new UIElement();
+        final UIElement inner = new UIElement();
         inner.layout(layout -> layout.positionType(YogaPositionType.ABSOLUTE).left(1).top(1).width(WIDTH - 2).height(HEIGHT - 2));
         inner.style(style -> style.background(new ColorRectTexture(0xFFF7F9FB)));
         root.addChild(inner);
@@ -93,17 +93,17 @@ public class MultiblockInfoCategory extends ModularUIRecipeCategory<MultiblockIn
         root.addChild(text(Component.literal("Click blue blocks to view variants."),
                 6, 39, 172, 10, 0xFF31465C, false));
 
-        Scene scene = new Scene() {
+        final Scene scene = new Scene() {
             @Override
-            public void renderBlockOverLay(WorldSceneRenderer renderer) {
+            public void renderBlockOverLay(final WorldSceneRenderer renderer) {
                 super.renderBlockOverLay(renderer);
-                PoseStack poseStack = new PoseStack();
-                for (BlockPos variablePos : state.variablePositions) {
+                final PoseStack poseStack = new PoseStack();
+                for (final BlockPos variablePos : state.variablePositions) {
                     RenderUtils.renderBlockOverLay(poseStack, variablePos, 0.18f, 0.15f, 0.75f, 1.02f);
                 }
                 if (getLastHoverPosFace() != null) {
-                    BlockPos hoveredPos = getLastHoverPosFace().pos();
-                    char symbol = state.symbolByPos.getOrDefault(hoveredPos, '\0');
+                    final BlockPos hoveredPos = getLastHoverPosFace().pos();
+                    final char symbol = state.symbolByPos.getOrDefault(hoveredPos, '\0');
                     if (!state.pattern.getDisplayCandidates(symbol).isEmpty()) {
                         RenderUtils.renderBlockOverLay(poseStack, hoveredPos, 0.48f, 0.95f, 0.25f, 1.04f);
                     }
@@ -124,7 +124,7 @@ public class MultiblockInfoCategory extends ModularUIRecipeCategory<MultiblockIn
                 .setOnSelected((pos, facing) -> state.updateCandidates(pos));
         root.addChild(scene);
 
-        Label label = text(Component.literal(state.selectedLabel), 4, 136, 124, 10, 0xFF16202A, false);
+        final Label label = text(Component.literal(state.selectedLabel), 4, 136, 124, 10, 0xFF16202A, false);
         root.addChild(label);
 
         root.addChild(createButton("MAT", 108, 134, 20, 16, "Toggle materials / variants", button -> {
@@ -149,16 +149,16 @@ public class MultiblockInfoCategory extends ModularUIRecipeCategory<MultiblockIn
             label.setText(Component.literal(state.selectedLabel));
         }));
 
-        UIElement footer = new UIElement();
+        final UIElement footer = new UIElement();
         footer.layout(layout -> layout.positionType(YogaPositionType.ABSOLUTE).left(4).top(152).width(176).height(28));
         footer.style(style -> style.background(new ColorRectTexture(0x66131A26)));
         root.addChild(footer);
 
-        ItemSlot[] displaySlots = new ItemSlot[MAX_MATERIAL_SLOTS];
+        final ItemSlot[] displaySlots = new ItemSlot[MAX_MATERIAL_SLOTS];
         for (int i = 0; i < MAX_MATERIAL_SLOTS; i++) {
-            int col = i % MATERIAL_COLUMNS;
-            int row = i / MATERIAL_COLUMNS;
-            ItemSlot slot = new ItemSlot();
+            final int col = i % MATERIAL_COLUMNS;
+            final int row = i / MATERIAL_COLUMNS;
+            final ItemSlot slot = new ItemSlot();
             slot.layout(layout -> layout.positionType(YogaPositionType.ABSOLUTE)
                     .left(34 + (col * 18))
                     .top(154 + (row * 18))
@@ -189,8 +189,8 @@ public class MultiblockInfoCategory extends ModularUIRecipeCategory<MultiblockIn
         return ModularUI.of(UI.of(root));
     }
 
-    private static Label text(Component component, int x, int y, int width, int height, int color, boolean shadow) {
-        Label element = new Label();
+    private static Label text(final Component component, final int x, final int y, final int width, final int height, final int color, final boolean shadow) {
+        final Label element = new Label();
         element.setText(component);
         element.layout(layout -> layout.positionType(YogaPositionType.ABSOLUTE).left(x).top(y).width(width).height(height));
         element.textStyle(style -> {
@@ -200,9 +200,9 @@ public class MultiblockInfoCategory extends ModularUIRecipeCategory<MultiblockIn
         return element;
     }
 
-    private static Button createButton(String text, int x, int y, int width, int height, String tooltip,
-                                       java.util.function.Consumer<Button> onClick) {
-        Button button = new Button();
+    private static Button createButton(final String text, final int x, final int y, final int width, final int height, final String tooltip,
+                                       final java.util.function.Consumer<Button> onClick) {
+        final Button button = new Button();
         button.setText(text);
         button.layout(layout -> layout.positionType(YogaPositionType.ABSOLUTE).left(x).top(y).width(width).height(height));
         button.setOnClick(event -> onClick.accept((Button) event.currentElement));
@@ -217,7 +217,7 @@ public class MultiblockInfoCategory extends ModularUIRecipeCategory<MultiblockIn
     }
 
     @Override
-    public @Nullable ResourceLocation getRegistryName(@NotNull MultiblockInfoWrapper recipe) {
+    public @Nullable Identifier getRegistryName(@NotNull final MultiblockInfoWrapper recipe) {
         return recipe.entry().id();
     }
 
@@ -268,7 +268,7 @@ public class MultiblockInfoCategory extends ModularUIRecipeCategory<MultiblockIn
         private String selectedLabel = "Material list";
         private List<ItemStack> currentCandidates = List.of();
 
-        private PreviewState(MultiblockInfoWrapper recipe) {
+        private PreviewState(final MultiblockInfoWrapper recipe) {
             this.recipe = recipe;
             this.pattern = recipe.entry().definition().pattern();
             this.previewLevel = new TrackedDummyWorld();
@@ -276,29 +276,29 @@ public class MultiblockInfoCategory extends ModularUIRecipeCategory<MultiblockIn
             buildPreviewWorld();
         }
 
-        private void attachDisplaySlots(ItemSlot[] slots) {
+        private void attachDisplaySlots(final ItemSlot[] slots) {
             this.displaySlots = slots;
         }
 
         private void buildPreviewWorld() {
-            MultiblockControllerDefinition definition = recipe.entry().definition();
-            char[][][] chars = pattern.getPattern();
-            BlockState controllerState = resolveControllerState(recipe.entry().iconStack());
+            final MultiblockControllerDefinition definition = recipe.entry().definition();
+            final char[][][] chars = pattern.getPattern();
+            final BlockState controllerState = resolveControllerState(recipe.entry().iconStack());
 
-            Map<BlockPos, BlockInfo> blockMap = new HashMap<>();
+            final Map<BlockPos, BlockInfo> blockMap = new HashMap<>();
 
             for (int y = 0; y < chars.length; y++) {
                 for (int z = 0; z < chars[y].length; z++) {
                     for (int x = 0; x < chars[y][z].length; x++) {
-                        char symbol = chars[y][z][x];
-                        BlockState logicalState = symbol == pattern.getControllerChar()
+                        final char symbol = chars[y][z][x];
+                        final BlockState logicalState = symbol == pattern.getControllerChar()
                                 ? controllerState
                                 : definition.defaultCreativeStates().get(symbol);
                         if (logicalState == null || logicalState.isAir()) {
                             continue;
                         }
 
-                        BlockPos pos = origin.offset(x, y, z);
+                        final BlockPos pos = origin.offset(x, y, z);
                         blockMap.put(pos, BlockInfo.fromBlockState(adaptPreviewState(logicalState)));
                         allPositions.add(pos);
                         symbolByPos.put(pos, symbol);
@@ -315,8 +315,8 @@ public class MultiblockInfoCategory extends ModularUIRecipeCategory<MultiblockIn
             layers.sort(Comparator.naturalOrder());
         }
 
-        private void applyLayer(Scene scene) {
-            List<Integer> uniqueLayers = layers.stream().distinct().sorted().toList();
+        private void applyLayer(final Scene scene) {
+            final List<Integer> uniqueLayers = layers.stream().distinct().sorted().toList();
             if (currentLayer < 0 || currentLayer >= uniqueLayers.size()) {
                 scene.setRenderedCore(allPositions);
                 if (showingMaterials) {
@@ -325,7 +325,7 @@ public class MultiblockInfoCategory extends ModularUIRecipeCategory<MultiblockIn
                 return;
             }
 
-            int worldY = uniqueLayers.get(currentLayer);
+            final int worldY = uniqueLayers.get(currentLayer);
             scene.setRenderedCore(allPositions.stream().filter(pos -> pos.getY() == worldY).toList());
             if (showingMaterials) {
                 selectedLabel = "Materials - layer " + (currentLayer + 1) + "/" + uniqueLayers.size();
@@ -333,7 +333,7 @@ public class MultiblockInfoCategory extends ModularUIRecipeCategory<MultiblockIn
         }
 
         private void cycleLayer() {
-            List<Integer> uniqueLayers = layers.stream().distinct().sorted().toList();
+            final List<Integer> uniqueLayers = layers.stream().distinct().sorted().toList();
             if (uniqueLayers.isEmpty()) {
                 currentLayer = -1;
             } else if (currentLayer < 0) {
@@ -346,9 +346,9 @@ public class MultiblockInfoCategory extends ModularUIRecipeCategory<MultiblockIn
             }
         }
 
-        private void updateCandidates(BlockPos pos) {
-            char symbol = symbolByPos.getOrDefault(pos, '\0');
-            List<BlockState> candidates = pattern.getDisplayCandidates(symbol);
+        private void updateCandidates(final BlockPos pos) {
+            final char symbol = symbolByPos.getOrDefault(pos, '\0');
+            final List<BlockState> candidates = pattern.getDisplayCandidates(symbol);
             if (candidates.isEmpty()) {
                 showingMaterials = true;
                 displayPage = 0;
@@ -371,18 +371,18 @@ public class MultiblockInfoCategory extends ModularUIRecipeCategory<MultiblockIn
             if (displaySlots.length == 0) {
                 return;
             }
-            for (ItemSlot slot : displaySlots) {
+            for (final ItemSlot slot : displaySlots) {
                 slot.setItem(ItemStack.EMPTY);
             }
 
             if (showingMaterials) {
-                int pageCount = Math.max(1, (int) Math.ceil(recipe.materials().size() / (double) MAX_MATERIAL_SLOTS));
+                final int pageCount = Math.max(1, (int) Math.ceil(recipe.materials().size() / (double) MAX_MATERIAL_SLOTS));
                 if (displayPage >= pageCount) {
                     displayPage = 0;
                 }
-                int start = displayPage * MAX_MATERIAL_SLOTS;
+                final int start = displayPage * MAX_MATERIAL_SLOTS;
                 for (int i = 0; i < MAX_MATERIAL_SLOTS && start + i < recipe.materials().size(); i++) {
-                    MultiblockInfoWrapper.MaterialStack material = recipe.materials().get(start + i);
+                    final MultiblockInfoWrapper.MaterialStack material = recipe.materials().get(start + i);
                     displaySlots[i].setItem(material.stack().copyWithCount(material.count()), false);
                     displaySlots[i].style(style -> style.tooltips(
                             Component.literal(material.stack().getHoverName().getString()),
@@ -390,31 +390,31 @@ public class MultiblockInfoCategory extends ModularUIRecipeCategory<MultiblockIn
                 }
             } else {
                 for (int i = 0; i < MAX_MATERIAL_SLOTS && i < currentCandidates.size(); i++) {
-                    ItemStack stack = currentCandidates.get(i);
+                    final ItemStack stack = currentCandidates.get(i);
                     displaySlots[i].setItem(stack, false);
                     displaySlots[i].style(style -> style.tooltips(stack.getHoverName()));
                 }
             }
         }
 
-        private void cycleDisplayPage(int delta) {
+        private void cycleDisplayPage(final int delta) {
             if (!showingMaterials || recipe.materials().isEmpty()) {
                 return;
             }
-            int pageCount = Math.max(1, (int) Math.ceil(recipe.materials().size() / (double) MAX_MATERIAL_SLOTS));
+            final int pageCount = Math.max(1, (int) Math.ceil(recipe.materials().size() / (double) MAX_MATERIAL_SLOTS));
             displayPage = (displayPage + delta + pageCount) % pageCount;
         }
     }
 
-    private static BlockState resolveControllerState(ItemStack iconStack) {
-        if (iconStack.getItem() instanceof BlockItem blockItem) {
+    private static BlockState resolveControllerState(final ItemStack iconStack) {
+        if (iconStack.getItem() instanceof final BlockItem blockItem) {
             return blockItem.getBlock().defaultBlockState();
         }
         return Blocks.IRON_BLOCK.defaultBlockState();
     }
 
-    private static BlockState adaptPreviewState(BlockState state) {
-        ResourceLocation key = BuiltInRegistries.BLOCK.getKey(state.getBlock());
+    private static BlockState adaptPreviewState(final BlockState state) {
+        final Identifier key = BuiltInRegistries.BLOCK.getKey(state.getBlock());
         if (key != null && "ae2".equals(key.getNamespace()) && "quartz_vibrant_glass".equals(key.getPath())) {
             return Blocks.GLASS.defaultBlockState();
         }

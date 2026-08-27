@@ -2,12 +2,12 @@ package com.raishxn.ufo.api.tutorial;
 
 import com.raishxn.ufo.api.multiblock.MultiblockControllerDefinitions;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.List;
 
 public record UfoTutorialEntry(
-        ResourceLocation id,
+        Identifier id,
         Component title,
         MultiblockControllerDefinitions.PreviewEntry previewEntry,
         List<UfoTutorialScene> scenes) {

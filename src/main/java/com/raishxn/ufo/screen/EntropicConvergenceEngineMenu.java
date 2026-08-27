@@ -13,22 +13,22 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jetbrains.annotations.NotNull;
 
 public class EntropicConvergenceEngineMenu extends AbstractUniversalMultiblockControllerMenu<EntropicConvergenceEngineBE> {
-    public EntropicConvergenceEngineMenu(int id, Inventory inv, FriendlyByteBuf extraData) {
+    public EntropicConvergenceEngineMenu(final int id, final Inventory inv, final FriendlyByteBuf extraData) {
         this(id, inv, inv.player.level().getBlockEntity(extraData.readBlockPos()));
     }
 
-    public EntropicConvergenceEngineMenu(int id, Inventory inv, BlockEntity entity) {
+    public EntropicConvergenceEngineMenu(final int id, final Inventory inv, final BlockEntity entity) {
         super(ModMenus.ENTROPIC_CONVERGENCE_ENGINE_MENU.get(), id, inv, (EntropicConvergenceEngineBE) entity,
                 ContainerLevelAccess.create(entity.getLevel(), entity.getBlockPos()));
     }
 
     @Override
-    public @NotNull ItemStack quickMoveStack(@NotNull Player playerIn, int index) {
+    public @NotNull ItemStack quickMoveStack(@NotNull final Player playerIn, final int index) {
         return ItemStack.EMPTY;
     }
 
     @Override
-    public boolean stillValid(@NotNull Player player) {
+    public boolean stillValid(@NotNull final Player player) {
         return stillValid(this.levelAccess, player, getValidBlock());
     }
 

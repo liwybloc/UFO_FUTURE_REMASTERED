@@ -12,7 +12,7 @@ public class QuantumCryoforgeControllerBlock extends AbstractSimpleMultiblockCon
 
     public static final MapCodec<QuantumCryoforgeControllerBlock> CODEC = simpleCodec(QuantumCryoforgeControllerBlock::new);
 
-    public QuantumCryoforgeControllerBlock(BlockBehaviour.Properties properties) {
+    public QuantumCryoforgeControllerBlock(final BlockBehaviour.Properties properties) {
         super(properties);
     }
 
@@ -27,7 +27,7 @@ public class QuantumCryoforgeControllerBlock extends AbstractSimpleMultiblockCon
     }
 
     @Override
-    protected QuantumCryoforgeControllerBE createBlockEntity(BlockPos pos, BlockState state) {
+    protected QuantumCryoforgeControllerBE createBlockEntity(final BlockPos pos, final BlockState state) {
         return new QuantumCryoforgeControllerBE(pos, state);
     }
 }

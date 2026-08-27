@@ -60,17 +60,16 @@ public class MultiblockPattern {
     public int getControllerLayer() { return controllerLayer; }
     public int getControllerRow() { return controllerRow; }
     public int getControllerCol() { return controllerCol; }
-    public Component getLegendName(char symbol) { return legendNames.getOrDefault(symbol, Component.literal("Unknown Block")); }
+    public Component getLegendName(final char symbol) { return legendNames.getOrDefault(symbol, Component.literal("Unknown Block")); }
 
-    private MultiblockPattern(char[][][] pattern, Map<Character, BlockPredicate> legend, Map<Character, Component> legendNames,
-                              Map<Character, List<BlockState>> displayCandidates, char controllerChar) {
+    private MultiblockPattern(final char[][][] pattern, final Map<Character, BlockPredicate> legend, final Map<Character, Component> legendNames,
+                              final Map<Character, List<BlockState>> displayCandidates, final char controllerChar) {
         this.pattern = pattern;
         this.legend = legend;
         this.legendNames = legendNames;
         this.displayCandidates = displayCandidates;
         this.controllerChar = controllerChar;
 
-        // Locate controller position in the pattern
         int cLayer = -1, cRow = -1, cCol = -1;
         for (int y = 0; y < pattern.length; y++) {
             for (int z = 0; z < pattern[y].length; z++) {
@@ -99,50 +98,47 @@ public class MultiblockPattern {
      * @param controllerPos the world position of the controller block
      * @return a {@link MatchResult} containing whether the structure matched and which positions are parts
      */
-    public MatchResult match(Level level, BlockPos controllerPos, net.minecraft.core.Direction facing) {
-        List<BlockPos> partPositions = new ArrayList<>();
+    public MatchResult match(final Level level, final BlockPos controllerPos, final net.minecraft.core.Direction facing) {
+        final List<BlockPos> partPositions = new ArrayList<>();
         PatternError firstError = null;
-        List<PatternError> allErrors = new ArrayList<>();
+        final List<PatternError> allErrors = new ArrayList<>();
         boolean valid = true;
         boolean hasUnloadedPositions = false;
 
         for (int y = 0; y < pattern.length; y++) {
             for (int z = 0; z < pattern[y].length; z++) {
                 for (int x = 0; x < pattern[y][z].length; x++) {
-                    char c = pattern[y][z][x];
+                    final char c = pattern[y][z][x];
 
-                    // Calculate world offset from controller
-                    int offsetX = x - controllerCol;
-                    int offsetY = y - controllerLayer;
-                    int offsetZ = z - controllerRow;
+                    final int offsetX = x - controllerCol;
+                    final int offsetY = y - controllerLayer;
+                    final int offsetZ = z - controllerRow;
 
-                    BlockPos worldPos = getRotatedPos(controllerPos, offsetX, offsetY, offsetZ, facing);
+                    final BlockPos worldPos = getRotatedPos(controllerPos, offsetX, offsetY, offsetZ, facing);
 
-                    // Skip the controller position itself
                     if (worldPos.equals(controllerPos)) {
                         continue;
                     }
 
-                    BlockPredicate predicate = legend.get(c);
+                    final BlockPredicate predicate = legend.get(c);
                     if (predicate == null) {
-                        // Unknown char in pattern ⇒ treat as "anything"
                         continue;
                     }
 
                     if (!level.isLoaded(worldPos)) {
                         valid = false;
                         hasUnloadedPositions = true;
-                        PatternError err = new PatternError(worldPos, Component.literal("Chunk not loaded"));
+                        final PatternError err = new PatternError(worldPos, Component.literal("Chunk not loaded"));
                         allErrors.add(err);
                         if (firstError == null) firstError = err;
                         continue;
                     }
 
-                    BlockState state = level.getBlockState(worldPos);
+                    final BlockState state = level.getBlockState(worldPos);
                     if (!predicate.test(state, level, worldPos)) {
                         valid = false;
-                        Component expected = legendNames.getOrDefault(c, Component.literal("Expected part"));
-                        PatternError err = new PatternError(worldPos, expected);
+                        final Component expected = legendNames.getOrDefault(c, Component.literal("Expected part"));
+                        final PatternError err = new PatternError(worldPos, expected);
                         allErrors.add(err);
                         if (firstError == null) firstError = err;
                     } else {
@@ -165,7 +161,7 @@ public class MultiblockPattern {
      * Assumes pattern is built such that z=0 is the front face looking SOUTH (+Z). 
      * If facing is NORTH, the machine goes $+Z$ backwards.
      */
-    private BlockPos getRotatedPos(BlockPos center, int localX, int localY, int localZ, net.minecraft.core.Direction facing) {
+    private BlockPos getRotatedPos(final BlockPos center, final int localX, final int localY, final int localZ, final net.minecraft.core.Direction facing) {
         switch (facing) {
             case SOUTH:
                 return center.offset(-localX, localY, -localZ);
@@ -183,28 +179,28 @@ public class MultiblockPattern {
      * Instantly assembles the structure unconditionally, replacing non-matching blocks 
      * using the provided map of default states. Does not replace the controller.
      */
-    public void assembleAsCreative(Level level, BlockPos controllerPos, net.minecraft.core.Direction facing, Map<Character, BlockState> defaultStates) {
+    public void assembleAsCreative(final Level level, final BlockPos controllerPos, final net.minecraft.core.Direction facing, final Map<Character, BlockState> defaultStates) {
         for (int y = 0; y < pattern.length; y++) {
             for (int z = 0; z < pattern[y].length; z++) {
                 for (int x = 0; x < pattern[y][z].length; x++) {
-                    char c = pattern[y][z][x];
+                    final char c = pattern[y][z][x];
                     
-                    int offsetX = x - controllerCol;
-                    int offsetY = y - controllerLayer;
-                    int offsetZ = z - controllerRow;
+                    final int offsetX = x - controllerCol;
+                    final int offsetY = y - controllerLayer;
+                    final int offsetZ = z - controllerRow;
 
-                    BlockPos worldPos = getRotatedPos(controllerPos, offsetX, offsetY, offsetZ, facing);
+                    final BlockPos worldPos = getRotatedPos(controllerPos, offsetX, offsetY, offsetZ, facing);
 
                     if (worldPos.equals(controllerPos)) continue;
 
                     if (!level.isInWorldBounds(worldPos)) continue;
                     if (!level.hasChunkAt(worldPos)) continue;
 
-                    BlockPredicate predicate = legend.get(c);
-                    BlockState targetState = defaultStates.get(c);
+                    final BlockPredicate predicate = legend.get(c);
+                    final BlockState targetState = defaultStates.get(c);
 
                     if (predicate != null && targetState != null) {
-                        BlockState currentState = level.getBlockState(worldPos);
+                        final BlockState currentState = level.getBlockState(worldPos);
                         if (!predicate.test(currentState, level, worldPos)) {
                             level.setBlockAndUpdate(worldPos, targetState);
                         }
@@ -217,16 +213,16 @@ public class MultiblockPattern {
     /**
      * Returns the exact world positions for a specific character in the pattern.
      */
-    public List<BlockPos> getExpectedPositions(BlockPos controllerPos, net.minecraft.core.Direction facing, char targetChar) {
-        List<BlockPos> list = new ArrayList<>();
+    public List<BlockPos> getExpectedPositions(final BlockPos controllerPos, final net.minecraft.core.Direction facing, final char targetChar) {
+        final List<BlockPos> list = new ArrayList<>();
         for (int y = 0; y < pattern.length; y++) {
             for (int z = 0; z < pattern[y].length; z++) {
                 for (int x = 0; x < pattern[y][z].length; x++) {
                     if (pattern[y][z][x] == targetChar) {
-                        int offsetX = x - controllerCol;
-                        int offsetY = y - controllerLayer;
-                        int offsetZ = z - controllerRow;
-                        BlockPos pos = getRotatedPos(controllerPos, offsetX, offsetY, offsetZ, facing);
+                        final int offsetX = x - controllerCol;
+                        final int offsetY = y - controllerLayer;
+                        final int offsetZ = z - controllerRow;
+                        final BlockPos pos = getRotatedPos(controllerPos, offsetX, offsetY, offsetZ, facing);
                         list.add(pos);
                     }
                 }
@@ -235,18 +231,18 @@ public class MultiblockPattern {
         return list;
     }
 
-    public List<BlockState> getDisplayCandidates(char symbol) {
+    public List<BlockState> getDisplayCandidates(final char symbol) {
         return displayCandidates.getOrDefault(symbol, List.of());
     }
 
-    public Optional<Character> getSymbolAt(BlockPos controllerPos, net.minecraft.core.Direction facing, BlockPos worldPos) {
+    public Optional<Character> getSymbolAt(final BlockPos controllerPos, final net.minecraft.core.Direction facing, final BlockPos worldPos) {
         for (int y = 0; y < pattern.length; y++) {
             for (int z = 0; z < pattern[y].length; z++) {
                 for (int x = 0; x < pattern[y][z].length; x++) {
-                    int offsetX = x - controllerCol;
-                    int offsetY = y - controllerLayer;
-                    int offsetZ = z - controllerRow;
-                    BlockPos expectedPos = getRotatedPos(controllerPos, offsetX, offsetY, offsetZ, facing);
+                    final int offsetX = x - controllerCol;
+                    final int offsetY = y - controllerLayer;
+                    final int offsetZ = z - controllerRow;
+                    final BlockPos expectedPos = getRotatedPos(controllerPos, offsetX, offsetY, offsetZ, facing);
                     if (expectedPos.equals(worldPos)) {
                         return Optional.of(pattern[y][z][x]);
                     }
@@ -271,7 +267,6 @@ public class MultiblockPattern {
             List<PatternError> allErrors,
             boolean hasUnloadedPositions) {}
 
-    // ──────────────────────── Builder ────────────────────────
 
     public static class Builder {
         private final List<String[]> layers = new ArrayList<>();
@@ -284,7 +279,7 @@ public class MultiblockPattern {
          * Adds a horizontal layer to the pattern (bottom to top).
          * Each string represents a row (north to south); each char a column (west to east).
          */
-        public Builder layer(String[] rows) {
+        public Builder layer(final String[] rows) {
             this.layers.add(rows);
             return this;
         }
@@ -292,11 +287,11 @@ public class MultiblockPattern {
         /**
          * Defines what block a character in the pattern maps to.
          */
-        public Builder where(char c, BlockPredicate predicate) {
+        public Builder where(final char c, final BlockPredicate predicate) {
             return where(c, predicate, Component.literal("Unknown Block"));
         }
 
-        public Builder where(char c, BlockPredicate predicate, Component expectedName) {
+        public Builder where(final char c, final BlockPredicate predicate, final Component expectedName) {
             this.legend.put(c, predicate);
             this.legendNames.put(c, expectedName);
             return this;
@@ -305,16 +300,16 @@ public class MultiblockPattern {
         /**
          * Convenience: maps a char to a specific block class.
          */
-        public Builder where(char c, Block block) {
+        public Builder where(final char c, final Block block) {
             return where(c, (state, level, pos) -> state.is(block), block.getName());
         }
 
-        public Builder candidates(char c, BlockState... states) {
+        public Builder candidates(final char c, final BlockState... states) {
             return candidates(c, Arrays.asList(states));
         }
 
-        public Builder candidates(char c, List<BlockState> states) {
-            List<BlockState> cleaned = states.stream()
+        public Builder candidates(final char c, final List<BlockState> states) {
+            final List<BlockState> cleaned = states.stream()
                     .filter(Objects::nonNull)
                     .toList();
             if (!cleaned.isEmpty()) {
@@ -327,16 +322,15 @@ public class MultiblockPattern {
          * Sets the character that represents the controller in the pattern.
          * Defaults to {@code 'C'}.
          */
-        public Builder controllerChar(char c) {
+        public Builder controllerChar(final char c) {
             this.controllerChar = c;
             return this;
         }
 
         public MultiblockPattern build() {
-            // Convert List<String[]> → char[][][]
-            char[][][] patternArray = new char[layers.size()][][];
+            final char[][][] patternArray = new char[layers.size()][][];
             for (int y = 0; y < layers.size(); y++) {
-                String[] rows = layers.get(y);
+                final String[] rows = layers.get(y);
                 patternArray[y] = new char[rows.length][];
                 for (int z = 0; z < rows.length; z++) {
                     patternArray[y][z] = rows[z].toCharArray();

@@ -14,7 +14,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 
 public class QuantumPatternProviderPart extends PatternProviderPart {
-    public QuantumPatternProviderPart(IPartItem<?> partItem) {
+    public QuantumPatternProviderPart(final IPartItem<?> partItem) {
         super(partItem);
     }
 
@@ -24,11 +24,11 @@ public class QuantumPatternProviderPart extends PatternProviderPart {
     }
 
     @Override
-    public void returnToMainMenu(Player player, ISubMenu subMenu) {
+    public void returnToMainMenu(final Player player, final ISubMenu subMenu) {
         MenuOpener.returnTo(ModMenus.QUANTUM_PATTERN_HATCH_MENU.get(), player, subMenu.getLocator());
     }
 
-    public boolean onPartActivate(Player player, InteractionHand hand, Vec3 pos) {
+    public boolean onPartActivate(final Player player, final InteractionHand hand, final Vec3 pos) {
         if (!player.level().isClientSide()) {
             MenuOpener.open(ModMenus.QUANTUM_PATTERN_HATCH_MENU.get(), player, MenuLocators.forPart(this));
         }

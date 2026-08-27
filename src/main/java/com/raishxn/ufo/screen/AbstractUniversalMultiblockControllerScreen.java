@@ -17,7 +17,7 @@ import com.raishxn.ufo.network.packet.PacketToggleUniversalOverclock;
 import com.raishxn.ufo.network.packet.PacketToggleUniversalSafeMode;
 import java.util.List;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.util.FormattedCharSequence;
@@ -48,7 +48,7 @@ public abstract class AbstractUniversalMultiblockControllerScreen<M extends Abst
     private List<GroupedRecipe> cachedGroupedRecipes = List.of();
     private int cachedRecipeSignature = 0;
 
-    protected AbstractUniversalMultiblockControllerScreen(M menu, Inventory playerInventory, Component title, ScreenStyle style) {
+    protected AbstractUniversalMultiblockControllerScreen(final M menu, final Inventory playerInventory, final Component title, final ScreenStyle style) {
         super(menu, playerInventory, title, style);
         this.inventoryLabelY = 1000;
         this.titleLabelY = 1000;
@@ -61,7 +61,7 @@ public abstract class AbstractUniversalMultiblockControllerScreen<M extends Abst
         setSlotsHidden(SlotSemantics.PLAYER_HOTBAR, true);
 
         this.scanButton = this.addRenderableWidget(Button.builder(Component.literal("Scan"), btn -> {
-                    BlockPos pos = this.menu.getBlockEntity().getBlockPos();
+                    final BlockPos pos = this.menu.getBlockEntity().getBlockPos();
                     ModPackets.sendToServer(new PacketScanUniversalStructure(pos));
                     runLocalStructureScan(pos);
                 })
@@ -89,7 +89,7 @@ public abstract class AbstractUniversalMultiblockControllerScreen<M extends Abst
     }
 
     @Override
-    public void drawBG(GuiGraphics guiGraphics, int offsetX, int offsetY, int mouseX, int mouseY, float partialTick) {
+    public void drawBG(final GuiGraphicsExtractor guiGraphics, final int offsetX, final int offsetY, final int mouseX, final int mouseY, final float partialTick) {
         super.drawBG(guiGraphics, offsetX, offsetY, mouseX, mouseY, partialTick);
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
@@ -97,31 +97,31 @@ public abstract class AbstractUniversalMultiblockControllerScreen<M extends Abst
         renderRecipeList(guiGraphics);
     }
 
-    private void renderTemperatureBar(GuiGraphics guiGraphics) {
-        int barX = this.leftPos + 14;
-        int barY = this.topPos + 9;
-        int barWidth = 146;
-        int barHeight = 10;
-        int filled = (int) (barWidth * Math.min(1.0F, this.menu.getTemperature() / (float) this.menu.getMaxTemperature()));
+    private void renderTemperatureBar(final GuiGraphicsExtractor guiGraphics) {
+        final int barX = this.leftPos + 14;
+        final int barY = this.topPos + 9;
+        final int barWidth = 146;
+        final int barHeight = 10;
+        final int filled = (int) (barWidth * Math.min(1.0F, this.menu.getTemperature() / (float) this.menu.getMaxTemperature()));
 
         if (filled > 0) {
             guiGraphics.fill(barX, barY, barX + filled, barY + barHeight, 0xCCB32020);
         }
     }
 
-    private void renderRecipeList(GuiGraphics guiGraphics) {
-        int listX = this.leftPos + 7;
-        int listY = this.topPos + 30;
-        int lineHeight = 10;
-        int maxTextWidth = 156;
-        List<GroupedRecipe> recipes = buildGroupedRecipes();
+    private void renderRecipeList(final GuiGraphicsExtractor guiGraphics) {
+        final int listX = this.leftPos + 7;
+        final int listY = this.topPos + 30;
+        final int lineHeight = 10;
+        final int maxTextWidth = 156;
+        final List<GroupedRecipe> recipes = buildGroupedRecipes();
 
         guiGraphics.drawString(this.font, this.font.plainSubstrByWidth(getScreenTitle().getString(), maxTextWidth), listX, listY, 0xF0F0F0, false);
         guiGraphics.drawString(this.font, this.font.plainSubstrByWidth(buildStatusLine(), maxTextWidth), listX, listY + 10, 0xD0D7E6, false);
         renderSummaryLine(guiGraphics, listX, listY + 20, maxTextWidth, recipes);
 
         for (int i = 0; i < 8; i++) {
-            int rowY = listY + 32 + i * lineHeight;
+            final int rowY = listY + 32 + i * lineHeight;
             if (i < recipes.size()) {
                 renderRecipeRow(guiGraphics, recipes.get(i), listX, rowY);
             } else if (i == 0 && recipes.isEmpty()) {
@@ -130,12 +130,12 @@ public abstract class AbstractUniversalMultiblockControllerScreen<M extends Abst
         }
     }
 
-    private void renderRecipeRow(GuiGraphics guiGraphics, GroupedRecipe groupedRecipe, int x, int y) {
-        UniversalDisplayedRecipe recipe = groupedRecipe.recipe();
+    private void renderRecipeRow(final GuiGraphicsExtractor guiGraphics, final GroupedRecipe groupedRecipe, final int x, final int y) {
+        final UniversalDisplayedRecipe recipe = groupedRecipe.recipe();
         ItemStack iconStack = recipe.itemIcon();
         boolean fluidRecipe = false;
         if (iconStack.isEmpty()) {
-            FluidStack fluid = recipe.fluidIcon();
+            final FluidStack fluid = recipe.fluidIcon();
             if (!fluid.isEmpty()) {
                 iconStack = new ItemStack(fluid.getFluid().getBucket());
                 fluidRecipe = true;
@@ -152,12 +152,12 @@ public abstract class AbstractUniversalMultiblockControllerScreen<M extends Abst
             textX += 10;
         }
 
-        String amount = fluidRecipe ? formatAmount(groupedRecipe.totalOutputAmount()) + "mB" : formatAmount(groupedRecipe.totalOutputAmount()) + "x";
-        String time = groupedRecipe.displayMaxProgress() > 0
+        final String amount = fluidRecipe ? formatAmount(groupedRecipe.totalOutputAmount()) + "mB" : formatAmount(groupedRecipe.totalOutputAmount()) + "x";
+        final String time = groupedRecipe.displayMaxProgress() > 0
                 ? formatSeconds(groupedRecipe.displayProgress()) + "/" + formatSeconds(groupedRecipe.displayMaxProgress()) + "s"
                 : "-/-";
-        int timeWidth = this.font.width(time);
-        int availableWidth = Math.max(20, 156 - (textX - x) - timeWidth - 4);
+        final int timeWidth = this.font.width(time);
+        final int availableWidth = Math.max(20, 156 - (textX - x) - timeWidth - 4);
         String leftText = amount + " " + recipe.label().getString();
         if (groupedRecipe.copyCount() > 1) {
             leftText += " [" + groupedRecipe.copyCount() + "]";
@@ -170,19 +170,18 @@ public abstract class AbstractUniversalMultiblockControllerScreen<M extends Abst
         if (!this.menu.isAssembled()) {
             return "Status: Incomplete";
         }
-        StringBuilder builder = new StringBuilder(this.menu.isRunning() ? "RUN" : "IDLE");
-        builder.append(" | MK").append(this.menu.getMachineTier());
-        builder.append(" | ").append(this.menu.isSafeMode() ? "SAFE" : "RISK");
-        builder.append(" | ").append(this.menu.isOverclocked() ? "OC" : "STD");
-        return builder.toString();
+        String builder = (this.menu.isRunning() ? "RUN" : "IDLE") + " | MK" + this.menu.getMachineTier() +
+                " | " + (this.menu.isSafeMode() ? "SAFE" : "RISK") +
+                " | " + (this.menu.isOverclocked() ? "OC" : "STD");
+        return builder;
     }
 
-    private void renderSummaryLine(GuiGraphics guiGraphics, int x, int y, int maxTextWidth, List<GroupedRecipe> recipes) {
-        String summaryText = buildSummaryText(recipes);
+    private void renderSummaryLine(final GuiGraphicsExtractor guiGraphics, final int x, final int y, final int maxTextWidth, final List<GroupedRecipe> recipes) {
+        final String summaryText = buildSummaryText(recipes);
         guiGraphics.drawString(this.font, this.font.plainSubstrByWidth(summaryText, maxTextWidth), x, y, 0xB9D8FF, false);
     }
 
-    private String buildSummaryText(List<GroupedRecipe> recipes) {
+    private String buildSummaryText(final List<GroupedRecipe> recipes) {
         return "AE " + formatAmount(this.menu.getStoredEnergy())
                 + " | A" + this.menu.getActiveParallels()
                 + " U" + recipes.size()
@@ -205,7 +204,7 @@ public abstract class AbstractUniversalMultiblockControllerScreen<M extends Abst
         return Component.literal(raw);
     }
 
-    private static String formatAmount(long amount) {
+    private static String formatAmount(final long amount) {
         if (amount >= 1_000_000_000L) {
             return String.format(Locale.ROOT, "%.1fB", amount / 1_000_000_000.0);
         }
@@ -218,8 +217,8 @@ public abstract class AbstractUniversalMultiblockControllerScreen<M extends Abst
         return Long.toString(amount);
     }
 
-    private static String formatSeconds(int ticks) {
-        double seconds = ticks / 20.0;
+    private static String formatSeconds(final int ticks) {
+        final double seconds = ticks / 20.0;
         return seconds >= 100
                 ? String.format(Locale.ROOT, "%.0f", seconds)
                 : String.format(Locale.ROOT, "%.1f", seconds);
@@ -230,13 +229,13 @@ public abstract class AbstractUniversalMultiblockControllerScreen<M extends Abst
         super.containerTick();
         refreshRecipeCache();
         if (this.safeModeButton != null) {
-            boolean safe = this.menu.isSafeMode();
+            final boolean safe = this.menu.isSafeMode();
             this.safeModeButton.setMessage(Component.literal(safe ? "S" : "!"));
             this.safeModeButton.setTooltip(Tooltip.create(Component.literal(safe ? "Safe Mode enabled" : "Safe Mode disabled")));
             this.safeModeButton.active = !this.menu.isRunning() && this.menu.getDisplayedRecipes().isEmpty();
         }
         if (this.overclockButton != null) {
-            boolean oc = this.menu.isOverclocked();
+            final boolean oc = this.menu.isOverclocked();
             this.overclockButton.setMessage(Component.literal(oc ? "OC" : ">"));
             this.overclockButton.setTooltip(Tooltip.create(Component.literal(oc ? "Overclock enabled" : "Overclock disabled")));
             this.overclockButton.active = !this.menu.isRunning() && this.menu.getDisplayedRecipes().isEmpty();
@@ -244,7 +243,7 @@ public abstract class AbstractUniversalMultiblockControllerScreen<M extends Abst
     }
 
     @Override
-    protected void renderTooltip(GuiGraphics guiGraphics, int mouseX, int mouseY) {
+    protected void renderTooltip(final GuiGraphicsExtractor guiGraphics, final int mouseX, final int mouseY) {
         if (isHovering(14, 9, 146, 10, mouseX, mouseY)) {
             guiGraphics.renderTooltip(this.font,
                     Component.literal("Temperature: " + this.menu.getTemperature() + " / " + this.menu.getMaxTemperature()),
@@ -259,7 +258,7 @@ public abstract class AbstractUniversalMultiblockControllerScreen<M extends Abst
             guiGraphics.renderTooltip(this.font, buildSummaryTooltip().stream().map(Component::getVisualOrderText).toList(), mouseX, mouseY);
             return;
         }
-        GroupedRecipe hoveredRecipe = getHoveredGroupedRecipe(mouseX, mouseY);
+        final GroupedRecipe hoveredRecipe = getHoveredGroupedRecipe(mouseX, mouseY);
         if (hoveredRecipe != null) {
             guiGraphics.renderTooltip(this.font, buildGroupedRecipeTooltip(hoveredRecipe).stream().map(Component::getVisualOrderText).toList(), mouseX, mouseY);
             return;
@@ -267,31 +266,31 @@ public abstract class AbstractUniversalMultiblockControllerScreen<M extends Abst
         super.renderTooltip(guiGraphics, mouseX, mouseY);
     }
 
-    private boolean isHoveringParallelText(int mouseX, int mouseY) {
-        int listX = this.leftPos + 7;
-        int lineY = this.topPos + 50;
-        String energyText = "AE " + formatAmount(this.menu.getStoredEnergy()) + " | A" + this.menu.getActiveParallels()
+    private boolean isHoveringParallelText(final int mouseX, final int mouseY) {
+        final int listX = this.leftPos + 7;
+        final int lineY = this.topPos + 50;
+        final String energyText = "AE " + formatAmount(this.menu.getStoredEnergy()) + " | A" + this.menu.getActiveParallels()
                 + " U" + buildGroupedRecipes().size() + " | ";
-        String parallelText = buildParallelSummaryText();
-        String fullText = energyText + parallelText;
-        int maxTextWidth = 156;
-        int fullWidth = this.font.width(fullText);
+        final String parallelText = buildParallelSummaryText();
+        final String fullText = energyText + parallelText;
+        final int maxTextWidth = 156;
+        final int fullWidth = this.font.width(fullText);
 
         if (fullWidth > maxTextWidth) {
             return false;
         }
 
-        int parallelX = listX + this.font.width(energyText);
-        int parallelWidth = this.font.width(parallelText);
+        final int parallelX = listX + this.font.width(energyText);
+        final int parallelWidth = this.font.width(parallelText);
         return mouseX >= parallelX
                 && mouseX < parallelX + parallelWidth
                 && mouseY >= lineY
                 && mouseY < lineY + this.font.lineHeight;
     }
 
-    private boolean isHoveringSummaryLine(int mouseX, int mouseY) {
-        int listX = this.leftPos + 7;
-        int lineY = this.topPos + 50;
+    private boolean isHoveringSummaryLine(final int mouseX, final int mouseY) {
+        final int listX = this.leftPos + 7;
+        final int lineY = this.topPos + 50;
         return mouseX >= listX
                 && mouseX < listX + 156
                 && mouseY >= lineY
@@ -299,17 +298,17 @@ public abstract class AbstractUniversalMultiblockControllerScreen<M extends Abst
     }
 
     private List<Component> buildSummaryTooltip() {
-        List<GroupedRecipe> groupedRecipes = buildGroupedRecipes();
+        final List<GroupedRecipe> groupedRecipes = buildGroupedRecipes();
         long totalOutput = 0L;
         double totalPerSecond = 0.0D;
-        for (GroupedRecipe recipe : groupedRecipes) {
+        for (final GroupedRecipe recipe : groupedRecipes) {
             totalOutput += recipe.totalOutputAmount();
             if (recipe.displayMaxProgress() > 0) {
                 totalPerSecond += recipe.totalOutputAmount() * 20.0D / recipe.displayMaxProgress();
             }
         }
 
-        List<Component> lines = new ArrayList<>();
+        final List<Component> lines = new ArrayList<>();
         lines.add(Component.literal("AE Energy: " + formatAmount(this.menu.getStoredEnergy()) + " AE"));
         lines.add(Component.literal("Active recipe copies: " + this.menu.getActiveParallels()));
         lines.add(Component.literal("Unique recipe groups: " + groupedRecipes.size()));
@@ -320,16 +319,16 @@ public abstract class AbstractUniversalMultiblockControllerScreen<M extends Abst
     }
 
     private java.util.List<Component> buildParallelTooltip() {
-        var recipes = this.menu.getDisplayedRecipes();
-        Map<String, Integer> recipeCounts = new LinkedHashMap<>();
-        for (UniversalDisplayedRecipe recipe : recipes) {
+        final var recipes = this.menu.getDisplayedRecipes();
+        final Map<String, Integer> recipeCounts = new LinkedHashMap<>();
+        for (final UniversalDisplayedRecipe recipe : recipes) {
             recipeCounts.merge(recipe.label().getString(), 1, Integer::sum);
         }
 
-        int active = this.menu.getActiveParallels();
-        int distinct = recipeCounts.size();
-        int repeated = Math.max(0, active - distinct);
-        java.util.List<Component> lines = new ArrayList<>();
+        final int active = this.menu.getActiveParallels();
+        final int distinct = recipeCounts.size();
+        final int repeated = Math.max(0, active - distinct);
+        final java.util.List<Component> lines = new ArrayList<>();
         lines.add(Component.literal("Parallel: " + active + " / " + this.menu.getMaxParallels()));
         lines.add(Component.literal("Different recipes: " + distinct));
         lines.add(Component.literal("Repeated instances: " + repeated));
@@ -349,8 +348,8 @@ public abstract class AbstractUniversalMultiblockControllerScreen<M extends Abst
     }
 
     private void refreshRecipeCache() {
-        List<UniversalDisplayedRecipe> displayedRecipes = this.menu.getDisplayedRecipes();
-        int signature = computeRecipeSignature(displayedRecipes);
+        final List<UniversalDisplayedRecipe> displayedRecipes = this.menu.getDisplayedRecipes();
+        final int signature = computeRecipeSignature(displayedRecipes);
         if (signature == this.cachedRecipeSignature && displayedRecipes.size() == this.cachedDisplayedRecipes.size()) {
             return;
         }
@@ -358,22 +357,22 @@ public abstract class AbstractUniversalMultiblockControllerScreen<M extends Abst
         this.cachedDisplayedRecipes = displayedRecipes;
         this.cachedRecipeSignature = signature;
 
-        Map<RecipeGroupKey, GroupAccumulator> groups = new LinkedHashMap<>();
-        for (UniversalDisplayedRecipe recipe : displayedRecipes) {
-            RecipeGroupKey key = RecipeGroupKey.of(recipe);
+        final Map<RecipeGroupKey, GroupAccumulator> groups = new LinkedHashMap<>();
+        for (final UniversalDisplayedRecipe recipe : displayedRecipes) {
+            final RecipeGroupKey key = RecipeGroupKey.of(recipe);
             groups.computeIfAbsent(key, ignored -> new GroupAccumulator(recipe)).add(recipe);
         }
 
-        List<GroupedRecipe> groupedRecipes = new ArrayList<>();
-        for (GroupAccumulator accumulator : groups.values()) {
+        final List<GroupedRecipe> groupedRecipes = new ArrayList<>();
+        for (final GroupAccumulator accumulator : groups.values()) {
             groupedRecipes.add(accumulator.toGroupedRecipe());
         }
         this.cachedGroupedRecipes = groupedRecipes;
     }
 
-    private static int computeRecipeSignature(List<UniversalDisplayedRecipe> recipes) {
+    private static int computeRecipeSignature(final List<UniversalDisplayedRecipe> recipes) {
         int signature = 1;
-        for (UniversalDisplayedRecipe recipe : recipes) {
+        for (final UniversalDisplayedRecipe recipe : recipes) {
             signature = 31 * signature + recipe.progress();
             signature = 31 * signature + recipe.maxProgress();
             signature = 31 * signature + Long.hashCode(recipe.outputAmount());
@@ -384,13 +383,13 @@ public abstract class AbstractUniversalMultiblockControllerScreen<M extends Abst
         return signature;
     }
 
-    private GroupedRecipe getHoveredGroupedRecipe(int mouseX, int mouseY) {
-        int listX = this.leftPos + 7;
-        int listY = this.topPos + 30;
-        int lineHeight = 10;
-        List<GroupedRecipe> recipes = buildGroupedRecipes();
+    private GroupedRecipe getHoveredGroupedRecipe(final int mouseX, final int mouseY) {
+        final int listX = this.leftPos + 7;
+        final int listY = this.topPos + 30;
+        final int lineHeight = 10;
+        final List<GroupedRecipe> recipes = buildGroupedRecipes();
         for (int i = 0; i < Math.min(8, recipes.size()); i++) {
-            int rowY = listY + 32 + i * lineHeight;
+            final int rowY = listY + 32 + i * lineHeight;
             if (mouseX >= listX && mouseX < listX + 156 && mouseY >= rowY && mouseY < rowY + lineHeight) {
                 return recipes.get(i);
             }
@@ -398,9 +397,9 @@ public abstract class AbstractUniversalMultiblockControllerScreen<M extends Abst
         return null;
     }
 
-    private List<Component> buildGroupedRecipeTooltip(GroupedRecipe groupedRecipe) {
-        UniversalDisplayedRecipe recipe = groupedRecipe.recipe();
-        List<Component> lines = new ArrayList<>();
+    private List<Component> buildGroupedRecipeTooltip(final GroupedRecipe groupedRecipe) {
+        final UniversalDisplayedRecipe recipe = groupedRecipe.recipe();
+        final List<Component> lines = new ArrayList<>();
         lines.add(recipe.label());
         lines.add(Component.literal("Parallel copies: " + groupedRecipe.copyCount()));
         lines.add(Component.literal("Total output: " + formatAmount(groupedRecipe.totalOutputAmount())
@@ -426,11 +425,11 @@ public abstract class AbstractUniversalMultiblockControllerScreen<M extends Abst
     }
 
     private record RecipeGroupKey(String itemId, String fluidId, String label, long outputAmount, int maxProgress) {
-        private static RecipeGroupKey of(UniversalDisplayedRecipe recipe) {
-            String itemId = recipe.itemIcon().isEmpty()
+        private static RecipeGroupKey of(final UniversalDisplayedRecipe recipe) {
+            final String itemId = recipe.itemIcon().isEmpty()
                     ? ""
                     : String.valueOf(BuiltInRegistries.ITEM.getKey(recipe.itemIcon().getItem()));
-            String fluidId = recipe.fluidIcon().isEmpty()
+            final String fluidId = recipe.fluidIcon().isEmpty()
                     ? ""
                     : String.valueOf(BuiltInRegistries.FLUID.getKey(recipe.fluidIcon().getFluid()));
             return new RecipeGroupKey(itemId, fluidId, recipe.label().getString(), recipe.outputAmount(), recipe.maxProgress());
@@ -445,11 +444,11 @@ public abstract class AbstractUniversalMultiblockControllerScreen<M extends Abst
         private int minProgress = Integer.MAX_VALUE;
         private int maxProgress;
 
-        private GroupAccumulator(UniversalDisplayedRecipe representative) {
+        private GroupAccumulator(final UniversalDisplayedRecipe representative) {
             this.representative = representative;
         }
 
-        private void add(UniversalDisplayedRecipe recipe) {
+        private void add(final UniversalDisplayedRecipe recipe) {
             this.count++;
             this.totalOutput += recipe.outputAmount();
             this.totalProgress += recipe.progress();
@@ -458,7 +457,7 @@ public abstract class AbstractUniversalMultiblockControllerScreen<M extends Abst
         }
 
         private GroupedRecipe toGroupedRecipe() {
-            int averageProgress = this.count == 0 ? 0 : this.totalProgress / this.count;
+            final int averageProgress = this.count == 0 ? 0 : this.totalProgress / this.count;
             return new GroupedRecipe(
                     this.representative,
                     this.count,
@@ -471,34 +470,32 @@ public abstract class AbstractUniversalMultiblockControllerScreen<M extends Abst
         }
     }
 
-    private void runLocalStructureScan(BlockPos pos) {
+    private void runLocalStructureScan(final BlockPos pos) {
         if (this.minecraft == null || this.minecraft.level == null || this.minecraft.player == null) {
             return;
         }
 
-        var blockEntity = this.minecraft.level.getBlockEntity(pos);
-        if (!(blockEntity instanceof IMultiblockController controller)) {
+        final var blockEntity = this.minecraft.level.getBlockEntity(pos);
+        if (!(blockEntity instanceof final IMultiblockController controller)) {
             return;
         }
 
-        var definition = MultiblockControllerDefinitions.getDefinition(blockEntity);
+        final var definition = MultiblockControllerDefinitions.getDefinition(blockEntity);
         if (definition.isEmpty()) {
             return;
         }
 
-        var state = this.minecraft.level.getBlockState(pos);
-        Direction facing = MultiblockControllerDefinitions.getPatternFacing(blockEntity, state);
+        final var state = this.minecraft.level.getBlockState(pos);
+        final Direction facing = MultiblockControllerDefinitions.getPatternFacing(blockEntity, state);
 
-        MultiblockPattern.MatchResult result = definition.get().pattern().match(this.minecraft.level, pos, facing);
+        final MultiblockPattern.MatchResult result = definition.get().pattern().match(this.minecraft.level, pos, facing);
         if (result.isValid()) {
             if (controller.isAssembled()) {
-                this.minecraft.player.displayClientMessage(
-                        Component.translatable("message.ufo.structure_formed").withStyle(ChatFormatting.GREEN), true);
+                this.minecraft.player.sendOverlayMessage(Component.translatable("message.ufo.structure_formed").withStyle(ChatFormatting.GREEN));
             } else {
-                this.minecraft.player.displayClientMessage(
+                this.minecraft.player.sendSystemMessage(
                         definition.get().name().copy().append(Component.literal(": structure shape is valid, but extra controller validation failed.")
-                                .withStyle(ChatFormatting.RED)),
-                        false);
+                                .withStyle(ChatFormatting.RED)));
             }
             return;
         }
@@ -506,33 +503,30 @@ public abstract class AbstractUniversalMultiblockControllerScreen<M extends Abst
         reportStructureErrors(definition.get(), result.allErrors());
     }
 
-    private void reportStructureErrors(MultiblockControllerDefinition definition, List<MultiblockPattern.PatternError> errors) {
+    private void reportStructureErrors(final MultiblockControllerDefinition definition, final List<MultiblockPattern.PatternError> errors) {
         if (this.minecraft == null || this.minecraft.player == null || errors == null || errors.isEmpty()) {
             return;
         }
 
-        int shown = Math.min(errors.size(), 10);
-        this.minecraft.player.displayClientMessage(
+        final int shown = Math.min(errors.size(), 10);
+        this.minecraft.player.sendSystemMessage(
                 definition.name().copy()
-                        .append(Component.literal(": " + errors.size() + " block(s) missing or misplaced.").withStyle(ChatFormatting.RED)),
-                false);
+                        .append(Component.literal(": " + errors.size() + " block(s) missing or misplaced.").withStyle(ChatFormatting.RED)));
 
         for (int i = 0; i < shown; i++) {
-            var error = errors.get(i);
-            BlockPos errorPos = error.pos();
-            Component message = Component.literal("  [" + errorPos.getX() + ", " + errorPos.getY() + ", " + errorPos.getZ() + "] Expected: ")
+            final var error = errors.get(i);
+            final BlockPos errorPos = error.pos();
+            final Component message = Component.literal("  [" + errorPos.getX() + ", " + errorPos.getY() + ", " + errorPos.getZ() + "] Expected: ")
                     .withStyle(ChatFormatting.GRAY)
                     .append(error.expected().copy().withStyle(ChatFormatting.YELLOW));
-            this.minecraft.player.displayClientMessage(message, false);
+            this.minecraft.player.sendSystemMessage(message);
         }
 
         if (errors.size() > shown) {
-            this.minecraft.player.displayClientMessage(
-                    Component.literal("  ... and " + (errors.size() - shown) + " more.").withStyle(ChatFormatting.GRAY),
-                    false);
+            this.minecraft.player.sendSystemMessage(Component.literal("  ... and " + (errors.size() - shown) + " more.").withStyle(ChatFormatting.GRAY));
         }
 
-        int maxHighlight = Math.min(errors.size(), 50);
+        final int maxHighlight = Math.min(errors.size(), 50);
         for (int i = 0; i < maxHighlight; i++) {
             StructureHighlightRenderer.highlight(errors.get(i).pos(), 5000);
         }

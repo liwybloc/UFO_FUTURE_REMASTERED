@@ -17,21 +17,21 @@ public final class EntropicConvergenceCalculator {
     private static final int SEARCH_RADIUS = FieldTieredCubeValidator.OUTER_SIZE - 1;
     private final EntropicConvergenceEngineBE target;
 
-    public EntropicConvergenceCalculator(EntropicConvergenceEngineBE target) {
+    public EntropicConvergenceCalculator(final EntropicConvergenceEngineBE target) {
         this.target = target;
     }
 
-    public void calculateMultiblock(ServerLevel level, BlockPos loc) {
+    public void calculateMultiblock(final ServerLevel level, final BlockPos loc) {
         if (MBCalculator.isModificationInProgress()) {
             return;
         }
 
-        var currentCluster = this.target.getCluster();
+        final var currentCluster = this.target.getCluster();
         if (currentCluster != null && currentCluster.isDestroyed()) {
             return;
         }
 
-        var result = FieldTieredCubeValidator.findMatchingCube(level, loc,
+        final var result = FieldTieredCubeValidator.findMatchingCube(level, loc,
                 (state, testLevel, pos) -> state.is(MultiblockBlocks.ENTROPIC_CONVERGENCE_CASING.get()));
 
         if (result.isEmpty() || !result.get().valid() || !result.get().shellPositions().contains(loc)) {
@@ -40,7 +40,7 @@ public final class EntropicConvergenceCalculator {
             return;
         }
 
-        var validation = result.get();
+        final var validation = result.get();
         boolean updateGrid = false;
         CraftingCPUCluster cluster = this.target.getCluster();
 
@@ -63,9 +63,9 @@ public final class EntropicConvergenceCalculator {
         }
     }
 
-    public void updateMultiblockAfterNeighborUpdate(ServerLevel level, BlockPos loc, BlockPos changedPos) {
-        boolean recheck;
-        CraftingCPUCluster cluster = this.target.getCluster();
+    public void updateMultiblockAfterNeighborUpdate(final ServerLevel level, final BlockPos loc, final BlockPos changedPos) {
+        final boolean recheck;
+        final CraftingCPUCluster cluster = this.target.getCluster();
 
         if (cluster != null) {
             recheck = isWithinBounds(changedPos, cluster.getBoundsMin(), cluster.getBoundsMax())
@@ -79,11 +79,11 @@ public final class EntropicConvergenceCalculator {
         }
     }
 
-    private void updateBlockEntities(CraftingCPUCluster cluster, ServerLevel level,
-            FieldTieredCubeValidator.ValidationResult validation) {
-        for (BlockPos shellPos : validation.shellPositions()) {
-            BlockEntity blockEntity = level.getBlockEntity(shellPos);
-            if (blockEntity instanceof EntropicConvergenceEngineBE convergence) {
+    private void updateBlockEntities(final CraftingCPUCluster cluster, final ServerLevel level,
+                                     final FieldTieredCubeValidator.ValidationResult validation) {
+        for (final BlockPos shellPos : validation.shellPositions()) {
+            final BlockEntity blockEntity = level.getBlockEntity(shellPos);
+            if (blockEntity instanceof final EntropicConvergenceEngineBE convergence) {
                 convergence.applyCalculatedStructure(cluster, validation);
                 ((InvokerCraftingCPUCluster) (Object) cluster).ufo$addBlockEntity(convergence);
             }
@@ -93,23 +93,23 @@ public final class EntropicConvergenceCalculator {
         postCpuChange(cluster);
     }
 
-    private void refreshBlockEntities(CraftingCPUCluster cluster, ServerLevel level,
-            FieldTieredCubeValidator.ValidationResult validation) {
-        for (BlockPos shellPos : validation.shellPositions()) {
-            BlockEntity blockEntity = level.getBlockEntity(shellPos);
-            if (blockEntity instanceof EntropicConvergenceEngineBE convergence) {
+    private void refreshBlockEntities(final CraftingCPUCluster cluster, final ServerLevel level,
+                                      final FieldTieredCubeValidator.ValidationResult validation) {
+        for (final BlockPos shellPos : validation.shellPositions()) {
+            final BlockEntity blockEntity = level.getBlockEntity(shellPos);
+            if (blockEntity instanceof final EntropicConvergenceEngineBE convergence) {
                 convergence.applyCalculatedStructure(cluster, validation);
             }
         }
     }
 
-    private void postCpuChange(CraftingCPUCluster cluster) {
-        Iterator<appeng.blockentity.crafting.CraftingBlockEntity> iterator = cluster.getBlockEntities();
+    private void postCpuChange(final CraftingCPUCluster cluster) {
+        final Iterator<appeng.blockentity.crafting.CraftingBlockEntity> iterator = cluster.getBlockEntities();
         while (iterator.hasNext()) {
-            var blockEntity = iterator.next();
-            var node = blockEntity.getGridNode();
+            final var blockEntity = iterator.next();
+            final var node = blockEntity.getGridNode();
             if (node != null) {
-                IGrid grid = node.getGrid();
+                final IGrid grid = node.getGrid();
                 if (grid != null) {
                     grid.postEvent(new GridCraftingCpuChange(node));
                 }
@@ -118,25 +118,25 @@ public final class EntropicConvergenceCalculator {
         }
     }
 
-    private boolean isRelevantBlock(BlockEntity blockEntity) {
+    private boolean isRelevantBlock(final BlockEntity blockEntity) {
         return blockEntity instanceof EntropicConvergenceEngineBE;
     }
 
-    public static void markNearbyDirty(ServerLevel level, BlockPos origin) {
-        for (BlockPos pos : BlockPos.betweenClosed(
+    public static void markNearbyDirty(final ServerLevel level, final BlockPos origin) {
+        for (final BlockPos pos : BlockPos.betweenClosed(
                 origin.offset(-SEARCH_RADIUS, -SEARCH_RADIUS, -SEARCH_RADIUS),
                 origin.offset(SEARCH_RADIUS, SEARCH_RADIUS, SEARCH_RADIUS))) {
-            BlockEntity blockEntity = level.getBlockEntity(pos);
-            if (blockEntity instanceof EntropicConvergenceEngineBE convergence) {
+            final BlockEntity blockEntity = level.getBlockEntity(pos);
+            if (blockEntity instanceof final EntropicConvergenceEngineBE convergence) {
                 convergence.scanStructure(level);
             }
         }
     }
 
-    private static boolean isWithinBounds(BlockPos pos, BlockPos min, BlockPos max) {
-        int x = pos.getX();
-        int y = pos.getY();
-        int z = pos.getZ();
+    private static boolean isWithinBounds(final BlockPos pos, final BlockPos min, final BlockPos max) {
+        final int x = pos.getX();
+        final int y = pos.getY();
+        final int z = pos.getZ();
         return x >= min.getX() && y >= min.getY() && z >= min.getZ()
                 && x <= max.getX() && y <= max.getY() && z <= max.getZ();
     }

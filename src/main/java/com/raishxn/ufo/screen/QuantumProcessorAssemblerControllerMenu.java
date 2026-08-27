@@ -14,11 +14,11 @@ import org.jetbrains.annotations.NotNull;
 
 public class QuantumProcessorAssemblerControllerMenu extends AbstractUniversalMultiblockControllerMenu<QuantumProcessorAssemblerControllerBE> {
 
-    public QuantumProcessorAssemblerControllerMenu(int id, Inventory inv, FriendlyByteBuf extraData) {
+    public QuantumProcessorAssemblerControllerMenu(final int id, final Inventory inv, final FriendlyByteBuf extraData) {
         this(id, inv, inv.player.level().getBlockEntity(extraData.readBlockPos()));
     }
 
-    public QuantumProcessorAssemblerControllerMenu(int id, Inventory inv, BlockEntity entity) {
+    public QuantumProcessorAssemblerControllerMenu(final int id, final Inventory inv, final BlockEntity entity) {
         super(
                 ModMenus.QUANTUM_PROCESSOR_ASSEMBLER_CONTROLLER_MENU.get(),
                 id,
@@ -28,12 +28,12 @@ public class QuantumProcessorAssemblerControllerMenu extends AbstractUniversalMu
     }
 
     @Override
-    public @NotNull ItemStack quickMoveStack(@NotNull Player player, int index) {
+    public @NotNull ItemStack quickMoveStack(@NotNull final Player player, final int index) {
         return ItemStack.EMPTY;
     }
 
     @Override
-    public boolean stillValid(@NotNull Player player) {
+    public boolean stillValid(@NotNull final Player player) {
         return stillValid(this.levelAccess, player, getValidBlock());
     }
 

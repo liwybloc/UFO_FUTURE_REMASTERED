@@ -22,7 +22,7 @@ public class BaseCatalystItem extends UpgradeCardItem {
     protected final String family;
     protected final int tier;
 
-    public BaseCatalystItem(Properties properties, String family, int tier) {
+    public BaseCatalystItem(final Properties properties, final String family, final int tier) {
         super(properties);
         this.family = family;
         this.tier = tier;
@@ -60,7 +60,7 @@ public class BaseCatalystItem extends UpgradeCardItem {
 
     public double getPowerMultiplier() {
         if ("matterflow".equals(family)) {
-            double baseStat = -10.0;
+            final double baseStat = -10.0;
             double tierMultiplier = 1.0;
             if (tier == 2) tierMultiplier = 2.5;
             if (tier == 3) tierMultiplier = 5.0;
@@ -71,7 +71,7 @@ public class BaseCatalystItem extends UpgradeCardItem {
 
     public double getSpeedMultiplier() {
         if ("chrono".equals(family)) {
-            double baseStat = 25.0;
+            final double baseStat = 25.0;
             double tierMultiplier = 1.0;
             if (tier == 2) tierMultiplier = 2.5;
             if (tier == 3) tierMultiplier = 5.0;
@@ -100,18 +100,14 @@ public class BaseCatalystItem extends UpgradeCardItem {
     }
 
     @Override
-    public InteractionResult useOn(UseOnContext context) {
+    public InteractionResult useOn(final UseOnContext context) {
         return CatalystUpgradeUseHelper.tryInstallHeldCatalyst(context);
     }
 
-    // Usando a assinatura de método moderna (1.21.1+)
-    @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> components, TooltipFlag flag) {
+    public void appendHoverText(final ItemStack stack, final TooltipContext context, final List<Component> components, final TooltipFlag flag) {
 
-        // 1. Verifica se o SHIFT está pressionado
-        if (Screen.hasShiftDown()) {
+        if (net.minecraft.client.Minecraft.getInstance().hasShiftDown()) {
 
-            // --- Pega os stats base (do seu DMAThermalHandler) ---
             double baseStat = 0;
             String statName = "Unknown";
             double tierMultiplier = 1.0;
@@ -151,7 +147,6 @@ public class BaseCatalystItem extends UpgradeCardItem {
                 }
             }
 
-            // --- Constrói a Tooltip ---
             components.add(Component.literal("Family: ").withStyle(ChatFormatting.GRAY)
                     .append(Component.literal(capitalize(family)).withStyle(ChatFormatting.AQUA)));
             components.add(Component.literal("Tier: ").withStyle(ChatFormatting.GRAY)
@@ -159,24 +154,21 @@ public class BaseCatalystItem extends UpgradeCardItem {
 
             components.add(Component.literal("")); // Espaçador
 
-            // Efeito Principal
-            double finalStat = baseStat * tierMultiplier;
-            String sign = finalStat > 0 ? "+" : "";
-            ChatFormatting statColor = (finalStat > 0) ? ChatFormatting.GREEN : ChatFormatting.RED;
-            String statText = String.format("%s%.1f%% %s", sign, finalStat, statName);
+            final double finalStat = baseStat * tierMultiplier;
+            final String sign = finalStat > 0 ? "+" : "";
+            final ChatFormatting statColor = (finalStat > 0) ? ChatFormatting.GREEN : ChatFormatting.RED;
+            final String statText = String.format("%s%.1f%% %s", sign, finalStat, statName);
 
             components.add(Component.literal("Effect: ").withStyle(ChatFormatting.GRAY)
                     .append(Component.literal(statText).withStyle(statColor)));
 
-            // Efeito Térmico
-            double heatMult = 1.0 + Math.max(0, staticHeat / 100.0);
-            String heatColorFormat = (heatMult > 1.0) ? "§c" : "§b"; // Vermelho para debuff de calor, Azul nulo/bom
-            String heatText = String.format("%sx%.1f Heat Production", heatColorFormat, heatMult);
+            final double heatMult = 1.0 + Math.max(0, staticHeat / 100.0);
+            final String heatColorFormat = (heatMult > 1.0) ? "§c" : "§b"; // Vermelho para debuff de calor, Azul nulo/bom
+            final String heatText = String.format("%sx%.1f Heat Production", heatColorFormat, heatMult);
 
             components.add(Component.literal("Thermal: ").withStyle(ChatFormatting.GRAY)
                     .append(Component.literal(heatText)));
 
-            // Efeito de Stacking
             components.add(Component.literal("")); // Espaçador
             components.add(Component.literal("Stacking Effect (Soft Cap):").withStyle(ChatFormatting.GOLD));
             components.add(Component.literal(" 2x: ").withStyle(ChatFormatting.GRAY).append(Component.literal("175%").withStyle(ChatFormatting.WHITE))); //
@@ -185,17 +177,14 @@ public class BaseCatalystItem extends UpgradeCardItem {
 
 
         } else {
-            // 2. Adiciona o prompt "Pressione SHIFT"
             components.add(Component.literal("Hold <").withStyle(ChatFormatting.DARK_GRAY)
                     .append(Component.literal("SHIFT").withStyle(ChatFormatting.AQUA, ChatFormatting.ITALIC))
                     .append(Component.literal("> for details.").withStyle(ChatFormatting.DARK_GRAY)));
         }
 
-        super.appendHoverText(stack, context, components, flag);
     }
 
-    // Helper para "matterflow" -> "Matterflow"
-    private String capitalize(String str) {
+    private String capitalize(final String str) {
         if (str == null || str.isEmpty()) return str;
         return str.substring(0, 1).toUpperCase() + str.substring(1);
     }

@@ -21,23 +21,17 @@ public class StellarNexusControllerMenu extends AbstractContainerMenu {
     private final ContainerLevelAccess levelAccess;
     private final ContainerData data;
 
-    public StellarNexusControllerMenu(int id, Inventory inv, FriendlyByteBuf extraData) {
+    public StellarNexusControllerMenu(final int id, final Inventory inv, final FriendlyByteBuf extraData) {
         this(id, inv, inv.player.level().getBlockEntity(extraData.readBlockPos()), new SimpleContainerData(20));
     }
 
-    public StellarNexusControllerMenu(int id, Inventory inv, BlockEntity entity, ContainerData data) {
+    public StellarNexusControllerMenu(final int id, final Inventory inv, final BlockEntity entity, final ContainerData data) {
         super(ModMenus.STELLAR_NEXUS_CONTROLLER_MENU.get(), id);
         checkContainerSize(inv, 0);
         this.blockEntity = (StellarNexusControllerBE) entity;
         this.levelAccess = ContainerLevelAccess.create(entity.getLevel(), entity.getBlockPos());
         this.data = data;
 
-        // Data mapping:
-        // 0 = progress, 1 = maxProgress, 2 = assembled
-        // 3 = fieldLevel, 4 = energyPercent, 5 = running
-        // 6 = heatLevel (0-1000), 7 = safeMode, 8 = cooldownTimer
-        // 9-12: energyBuffer (4 shorts for 64-bit long)
-        // 13-16: energyCapacity (4 shorts for 64-bit long)
         addDataSlots(this.data);
     }
 
@@ -112,12 +106,12 @@ public class StellarNexusControllerMenu extends AbstractContainerMenu {
     }
 
     @Override
-    public @NotNull ItemStack quickMoveStack(@NotNull Player player, int index) {
+    public @NotNull ItemStack quickMoveStack(@NotNull final Player player, final int index) {
         return ItemStack.EMPTY;
     }
 
     @Override
-    public boolean stillValid(@NotNull Player player) {
+    public boolean stillValid(@NotNull final Player player) {
         return stillValid(this.levelAccess, player, MultiblockBlocks.STELLAR_NEXUS_CONTROLLER.get());
     }
 }

@@ -12,46 +12,35 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.pedroksl.ae2addonlib.recipes.IngredientStack;
 
-import appeng.api.stacks.GenericStack;
-
-public class DimensionalMatterAssemblerRecipeSerializer implements RecipeSerializer<DimensionalMatterAssemblerRecipe> {
-
-    public static final DimensionalMatterAssemblerRecipeSerializer INSTANCE = new DimensionalMatterAssemblerRecipeSerializer();
-
-    private DimensionalMatterAssemblerRecipeSerializer() {}
+public final class DimensionalMatterAssemblerRecipeSerializer {
 
     public static final MapCodec<DimensionalMatterAssemblerRecipe> CODEC = RecordCodecBuilder.mapCodec((builder) -> builder.group(
-                    IngredientStack.Item.CODEC.listOf().fieldOf("item_inputs").forGetter(DimensionalMatterAssemblerRecipe::getItemInputs),
-                    IngredientStack.Fluid.CODEC.listOf().fieldOf("fluid_inputs").forGetter(DimensionalMatterAssemblerRecipe::getFluidInputs),
-                    GenericStack.CODEC.listOf().fieldOf("item_outputs").forGetter(DimensionalMatterAssemblerRecipe::getItemOutputs),
-                    GenericStack.CODEC.listOf().fieldOf("fluid_outputs").forGetter(DimensionalMatterAssemblerRecipe::getFluidOutputs),
-                    Codec.INT.fieldOf("energy").forGetter(DimensionalMatterAssemblerRecipe::getEnergy),
-                    Codec.INT.fieldOf("time").forGetter(DimensionalMatterAssemblerRecipe::getTime))
+                    IngredientStack.Item.CODEC.listOf().fieldOf("item_inputs").forGetter(DimensionalMatterAssemblerRecipe::itemInputs),
+                    IngredientStack.Fluid.CODEC.listOf().fieldOf("fluid_inputs").forGetter(DimensionalMatterAssemblerRecipe::fluidInputs),
+                    DimensionalMatterAssemblerRecipe.ItemOutput.CODEC.listOf().fieldOf("item_outputs").forGetter(DimensionalMatterAssemblerRecipe::itemOutputDefinitions),
+                    DimensionalMatterAssemblerRecipe.FluidOutput.CODEC.listOf().fieldOf("fluid_outputs").forGetter(DimensionalMatterAssemblerRecipe::fluidOutputDefinitions),
+                    Codec.INT.fieldOf("energy").forGetter(DimensionalMatterAssemblerRecipe::energy),
+                    Codec.INT.fieldOf("time").forGetter(DimensionalMatterAssemblerRecipe::time))
             .apply(builder, DimensionalMatterAssemblerRecipe::new));
             
     public static final StreamCodec<RegistryFriendlyByteBuf, DimensionalMatterAssemblerRecipe> STREAM_CODEC =
             StreamCodec.composite(
                     IngredientStack.Item.STREAM_CODEC.apply(ByteBufCodecs.list()),
-                    DimensionalMatterAssemblerRecipe::getItemInputs,
+                    DimensionalMatterAssemblerRecipe::itemInputs,
                     IngredientStack.Fluid.STREAM_CODEC.apply(ByteBufCodecs.list()),
-                    DimensionalMatterAssemblerRecipe::getFluidInputs,
-                    GenericStack.STREAM_CODEC.apply(ByteBufCodecs.list()),
-                    DimensionalMatterAssemblerRecipe::getItemOutputs,
-                    GenericStack.STREAM_CODEC.apply(ByteBufCodecs.list()),
-                    DimensionalMatterAssemblerRecipe::getFluidOutputs,
+                    DimensionalMatterAssemblerRecipe::fluidInputs,
+                    DimensionalMatterAssemblerRecipe.ItemOutput.STREAM_CODEC.apply(ByteBufCodecs.list()),
+                    DimensionalMatterAssemblerRecipe::itemOutputDefinitions,
+                    DimensionalMatterAssemblerRecipe.FluidOutput.STREAM_CODEC.apply(ByteBufCodecs.list()),
+                    DimensionalMatterAssemblerRecipe::fluidOutputDefinitions,
                     ByteBufCodecs.INT,
-                    DimensionalMatterAssemblerRecipe::getEnergy,
+                    DimensionalMatterAssemblerRecipe::energy,
                     ByteBufCodecs.INT,
-                    DimensionalMatterAssemblerRecipe::getTime,
+                    DimensionalMatterAssemblerRecipe::time,
                     DimensionalMatterAssemblerRecipe::new);
 
-    @Override
-    public @NotNull MapCodec<DimensionalMatterAssemblerRecipe> codec() {
-        return CODEC;
-    }
+    public static final RecipeSerializer<DimensionalMatterAssemblerRecipe> INSTANCE =
+            new RecipeSerializer<>(CODEC, STREAM_CODEC);
 
-    @Override
-    public @NotNull StreamCodec<RegistryFriendlyByteBuf, DimensionalMatterAssemblerRecipe> streamCodec() {
-        return STREAM_CODEC;
-    }
+    private DimensionalMatterAssemblerRecipeSerializer() {}
 }

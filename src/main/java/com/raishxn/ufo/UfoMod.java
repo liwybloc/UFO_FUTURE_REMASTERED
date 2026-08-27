@@ -4,7 +4,6 @@ package com.raishxn.ufo;
 import com.mojang.logging.LogUtils;
 import com.raishxn.ufo.block.ModBlocks;
 import com.raishxn.ufo.block.MultiblockBlocks;
-import com.raishxn.ufo.client.tutorial.screen.UfoTutorialScreen;
 import com.raishxn.ufo.client.tutorial.UfoTutorialScreens;
 import com.raishxn.ufo.datagen.ModDataComponents;
 import com.raishxn.ufo.event.ModKeyBindings;
@@ -23,7 +22,7 @@ import com.raishxn.ufo.network.packet.CycleToolKeyPacket;
 import com.raishxn.ufo.network.packet.ToggleAutoSmeltPacket;
 import com.raishxn.ufo.util.LazyInits;
 import net.minecraft.client.Minecraft;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
@@ -45,12 +44,12 @@ public class UfoMod {
     private static final int TUTORIAL_HOLD_TICKS = 12;
     private int tutorialHoldTicks;
     private boolean tutorialHoldOpened;
-    public static ResourceLocation id(String path) {
-        return ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
+    public static Identifier id(final String path) {
+        return Identifier.fromNamespaceAndPath(MOD_ID, path);
     }
 
-    public UfoMod(IEventBus modEventBus, ModContainer modContainer) {
-        if (net.neoforged.fml.loading.FMLEnvironment.dist == net.neoforged.api.distmarker.Dist.CLIENT) {
+    public UfoMod(final IEventBus modEventBus, final ModContainer modContainer) {
+        if (net.neoforged.fml.loading.FMLEnvironment.getDist() == net.neoforged.api.distmarker.Dist.CLIENT) {
             new UfoModClient(modEventBus);
         }
         ModDataComponents.register(modEventBus);
@@ -66,7 +65,6 @@ public class UfoMod {
         ModMenus.register(modEventBus);
         com.raishxn.ufo.menu.UFOMenus.INSTANCE.register(modEventBus);
         ModSounds.register(modEventBus);
-        com.raishxn.ufo.compat.mekanism.UfoMekanismStorageCompat.initialize(modEventBus);
         modContainer.registerConfig(ModConfig.Type.COMMON, UFOConfig.SPEC);
         modEventBus.addListener(this::commonSetup);
         modEventBus.addListener(this::loadComplete);
@@ -81,10 +79,7 @@ public class UfoMod {
     }
     private void commonSetup(final FMLCommonSetupEvent event) {
         event.enqueueWork(() -> {
-            // Register UFO storage handlers and upgrades within the enqueueWork to ensure
-            // proper lifecycle timing with AE2's own initialization
             UFORegistryHandler.INSTANCE.onInit();
-            // Force-load custom slot semantics so they are registered before any screen JSON is parsed
             java.util.Objects.requireNonNull(com.raishxn.ufo.menu.UFOSlotSemantics.MACHINE_OUTPUT_2);
             LazyInits.initCommon();
         });
@@ -94,8 +89,8 @@ public class UfoMod {
     }
 
     @SubscribeEvent
-    public void onKeyInput(InputEvent.Key event) {
-        Minecraft mc = Minecraft.getInstance();
+    public void onKeyInput(final InputEvent.Key event) {
+        final Minecraft mc = Minecraft.getInstance();
         if (mc.player == null) return;
 
         if (ModKeyBindings.CYCLE_TOOL_FORWARD.consumeClick()) {
@@ -118,9 +113,9 @@ public class UfoMod {
     }
 
     @SubscribeEvent
-    public void onClientTick(ClientTickEvent.Post event) {
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null || mc.screen == null || mc.screen instanceof UfoTutorialScreen) {
+    public void onClientTick(final ClientTickEvent.Post event) {
+        final Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null || mc.screen == null) {
             resetTutorialHold();
             return;
         }
@@ -140,7 +135,7 @@ public class UfoMod {
         this.tutorialHoldTicks = 0;
         this.tutorialHoldOpened = false;
     }
-    private void onRegisterKeyMappings(RegisterKeyMappingsEvent event) {
+    private void onRegisterKeyMappings(final RegisterKeyMappingsEvent event) {
         event.register(ModKeyBindings.CYCLE_TOOL_FORWARD);
         event.register(ModKeyBindings.CYCLE_TOOL_BACKWARD);
         event.register(ModKeyBindings.CYCLE_MODE);
@@ -148,7 +143,7 @@ public class UfoMod {
 
     public static class ClientModEvents {
         @SubscribeEvent
-        public static void onRegisterKeys(RegisterKeyMappingsEvent event) {
+        public static void onRegisterKeys(final RegisterKeyMappingsEvent event) {
             event.register(ModKeyBindings.CYCLE_TOOL_FORWARD);
             event.register(ModKeyBindings.CYCLE_TOOL_BACKWARD);
             event.register(ModKeyBindings.CYCLE_MODE);
@@ -156,7 +151,7 @@ public class UfoMod {
         }
     }
 
-    public static ResourceLocation makeId(String id) {
-        return ResourceLocation.fromNamespaceAndPath(MOD_ID, id);
+    public static Identifier makeId(final String id) {
+        return Identifier.fromNamespaceAndPath(MOD_ID, id);
     }
 }

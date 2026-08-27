@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "formed=false": {
+      "model": "ufo:block/entropy_computer_condensation_matrix"
+    },
+    "formed=true": {
+      "model": "ufo:block/entropy_computer_condensation_matrix"
+    }
+  }
+}

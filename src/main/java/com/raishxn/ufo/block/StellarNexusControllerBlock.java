@@ -3,6 +3,8 @@ package com.raishxn.ufo.block;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.world.level.redstone.Orientation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -33,7 +35,7 @@ public class StellarNexusControllerBlock extends DirectionalBlock implements net
     public static final MapCodec<StellarNexusControllerBlock> CODEC = simpleCodec(StellarNexusControllerBlock::new);
     public static final BooleanProperty ASSEMBLED = BooleanProperty.create("assembled");
 
-    public StellarNexusControllerBlock(BlockBehaviour.Properties properties) {
+    public StellarNexusControllerBlock(final BlockBehaviour.Properties properties) {
         super(properties);
         this.registerDefaultState(this.stateDefinition.any()
                 .setValue(FACING, Direction.NORTH)
@@ -46,68 +48,64 @@ public class StellarNexusControllerBlock extends DirectionalBlock implements net
     }
 
     @Override
-    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
+    protected InteractionResult useWithoutItem(final BlockState state, final Level level, final BlockPos pos, final Player player, final BlockHitResult hitResult) {
         if (player.isShiftKeyDown()) {
-            if (level.isClientSide) {
+            if (level.isClientSide()) {
                 com.raishxn.ufo.client.GhostHologramRenderer.toggleHologram(pos, state.getValue(FACING));
             }
-            return InteractionResult.sidedSuccess(level.isClientSide);
+            return level.isClientSide() ? InteractionResult.SUCCESS : InteractionResult.SUCCESS_SERVER;
         }
 
-        if (!level.isClientSide) {
-            BlockEntity entity = level.getBlockEntity(pos);
-            if (entity instanceof StellarNexusControllerBE controller) {
+        if (!level.isClientSide()) {
+            final BlockEntity entity = level.getBlockEntity(pos);
+            if (entity instanceof final StellarNexusControllerBE controller) {
                 player.openMenu(controller, pos);
             }
         }
-        return InteractionResult.sidedSuccess(level.isClientSide);
+        return level.isClientSide() ? InteractionResult.SUCCESS : InteractionResult.SUCCESS_SERVER;
     }
 
     @Override
-    public BlockState getStateForPlacement(BlockPlaceContext context) {
+    public BlockState getStateForPlacement(final BlockPlaceContext context) {
         return this.defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite());
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+    protected void createBlockStateDefinition(final StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(FACING, ASSEMBLED);
     }
 
-    // --- Block Entity ---
 
     @Nullable
     @Override
-    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+    public BlockEntity newBlockEntity(final BlockPos pos, final BlockState state) {
         return new StellarNexusControllerBE(ModBlockEntities.STELLAR_NEXUS_CONTROLLER_BE.get(), pos, state);
     }
 
     @Nullable
     @Override
-    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(final Level level, final BlockState state, final BlockEntityType<T> type) {
         if (level.isClientSide()) return null;
         return type == ModBlockEntities.STELLAR_NEXUS_CONTROLLER_BE.get()
                 ? (lvl, pos, st, be) -> ((StellarNexusControllerBE) be).serverTick()
                 : null;
     }
 
-    // --- Interactions ---
 
 
 
     @Override
-    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean moved) {
-        if (!state.is(newState.getBlock())) {
-            if (level.getBlockEntity(pos) instanceof StellarNexusControllerBE be) {
-                be.onControllerBroken();
-            }
+    protected void affectNeighborsAfterRemoval(final BlockState state, final ServerLevel level, final BlockPos pos, final boolean moved) {
+        if (level.getBlockEntity(pos) instanceof final StellarNexusControllerBE be) {
+            be.onControllerBroken();
         }
-        super.onRemove(state, level, pos, newState, moved);
+        super.affectNeighborsAfterRemoval(state, level, pos, moved);
     }
 
     @Override
-    public void neighborChanged(BlockState state, Level level, BlockPos pos, Block changedBlock, BlockPos changedPos, boolean isMoving) {
-        super.neighborChanged(state, level, pos, changedBlock, changedPos, isMoving);
-        if (!level.isClientSide() && level.getBlockEntity(pos) instanceof StellarNexusControllerBE be) {
+    protected void neighborChanged(final BlockState state, final Level level, final BlockPos pos, final Block changedBlock, final Orientation orientation, final boolean isMoving) {
+        super.neighborChanged(state, level, pos, changedBlock, orientation, isMoving);
+        if (!level.isClientSide() && level.getBlockEntity(pos) instanceof final StellarNexusControllerBE be) {
             be.markStructureDirty();
         }
     }

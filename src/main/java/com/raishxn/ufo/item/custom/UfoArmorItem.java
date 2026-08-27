@@ -5,50 +5,52 @@ import com.raishxn.ufo.datagen.ModDataComponents;
 import com.raishxn.ufo.util.EnergyToolHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.*;
-import net.minecraft.world.level.Level;
+import net.minecraft.world.item.component.TooltipDisplay;
+import net.minecraft.world.item.equipment.ArmorMaterial;
+import net.minecraft.world.item.equipment.ArmorType;
 import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.energy.IEnergyStorage;
+import net.neoforged.neoforge.transfer.energy.EnergyHandler;
 
 import java.util.List;
+import java.util.function.Consumer;
 
-// --- MUDANÇA 1: Implementar a interface IEnergyTool ---
-public class UfoArmorItem extends ArmorItem implements IEnergyTool {
+public class UfoArmorItem extends Item implements IEnergyTool {
 
     private static final int ENERGY_COST_PER_SECOND = 400; // 20 RF/tick * 20 ticks
     private static final int DRAIN_INTERVAL = 20; // Drain every 20 ticks (1 second) to avoid triggering equip sound
-    private static final ResourceLocation ARMOR_HEALTH_MODIFIER_ID = ResourceLocation.fromNamespaceAndPath(UfoMod.MOD_ID, "armor_health_boost");
+    private static final Identifier ARMOR_HEALTH_MODIFIER_ID = Identifier.fromNamespaceAndPath(UfoMod.MOD_ID, "armor_health_boost");
+    private final ArmorType type;
 
-    public UfoArmorItem(Holder<ArmorMaterial> pMaterial, Type pType, Properties pProperties) {
-        super(pMaterial, pType, pProperties);
+    public UfoArmorItem(final ArmorMaterial material, final ArmorType type, final Properties properties) {
+        super(properties.humanoidArmor(material, type));
+        this.type = type;
     }
 
-    // --- MUDANÇA 2: Adicionar o método getName para o efeito arco-íris ---
     @Override
-    public Component getName(ItemStack stack) {
+    public Component getName(final ItemStack stack) {
         return IEnergyTool.super.getName(stack);
     }
 
     @Override
-    public void inventoryTick(ItemStack stack, Level level, Entity entity, int slotId, boolean isSelected) {
-        if (!level.isClientSide && entity instanceof Player player) {
-            if (this.getType() == Type.CHESTPLATE) {
-                ItemStack equippedChestplate = player.getInventory().getArmor(Type.CHESTPLATE.getSlot().getIndex());
+    public void inventoryTick(final ItemStack stack, final ServerLevel level, final Entity entity, final EquipmentSlot slot) {
+        if (entity instanceof final Player player) {
+            if (this.type == ArmorType.CHESTPLATE) {
+                final ItemStack equippedChestplate = player.getItemBySlot(EquipmentSlot.CHEST);
 
                 if (equippedChestplate.getItem() instanceof UfoArmorItem) {
                     if (hasFullSuitOfArmorOn(player) && hasEnoughEnergy(player)) {
                         applyAllEffects(player);
-                        // Only drain energy every DRAIN_INTERVAL ticks to avoid constant component changes
-                        // which trigger the Minecraft equip sound detection
                         if (level.getGameTime() % DRAIN_INTERVAL == 0) {
                             drainEnergy(player);
                         }
@@ -60,14 +62,14 @@ public class UfoArmorItem extends ArmorItem implements IEnergyTool {
                 }
             }
         }
-        super.inventoryTick(stack, level, entity, slotId, isSelected);
+        super.inventoryTick(stack, level, entity, slot);
     }
 
-    private void drainEnergy(Player player) {
-        for (ItemStack armorStack : player.getInventory().armor) {
+    private void drainEnergy(final Player player) {
+        for (final ItemStack armorStack : armorItems(player)) {
             if (armorStack.getItem() instanceof UfoArmorItem) {
-                int currentEnergy = armorStack.getOrDefault(ModDataComponents.ENERGY.get(), 0);
-                int newEnergy = Math.max(0, currentEnergy - ENERGY_COST_PER_SECOND);
+                final int currentEnergy = armorStack.getOrDefault(ModDataComponents.ENERGY.get(), 0);
+                final int newEnergy = Math.max(0, currentEnergy - ENERGY_COST_PER_SECOND);
                 if (newEnergy != currentEnergy) {
                     armorStack.set(ModDataComponents.ENERGY.get(), newEnergy);
                 }
@@ -75,10 +77,10 @@ public class UfoArmorItem extends ArmorItem implements IEnergyTool {
         }
     }
 
-    private boolean hasEnoughEnergy(Player player) {
-        for (ItemStack armorStack : player.getInventory().armor) {
+    private boolean hasEnoughEnergy(final Player player) {
+        for (final ItemStack armorStack : armorItems(player)) {
             if (armorStack.getItem() instanceof UfoArmorItem) {
-                int currentEnergy = armorStack.getOrDefault(ModDataComponents.ENERGY.get(), 0);
+                final int currentEnergy = armorStack.getOrDefault(ModDataComponents.ENERGY.get(), 0);
                 if (currentEnergy < ENERGY_COST_PER_SECOND) {
                     return false;
                 }
@@ -87,8 +89,8 @@ public class UfoArmorItem extends ArmorItem implements IEnergyTool {
         return true;
     }
 
-    private void applyAllEffects(Player player) {
-        player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 200, 9, false, false, true));
+    private void applyAllEffects(final Player player) {
+        player.addEffect(new MobEffectInstance(MobEffects.RESISTANCE, 200, 9, false, false, true));
         player.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, 200, 0, false, false, true));
 
         if (!player.getAbilities().mayfly) {
@@ -96,9 +98,9 @@ public class UfoArmorItem extends ArmorItem implements IEnergyTool {
             player.onUpdateAbilities();
         }
 
-        net.minecraft.world.entity.ai.attributes.AttributeInstance healthAttribute = player.getAttribute(Attributes.MAX_HEALTH);
+        final net.minecraft.world.entity.ai.attributes.AttributeInstance healthAttribute = player.getAttribute(Attributes.MAX_HEALTH);
         if (healthAttribute != null && healthAttribute.getModifier(ARMOR_HEALTH_MODIFIER_ID) == null) {
-            AttributeModifier modifier = new AttributeModifier(
+            final AttributeModifier modifier = new AttributeModifier(
                     ARMOR_HEALTH_MODIFIER_ID,
                     40.0,
                     AttributeModifier.Operation.ADD_VALUE
@@ -107,8 +109,8 @@ public class UfoArmorItem extends ArmorItem implements IEnergyTool {
         }
     }
 
-    private void removeAllEffects(Player player) {
-        net.minecraft.world.entity.ai.attributes.AttributeInstance healthAttribute = player.getAttribute(Attributes.MAX_HEALTH);
+    private void removeAllEffects(final Player player) {
+        final net.minecraft.world.entity.ai.attributes.AttributeInstance healthAttribute = player.getAttribute(Attributes.MAX_HEALTH);
         if (healthAttribute != null && healthAttribute.getModifier(ARMOR_HEALTH_MODIFIER_ID) != null) {
             healthAttribute.removeModifier(ARMOR_HEALTH_MODIFIER_ID);
             if (player.getHealth() > player.getMaxHealth()) {
@@ -123,8 +125,8 @@ public class UfoArmorItem extends ArmorItem implements IEnergyTool {
         }
     }
 
-    private boolean hasFullSuitOfArmorOn(Player player) {
-        for (ItemStack armorStack : player.getInventory().armor) {
+    private boolean hasFullSuitOfArmorOn(final Player player) {
+        for (final ItemStack armorStack : armorItems(player)) {
             if (!(armorStack.getItem() instanceof UfoArmorItem)) {
                 return false;
             }
@@ -132,39 +134,44 @@ public class UfoArmorItem extends ArmorItem implements IEnergyTool {
         return true;
     }
 
-    // --- MÉTODOS VISUAIS E DA INTERFACE ---
+    private static java.util.List<ItemStack> armorItems(final Player player) {
+        return java.util.List.of(
+                player.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.HEAD),
+                player.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.CHEST),
+                player.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.LEGS),
+                player.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.FEET));
+    }
+
     @Override
-    public boolean isBarVisible(ItemStack pStack) {
+    public boolean isBarVisible(final ItemStack pStack) {
         return true;
     }
 
     @Override
-    public int getBarWidth(ItemStack pStack) {
+    public int getBarWidth(final ItemStack pStack) {
         return EnergyToolHelper.getBarWidth(pStack);
     }
 
     @Override
-    public int getBarColor(ItemStack pStack) {
+    public int getBarColor(final ItemStack pStack) {
         return EnergyToolHelper.getBarColor(pStack);
     }
 
-    // --- MUDANÇA 3: Adicionar o método getEnergyPerUse para satisfazer a interface ---
     @Override
     public int getEnergyPerUse() {
         return 0; // O consumo de energia da armadura é por tick, não por uso.
     }
-
-    @Override
-    public void appendHoverText(ItemStack pStack, Item.TooltipContext pContext, List<Component> pTooltipComponents, TooltipFlag pTooltipFlag) {
-        if (Screen.hasShiftDown()) {
-            IEnergyStorage energyStorage = pStack.getCapability(Capabilities.EnergyStorage.ITEM);
+    public void appendHoverText(final ItemStack pStack, final Item.TooltipContext pContext,
+                                final TooltipDisplay display, final Consumer<Component> tooltip,
+                                final TooltipFlag pTooltipFlag) {
+        if (net.minecraft.client.Minecraft.getInstance().hasShiftDown()) {
+            final EnergyHandler energyStorage = com.raishxn.ufo.util.EnergyToolHelper.getEnergyHandler(pStack);
             if (energyStorage != null) {
-                String energyText = String.format("%,d / %,d RF", energyStorage.getEnergyStored(), energyStorage.getMaxEnergyStored());
-                pTooltipComponents.add(Component.literal(energyText).withStyle(ChatFormatting.GRAY));
+                final String energyText = String.format("%,d / %,d RF", energyStorage.getAmountAsInt(), energyStorage.getCapacityAsInt());
+                tooltip.accept(Component.literal(energyText).withStyle(ChatFormatting.GRAY));
             }
         } else {
-            pTooltipComponents.add(Component.translatable("tooltip.ufo.press_shift").withStyle(ChatFormatting.AQUA));
+            tooltip.accept(Component.translatable("tooltip.ufo.press_shift").withStyle(ChatFormatting.AQUA));
         }
-        super.appendHoverText(pStack, pContext, pTooltipComponents, pTooltipFlag);
     }
 }

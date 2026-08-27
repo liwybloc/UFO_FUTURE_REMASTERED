@@ -14,11 +14,11 @@ import org.jetbrains.annotations.NotNull;
 
 public class QmfControllerMenu extends AbstractUniversalMultiblockControllerMenu<QmfControllerBE> {
 
-    public QmfControllerMenu(int id, Inventory inv, FriendlyByteBuf extraData) {
+    public QmfControllerMenu(final int id, final Inventory inv, final FriendlyByteBuf extraData) {
         this(id, inv, inv.player.level().getBlockEntity(extraData.readBlockPos()));
     }
 
-    public QmfControllerMenu(int id, Inventory inv, BlockEntity entity) {
+    public QmfControllerMenu(final int id, final Inventory inv, final BlockEntity entity) {
         super(
                 ModMenus.QMF_CONTROLLER_MENU.get(),
                 id,
@@ -28,12 +28,12 @@ public class QmfControllerMenu extends AbstractUniversalMultiblockControllerMenu
     }
 
     @Override
-    public @NotNull ItemStack quickMoveStack(@NotNull Player playerIn, int index) {
+    public @NotNull ItemStack quickMoveStack(@NotNull final Player playerIn, final int index) {
         return ItemStack.EMPTY;
     }
 
     @Override
-    public boolean stillValid(@NotNull Player player) {
+    public boolean stillValid(@NotNull final Player player) {
         return stillValid(this.levelAccess, player, getValidBlock());
     }
 

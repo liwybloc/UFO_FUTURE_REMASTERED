@@ -8,7 +8,7 @@ import com.raishxn.ufo.util.ModTags;
 import com.raishxn.ufo.recipe.UniversalMultiblockMachineKind;
 import com.raishxn.ufo.recipe.DimensionalMatterAssemblerRecipe;
 import net.minecraft.data.recipes.RecipeOutput;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
@@ -26,31 +26,30 @@ public class DMARecipeBuilder {
     private final String name;
     private final List<IngredientStack.Item> itemInputs = new ArrayList<>();
     private final List<IngredientStack.Fluid> fluidInputs = new ArrayList<>();
-    private final List<GenericStack> itemOutputs = new ArrayList<>();
-    private final List<GenericStack> fluidOutputs = new ArrayList<>();
+    private final List<DimensionalMatterAssemblerRecipe.ItemOutput> itemOutputs = new ArrayList<>();
+    private final List<DimensionalMatterAssemblerRecipe.FluidOutput> fluidOutputs = new ArrayList<>();
     private int energy = 0;
     private int time = 0; // The recipe class doesn't seem to use time, but we keep it for API compatibility.
     private boolean bulkQmfMirrorEnabled = true;
 
-    private DMARecipeBuilder(String name) {
+    private DMARecipeBuilder(final String name) {
         this.name = name;
     }
 
-    public static DMARecipeBuilder create(String name) {
+    public static DMARecipeBuilder create(final String name) {
         return new DMARecipeBuilder(name);
     }
 
-    public DMARecipeBuilder inputItem(ItemLike item) {
+    public DMARecipeBuilder inputItem(final ItemLike item) {
         return inputItem(item, 1);
     }
 
-    public DMARecipeBuilder inputItem(ItemLike item, int count) {
+    public DMARecipeBuilder inputItem(final ItemLike item, final int count) {
         this.itemInputs.add(new IngredientStack.Item(Ingredient.of(item), count));
         return this;
     }
     
-    // For specific AEItemKey inputs if ever needed, though IngredientStack is better
-    public DMARecipeBuilder inputFluid(Fluid fluid, int amount) {
+    public DMARecipeBuilder inputFluid(final Fluid fluid, final int amount) {
         this.fluidInputs.add(new IngredientStack.Fluid(FluidIngredient.of(fluid), amount));
         return this;
     }
@@ -60,36 +59,34 @@ public class DMARecipeBuilder {
      * Kept for KubeJS backward compatibility — this is a NO-OP.
      */
     @Deprecated
-    public DMARecipeBuilder inputCoolant(Fluid fluid, int amount) {
-        // NO-OP: coolant is no longer part of recipes
+    public DMARecipeBuilder inputCoolant(final Fluid fluid, final int amount) {
         return this;
     }
 
-    public DMARecipeBuilder output(ItemLike item) {
+    public DMARecipeBuilder output(final ItemLike item) {
         return output(item, 1);
     }
 
-    public DMARecipeBuilder output(ItemLike item, int amount) {
-        this.itemOutputs.add(new GenericStack(AEItemKey.of(item), amount));
+    public DMARecipeBuilder output(final ItemLike item, final int amount) {
+        this.itemOutputs.add(new DimensionalMatterAssemblerRecipe.ItemOutput(item.asItem(), amount));
         return this;
     }
 
-    public DMARecipeBuilder output(ItemLike item, int amount, float chance) {
-        // Current DimensionalMatterAssemblerRecipe doesn't support chance yet, but API compatibility:
+    public DMARecipeBuilder output(final ItemLike item, final int amount, final float chance) {
         return output(item, amount);
     }
 
-    public DMARecipeBuilder outputFluid(Fluid fluid, int amount, float chance) {
-        this.fluidOutputs.add(new GenericStack(AEFluidKey.of(fluid), amount));
+    public DMARecipeBuilder outputFluid(final Fluid fluid, final int amount, final float chance) {
+        this.fluidOutputs.add(new DimensionalMatterAssemblerRecipe.FluidOutput(fluid, amount));
         return this;
     }
 
-    public DMARecipeBuilder energy(int energy) {
+    public DMARecipeBuilder energy(final int energy) {
         this.energy = energy;
         return this;
     }
 
-    public DMARecipeBuilder time(int time) {
+    public DMARecipeBuilder time(final int time) {
         this.time = time;
         return this;
     }
@@ -99,12 +96,12 @@ public class DMARecipeBuilder {
         return this;
     }
 
-    public void save(RecipeOutput output) {
-        save(output, ResourceLocation.fromNamespaceAndPath(UfoMod.MOD_ID, this.name));
+    public void save(final RecipeOutput output) {
+        save(output, Identifier.fromNamespaceAndPath(UfoMod.MOD_ID, this.name));
     }
     
-    public void save(RecipeOutput output, ResourceLocation id) {
-        var recipe = new DimensionalMatterAssemblerRecipe(
+    public void save(final RecipeOutput output, final Identifier id) {
+        final var recipe = new DimensionalMatterAssemblerRecipe(
                 this.itemInputs,
                 this.fluidInputs,
                 this.itemOutputs,
@@ -116,7 +113,7 @@ public class DMARecipeBuilder {
         saveBulkQmfMirror(output);
     }
 
-    private void saveBulkQmfMirror(RecipeOutput output) {
+    private void saveBulkQmfMirror(final RecipeOutput output) {
         if (!this.bulkQmfMirrorEnabled) {
             return;
         }
@@ -129,16 +126,16 @@ public class DMARecipeBuilder {
             return;
         }
 
-        var builder = UniversalMultiblockRecipeBuilder.create(
+        final var builder = UniversalMultiblockRecipeBuilder.create(
                 "universal/qmf/bulk/" + this.name.substring("dma/".length()),
                 UniversalMultiblockMachineKind.QMF);
 
-        for (var input : this.itemInputs) {
+        for (final var input : this.itemInputs) {
             builder.inputItem(resolveSingleItem(input.getIngredient()), (long) input.getAmount() * BULK_QMF_FACTOR);
         }
 
-        for (var input : this.fluidInputs) {
-            var stacks = input.getIngredient().getStacks();
+        for (final var input : this.fluidInputs) {
+            final var stacks = input.getIngredient().getStacks();
             if (stacks.length == 0) {
                 return;
             }
@@ -146,22 +143,16 @@ public class DMARecipeBuilder {
         }
 
         if (!this.itemOutputs.isEmpty()) {
-            var itemOutput = this.itemOutputs.getFirst();
-            if (!(itemOutput.what() instanceof AEItemKey itemKey)) {
+            final var itemOutput = this.itemOutputs.getFirst();
+            if (new ItemStack(itemOutput.item()).is(ModTags.Items.CATALYST)) {
                 return;
             }
-            if (itemKey.toStack(1).is(ModTags.Items.CATALYST)) {
-                return;
-            }
-            builder.outputItem(itemKey.toStack(1).getItem(), (int) (itemOutput.amount() * BULK_QMF_FACTOR));
+            builder.outputItem(itemOutput.item(), (int) (itemOutput.amount() * BULK_QMF_FACTOR));
         }
 
         if (!this.fluidOutputs.isEmpty()) {
-            var fluidOutput = this.fluidOutputs.getFirst();
-            if (!(fluidOutput.what() instanceof AEFluidKey fluidKey)) {
-                return;
-            }
-            builder.outputFluid(fluidKey.getFluid(), fluidOutput.amount() * BULK_QMF_FACTOR);
+            final var fluidOutput = this.fluidOutputs.getFirst();
+            builder.outputFluid(fluidOutput.fluid(), fluidOutput.amount() * BULK_QMF_FACTOR);
         }
 
         builder.energy((long) this.energy * BULK_QMF_FACTOR)
@@ -170,8 +161,8 @@ public class DMARecipeBuilder {
                 .save(output);
     }
 
-    private static Item resolveSingleItem(Ingredient ingredient) {
-        var stacks = ingredient.getItems();
+    private static Item resolveSingleItem(final Ingredient ingredient) {
+        final var stacks = ingredient.getItems();
         if (stacks.length == 0) {
             throw new IllegalStateException("Cannot mirror DMA recipe with empty ingredient");
         }

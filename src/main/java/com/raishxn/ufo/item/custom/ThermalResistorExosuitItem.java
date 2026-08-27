@@ -30,12 +30,11 @@ public class ThermalResistorExosuitItem extends ArmorItem implements IThermalArm
 
     private final Multimap<Holder<Attribute>, AttributeModifier> customAttributeModifiers;
 
-    public ThermalResistorExosuitItem(ArmorItem.Type type, Properties properties) {
+    public ThermalResistorExosuitItem(final ArmorItem.Type type, final Properties properties) {
         super(ModArmorMaterials.UFO_ARMOR, type, properties.fireResistant());
 
-        ImmutableMultimap.Builder<Holder<Attribute>, AttributeModifier> builder = ImmutableMultimap.builder();
+        final ImmutableMultimap.Builder<Holder<Attribute>, AttributeModifier> builder = ImmutableMultimap.builder();
 
-        // Adiciona +15% de Velocidade de Mineração
         builder.put(
                 Attributes.MINING_EFFICIENCY,
                 new AttributeModifier(
@@ -49,19 +48,15 @@ public class ThermalResistorExosuitItem extends ArmorItem implements IThermalArm
     }
 
     @Override
-    public ItemAttributeModifiers getDefaultAttributeModifiers(ItemStack stack) {
-        // Pega os modificadores padrão (armadura, etc.)
-        ItemAttributeModifiers defaultModifiers = super.getDefaultAttributeModifiers(stack);
+    public ItemAttributeModifiers getDefaultAttributeModifiers(final ItemStack stack) {
+        final ItemAttributeModifiers defaultModifiers = super.getDefaultAttributeModifiers(stack);
 
-        // Cria um novo builder
-        ItemAttributeModifiers.Builder builder = ItemAttributeModifiers.builder();
+        final ItemAttributeModifiers.Builder builder = ItemAttributeModifiers.builder();
 
-        // Adiciona manualmente CADA modificador padrão ao builder
-        for (ItemAttributeModifiers.Entry entry : defaultModifiers.modifiers()) {
+        for (final ItemAttributeModifiers.Entry entry : defaultModifiers.modifiers()) {
             builder.add(entry.attribute(), entry.modifier(), entry.slot());
         }
 
-        // Adiciona os seus modificadores customizados
         this.customAttributeModifiers.forEach((attributeHolder, modifier) -> {
             builder.add(attributeHolder, modifier, EquipmentSlotGroup.bySlot(this.type.getSlot()));
         });
@@ -70,31 +65,25 @@ public class ThermalResistorExosuitItem extends ArmorItem implements IThermalArm
     }
 
     @Override
-    public void inventoryTick(ItemStack stack, Level level, Entity entity, int slot, boolean isSelected) {
+    public void inventoryTick(final ItemStack stack, final Level level, final Entity entity, final int slot, final boolean isSelected) {
         super.inventoryTick(stack, level, entity, slot, isSelected);
 
-        if (level.isClientSide() || !(entity instanceof Player player)) {
+        if (level.isClientSide() || !(entity instanceof final Player player)) {
             return;
         }
         if (player.getItemBySlot(this.type.getSlot()) != stack) {
             return;
         }
 
-        // Imunidade a Fogo / Refrigeração (Remove queimadura)
         if (player.isOnFire()) {
             player.clearFire();
         }
 
-        // Adiciona Resistência II se o set estiver completo
         if (hasFullSet(player)) {
-            // <-- ATUALIZADO: Amplificador 1 = Nível II -->
-            player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 220, 1, false, false, true));
+            player.addEffect(new MobEffectInstance(MobEffects.RESISTANCE, 220, 1, false, false, true));
         }
     }
-
-    // --- TOOLTIPS COMPLETAMENTE ATUALIZADOS ---
-    @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
+    public void appendHoverText(final ItemStack stack, final TooltipContext context, final List<Component> tooltip, final TooltipFlag flag) {
         tooltip.add(Component.literal("§6Thermal Resistor Exosuit"));
         tooltip.add(Component.literal("§7Projetada para resistir ao impossível."));
         tooltip.add(Component.literal("§8Camadas de matéria densa dissipam calor extremo."));
@@ -104,8 +93,8 @@ public class ThermalResistorExosuitItem extends ArmorItem implements IThermalArm
         tooltip.add(Component.literal("§9Refrigeração Integrada"));
         tooltip.add(Component.empty());
 
-        if (Screen.hasShiftDown()) {
-            Player player = Minecraft.getInstance().player;
+        if (net.minecraft.client.Minecraft.getInstance().hasShiftDown()) {
+            final Player player = Minecraft.getInstance().player;
             if (player != null && hasFullSet(player)) {
                 tooltip.add(Component.literal("§5[Conjunto Completo Ativo]"));
                 tooltip.add(Component.literal("§bImune a Fogo e Lava"));
@@ -119,11 +108,9 @@ public class ThermalResistorExosuitItem extends ArmorItem implements IThermalArm
             tooltip.add(Component.literal("§8Pressione <SHIFT> para detalhes."));
         }
 
-        super.appendHoverText(stack, context, tooltip, flag);
     }
-    // --- FIM DA ATUALIZAÇÃO DOS TOOLTIPS ---
 
-    private boolean hasFullSet(Player player) {
+    private boolean hasFullSet(final Player player) {
         return player.getItemBySlot(EquipmentSlot.HEAD).getItem() instanceof IThermalArmor &&
                 player.getItemBySlot(EquipmentSlot.CHEST).getItem() instanceof IThermalArmor &&
                 player.getItemBySlot(EquipmentSlot.LEGS).getItem() instanceof IThermalArmor &&

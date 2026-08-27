@@ -180,7 +180,7 @@ ServerEvents.recipes(event => {
     time: 30000,
     cooling_level: 2,
     field_tier: 2,
-    fuel_fluid: 'mekanism:hydrogen',
+    fuel_fluid: 'ufo:liquid_starlight',
     fuel_amount: 20000,
     coolant_fluid: 'ufo:source_gelid_cryotheum',
     coolant_amount: 25000

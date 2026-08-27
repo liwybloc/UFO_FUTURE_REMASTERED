@@ -1,10 +1,8 @@
 package com.raishxn.ufo.util;
 
-import com.raishxn.ufo.UfoMod;
-import com.raishxn.ufo.item.ModItems;
 import com.raishxn.ufo.item.ModTools;
 import net.minecraft.client.renderer.item.ItemProperties;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 
 public class ModItemProperties {
@@ -12,8 +10,8 @@ public class ModItemProperties {
         makeCustomBow(ModTools.UFO_BOW.get());
     }
 
-    private static void makeCustomBow(Item item) {
-        ItemProperties.register(item, ResourceLocation.withDefaultNamespace("pull"), (p_344163_, p_344164_, p_344165_, p_344166_) -> {
+    private static void makeCustomBow(final Item item) {
+        ItemProperties.register(item, Identifier.withDefaultNamespace("pull"), (p_344163_, p_344164_, p_344165_, p_344166_) -> {
             if (p_344165_ == null) {
                 return 0.0F;
             } else {
@@ -22,7 +20,7 @@ public class ModItemProperties {
         });
         ItemProperties.register(
                 item,
-                ResourceLocation.withDefaultNamespace("pulling"),
+                Identifier.withDefaultNamespace("pulling"),
                 (p_174630_, p_174631_, p_174632_, p_174633_) -> p_174632_ != null && p_174632_.isUsingItem() && p_174632_.getUseItem() == p_174630_ ? 1.0F : 0.0F
         );
     }

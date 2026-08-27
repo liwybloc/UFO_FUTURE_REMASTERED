@@ -1,7 +1,7 @@
 package com.raishxn.ufo.fluid;
 
 import com.raishxn.ufo.UfoMod;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.common.SoundActions;
@@ -16,7 +16,7 @@ import java.util.function.Supplier;
 public class ModFluidTypes {
     public static final DeferredRegister<FluidType> FLUID_TYPES =
             DeferredRegister.create(NeoForgeRegistries.FLUID_TYPES, UfoMod.MOD_ID);
-    public static void register(IEventBus eventBus) {
+    public static void register(final IEventBus eventBus) {
         FLUID_TYPES.register(eventBus);
     }
     public static final DeferredHolder<FluidType, FluidType> NEUTRON_STAR_FRAGMENT_FLUID_TYPE = registerBasic(
@@ -34,7 +34,6 @@ public class ModFluidTypes {
     public static final DeferredHolder<FluidType, FluidType> PRIMORDIAL_MATTER_FLUID_TYPE = registerBasic(
             "primordial_matter_fluid", "primordialmatter", 5000, 1000, 8);
 
-    // Plasma ajustado para 2000 conforme o PDF [392]
     public static final DeferredHolder<FluidType, FluidType> RAW_STAR_MATTER_PLASMA_FLUID_TYPE = registerBasic(
             "raw_star_matter_plasma_fluid", "raw_star_matter_plasma", 2000, 10000, 15);
 
@@ -54,9 +53,9 @@ public class ModFluidTypes {
 
 
     public static final DeferredHolder<FluidType, FluidType> GELID_CRYOTHEUM_TYPE = FLUID_TYPES.register("gelid_cryotheum", () -> new BaseFluidType(
-            ResourceLocation.fromNamespaceAndPath(UfoMod.MOD_ID, "block/fluid/gelid_cryotheum_still"),
-            ResourceLocation.fromNamespaceAndPath(UfoMod.MOD_ID, "block/fluid/gelid_cryotheum_flow"),
-            ResourceLocation.fromNamespaceAndPath(UfoMod.MOD_ID, "block/fluid/gelid_cryotheum_still"),
+            Identifier.fromNamespaceAndPath(UfoMod.MOD_ID, "block/fluid/gelid_cryotheum_still"),
+            Identifier.fromNamespaceAndPath(UfoMod.MOD_ID, "block/fluid/gelid_cryotheum_flow"),
+            Identifier.fromNamespaceAndPath(UfoMod.MOD_ID, "block/fluid/gelid_cryotheum_still"),
             0xFF00FFFF,
             new Vector3f(0.0f, 1.0f, 1.0f),
             FluidType.Properties.create()
@@ -68,9 +67,9 @@ public class ModFluidTypes {
     ));
 
     public static final DeferredHolder<FluidType, FluidType> STABLE_COOLANT_TYPE = FLUID_TYPES.register("stable_coolant", () -> new BaseFluidType(
-            ResourceLocation.fromNamespaceAndPath(UfoMod.MOD_ID, "block/fluid/fluid.stable_coolant"),
-            ResourceLocation.fromNamespaceAndPath(UfoMod.MOD_ID, "block/fluid/fluid.stable_coolant"),
-            ResourceLocation.fromNamespaceAndPath(UfoMod.MOD_ID, "block/fluid/fluid.stable_coolant"),
+            Identifier.fromNamespaceAndPath(UfoMod.MOD_ID, "block/fluid/fluid.stable_coolant"),
+            Identifier.fromNamespaceAndPath(UfoMod.MOD_ID, "block/fluid/fluid.stable_coolant"),
+            Identifier.fromNamespaceAndPath(UfoMod.MOD_ID, "block/fluid/fluid.stable_coolant"),
             0xFF88DDFF,
             new Vector3f(0.2f, 0.8f, 0.9f),
             FluidType.Properties.create()
@@ -83,8 +82,8 @@ public class ModFluidTypes {
 
 
 
-    private static DeferredHolder<FluidType, FluidType> registerBasic(String name, String textureName, int temp, int density, int lightLevel) {
-        ResourceLocation stillTexture = ResourceLocation.fromNamespaceAndPath(UfoMod.MOD_ID, "block/fluid/" + textureName);
+    private static DeferredHolder<FluidType, FluidType> registerBasic(final String name, final String textureName, final int temp, final int density, final int lightLevel) {
+        final Identifier stillTexture = Identifier.fromNamespaceAndPath(UfoMod.MOD_ID, "block/fluid/" + textureName);
         return FLUID_TYPES.register(name, () -> new BaseFluidType(
                 stillTexture, stillTexture, stillTexture,
                 0xFFFFFFFF,
@@ -99,16 +98,16 @@ public class ModFluidTypes {
         ));
     }
 
-    private static DeferredHolder<FluidType, FluidType> registerCoolant(String name, String textureName, int temperature) {
-        ResourceLocation texture = ResourceLocation.fromNamespaceAndPath(UfoMod.MOD_ID, "block/fluid/" + textureName);
+    private static DeferredHolder<FluidType, FluidType> registerCoolant(final String name, final String textureName, final int temperature) {
+        final Identifier texture = Identifier.fromNamespaceAndPath(UfoMod.MOD_ID, "block/fluid/" + textureName);
         return FLUID_TYPES.register(name, () -> new BaseFluidType(
                 texture, texture, texture,
                 0xFFFFFFFF, // Usa a cor personalizada (Roxo/Verde)
                 new Vector3f(0.5f, 0.8f, 1.0f), // Neblina azulada
                 FluidType.Properties.create()
                         .temperature(temperature)
-                        .density(3000)     // Densidade padrão para seus coolants
-                        .viscosity(6000)   // Viscosidade padrão para seus coolants
+                        .density(3000)
+                        .viscosity(6000)
                         .sound(SoundActions.BUCKET_FILL, SoundEvents.BUCKET_FILL_POWDER_SNOW)
                         .sound(SoundActions.BUCKET_EMPTY, SoundEvents.BUCKET_EMPTY_POWDER_SNOW)
         ));

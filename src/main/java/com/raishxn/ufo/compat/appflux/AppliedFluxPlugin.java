@@ -6,7 +6,7 @@ import com.glodblock.github.appflux.common.me.key.type.EnergyType;
 
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.energy.IEnergyStorage;
+import net.neoforged.neoforge.transfer.energy.EnergyHandler;
 
 
 import appeng.api.config.Actionable;
@@ -15,6 +15,8 @@ import appeng.api.implementations.items.IAEItemPowerStorage;
 import appeng.api.networking.IGrid;
 import appeng.api.networking.security.IActionSource;
 import appeng.api.upgrades.Upgrades;
+import net.neoforged.neoforge.transfer.energy.EnergyHandler;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
 
 public class AppliedFluxPlugin {
 
@@ -28,21 +30,21 @@ public class AppliedFluxPlugin {
 
 
     public static double rechargeAeStorageItem(
-            IGrid grid, double neededPower, Player player, ItemStack stack, IAEItemPowerStorage aePowerStorage) {
+            final IGrid grid, double neededPower, final Player player, final ItemStack stack, final IAEItemPowerStorage aePowerStorage) {
         try {
-            var storage = grid.getStorageService();
+            final var storage = grid.getStorageService();
 
-            var mult = PowerMultiplier.CONFIG;
-            var neededFePower = mult.divide(neededPower);
+            final var mult = PowerMultiplier.CONFIG;
+            final var neededFePower = mult.divide(neededPower);
 
-            var extracted = mult.multiply(storage.getInventory()
+            final var extracted = mult.multiply(storage.getInventory()
                     .extract(
                             FluxKey.of(EnergyType.FE),
                             (long) neededFePower,
                             Actionable.MODULATE,
                             IActionSource.ofPlayer(player)));
 
-            var remainder = aePowerStorage.injectAEPower(stack, extracted, Actionable.MODULATE);
+            final var remainder = aePowerStorage.injectAEPower(stack, extracted, Actionable.MODULATE);
             storage.getInventory()
                     .insert(
                             FluxKey.of(EnergyType.FE),
@@ -51,22 +53,23 @@ public class AppliedFluxPlugin {
                             IActionSource.ofPlayer(player));
 
             neededPower -= extracted - remainder;
-        } catch (Throwable ignored) {
-            // NO_OP
+        } catch (final Throwable ignored) {
         }
         return neededPower;
     }
 
-    public static void rechargeEnergyStorage(IGrid grid, int afRate, IActionSource source, IEnergyStorage cap) {
+    public static void rechargeEnergyStorage(final IGrid grid, final int afRate, final IActionSource source, final EnergyHandler cap) {
         try {
-            var storage = grid.getStorageService();
-
-            var extracted =
+            final var storage = grid.getStorageService();
+            final var extracted =
                     storage.getInventory().extract(FluxKey.of(EnergyType.FE), afRate, Actionable.MODULATE, source);
-            var inserted = cap.receiveEnergy((int) extracted, false);
+            final int inserted;
+            try (final Transaction transaction = Transaction.openRoot()) {
+                inserted = cap.insert((int) Math.min(Integer.MAX_VALUE, extracted), transaction);
+                transaction.commit();
+            }
             storage.getInventory().insert(FluxKey.of(EnergyType.FE), extracted - inserted, Actionable.MODULATE, source);
-        } catch (Throwable ignored) {
-            // NO_OP
+        } catch (final Throwable ignored) {
         }
     }
 }

@@ -8,7 +8,7 @@ import com.raishxn.ufo.api.tutorial.UfoTutorialRegistry;
 import com.raishxn.ufo.api.tutorial.UfoTutorialScene;
 import com.raishxn.ufo.api.tutorial.UfoTutorialStep;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -21,22 +21,22 @@ public final class UfoTutorials {
 
     public static void registerDefaults() {
         UfoTutorialRegistry.clear();
-        for (MultiblockControllerDefinitions.PreviewEntry entry : MultiblockControllerDefinitions.getPreviewEntries()) {
+        for (final MultiblockControllerDefinitions.PreviewEntry entry : MultiblockControllerDefinitions.getPreviewEntries()) {
             UfoTutorialRegistry.register(createGenericMultiblockTutorial(entry));
         }
     }
 
-    private static UfoTutorialEntry createGenericMultiblockTutorial(MultiblockControllerDefinitions.PreviewEntry entry) {
+    private static UfoTutorialEntry createGenericMultiblockTutorial(final MultiblockControllerDefinitions.PreviewEntry entry) {
         if ("quantum_matter_fabricator".equals(entry.id().getPath())) {
             return createQmfTutorial(entry);
         }
 
-        MultiblockPattern pattern = entry.definition().pattern();
-        char[][][] blocks = pattern.getPattern();
-        Set<Character> structuralSymbols = collectStructuralSymbols(pattern, blocks);
-        ResourceLocation sceneId = ResourceLocation.fromNamespaceAndPath(UfoMod.MOD_ID, entry.id().getPath() + "/structure");
+        final MultiblockPattern pattern = entry.definition().pattern();
+        final char[][][] blocks = pattern.getPattern();
+        final Set<Character> structuralSymbols = collectStructuralSymbols(pattern, blocks);
+        final Identifier sceneId = Identifier.fromNamespaceAndPath(UfoMod.MOD_ID, entry.id().getPath() + "/structure");
 
-        UfoTutorialScene scene = new UfoTutorialScene(
+        final UfoTutorialScene scene = new UfoTutorialScene(
                 sceneId,
                 Component.translatable("ufo.tutorial.scene.structure"),
                 List.of(
@@ -64,9 +64,9 @@ public final class UfoTutorials {
         return new UfoTutorialEntry(entry.id(), entry.definition().name(), entry, List.of(scene));
     }
 
-    private static UfoTutorialEntry createQmfTutorial(MultiblockControllerDefinitions.PreviewEntry entry) {
-        ResourceLocation sceneId = ResourceLocation.fromNamespaceAndPath(UfoMod.MOD_ID, "quantum_matter_fabricator/structure");
-        UfoTutorialScene scene = new UfoTutorialScene(
+    private static UfoTutorialEntry createQmfTutorial(final MultiblockControllerDefinitions.PreviewEntry entry) {
+        final Identifier sceneId = Identifier.fromNamespaceAndPath(UfoMod.MOD_ID, "quantum_matter_fabricator/structure");
+        final UfoTutorialScene scene = new UfoTutorialScene(
                 sceneId,
                 Component.translatable("ufo.tutorial.qmf.scene.structure"),
                 List.of(
@@ -99,11 +99,11 @@ public final class UfoTutorials {
         return new UfoTutorialEntry(entry.id(), entry.definition().name(), entry, List.of(scene));
     }
 
-    private static Set<Character> collectStructuralSymbols(MultiblockPattern pattern, char[][][] blocks) {
-        LinkedHashSet<Character> symbols = new LinkedHashSet<>();
-        for (char[][] layer : blocks) {
-            for (char[] row : layer) {
-                for (char symbol : row) {
+    private static Set<Character> collectStructuralSymbols(final MultiblockPattern pattern, final char[][][] blocks) {
+        final LinkedHashSet<Character> symbols = new LinkedHashSet<>();
+        for (final char[][] layer : blocks) {
+            for (final char[] row : layer) {
+                for (final char symbol : row) {
                     if (!Character.isWhitespace(symbol) && symbol != 'A' && symbol != pattern.getControllerChar()) {
                         symbols.add(symbol);
                     }

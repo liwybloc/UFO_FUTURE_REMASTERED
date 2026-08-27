@@ -6,48 +6,51 @@ import com.raishxn.ufo.block.entity.AbstractSimpleMultiblockControllerBE;
 import com.raishxn.ufo.block.entity.QuantumPatternHatchBE;
 import com.raishxn.ufo.block.entity.StellarNexusControllerBE;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.redstone.Orientation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 
 public class QuantumPatternHatchBlock extends PatternProviderBlock {
 
-    public QuantumPatternHatchBlock() {
-        super();
+    public QuantumPatternHatchBlock(final BlockBehaviour.Properties properties) {
+        super(properties.strength(5.0F).requiresCorrectToolForDrops());
     }
 
     @Override
-    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean moved) {
-        if (!state.is(newState.getBlock()) && level.getBlockEntity(pos) instanceof QuantumPatternHatchBE hatch) {
-            var controllerPos = hatch.getControllerPos();
-            if (controllerPos != null && level.getBlockEntity(controllerPos) instanceof IMultiblockController controller) {
+    protected void affectNeighborsAfterRemoval(final BlockState state, final ServerLevel level, final BlockPos pos, final boolean moved) {
+        if (level.getBlockEntity(pos) instanceof final QuantumPatternHatchBE hatch) {
+            final var controllerPos = hatch.getControllerPos();
+            if (controllerPos != null && level.getBlockEntity(controllerPos) instanceof final IMultiblockController controller) {
                 controller.removePart(pos);
                 controller.scanStructure(level);
             }
             hatch.unlinkFromController();
         }
-        super.onRemove(state, level, pos, newState, moved);
+        super.affectNeighborsAfterRemoval(state, level, pos, moved);
     }
 
     @Override
-    public void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, BlockPos fromPos, boolean isMoving) {
-        super.neighborChanged(state, level, pos, block, fromPos, isMoving);
-        if (!level.isClientSide() && level.getBlockEntity(pos) instanceof QuantumPatternHatchBE hatch) {
-            var controllerPos = hatch.getControllerPos();
+    protected void neighborChanged(final BlockState state, final Level level, final BlockPos pos, final Block block, final Orientation orientation, final boolean isMoving) {
+        super.neighborChanged(state, level, pos, block, orientation, isMoving);
+        if (!level.isClientSide() && level.getBlockEntity(pos) instanceof final QuantumPatternHatchBE hatch) {
+            final var controllerPos = hatch.getControllerPos();
             if (controllerPos != null) {
                 markControllerDirty(level, controllerPos);
             }
         }
     }
 
-    private static void markControllerDirty(Level level, BlockPos controllerPos) {
-        BlockEntity entity = level.getBlockEntity(controllerPos);
-        if (entity instanceof AbstractSimpleMultiblockControllerBE controller) {
+    private static void markControllerDirty(final Level level, final BlockPos controllerPos) {
+        final BlockEntity entity = level.getBlockEntity(controllerPos);
+        if (entity instanceof final AbstractSimpleMultiblockControllerBE controller) {
             controller.markStructureDirty();
-        } else if (entity instanceof StellarNexusControllerBE controller) {
+        } else if (entity instanceof final StellarNexusControllerBE controller) {
             controller.markStructureDirty();
-        } else if (entity instanceof IMultiblockController controller) {
+        } else if (entity instanceof final IMultiblockController controller) {
             controller.scanStructure(level);
         }
     }

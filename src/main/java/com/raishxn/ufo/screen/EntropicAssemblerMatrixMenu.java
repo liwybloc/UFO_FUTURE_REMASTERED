@@ -13,22 +13,22 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jetbrains.annotations.NotNull;
 
 public class EntropicAssemblerMatrixMenu extends AbstractUniversalMultiblockControllerMenu<EntropicAssemblerMatrixBE> {
-    public EntropicAssemblerMatrixMenu(int id, Inventory inv, FriendlyByteBuf extraData) {
+    public EntropicAssemblerMatrixMenu(final int id, final Inventory inv, final FriendlyByteBuf extraData) {
         this(id, inv, inv.player.level().getBlockEntity(extraData.readBlockPos()));
     }
 
-    public EntropicAssemblerMatrixMenu(int id, Inventory inv, BlockEntity entity) {
+    public EntropicAssemblerMatrixMenu(final int id, final Inventory inv, final BlockEntity entity) {
         super(ModMenus.ENTROPIC_ASSEMBLER_MATRIX_MENU.get(), id, inv, (EntropicAssemblerMatrixBE) entity,
                 ContainerLevelAccess.create(entity.getLevel(), entity.getBlockPos()));
     }
 
     @Override
-    public @NotNull ItemStack quickMoveStack(@NotNull Player playerIn, int index) {
+    public @NotNull ItemStack quickMoveStack(@NotNull final Player playerIn, final int index) {
         return ItemStack.EMPTY;
     }
 
     @Override
-    public boolean stillValid(@NotNull Player player) {
+    public boolean stillValid(@NotNull final Player player) {
         return stillValid(this.levelAccess, player, getValidBlock());
     }
 

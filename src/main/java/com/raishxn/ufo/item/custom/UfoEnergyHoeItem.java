@@ -25,29 +25,27 @@ public class UfoEnergyHoeItem extends HoeItem implements IEnergyTool, IHasModeHU
     private static final String TAG_RANGE = "range";
     private static final int[] RANGES = {0, 1, 2, 3, 5}; // 0=1x1, 1=3x3...
 
-    public UfoEnergyHoeItem(Tier pTier, Properties pProperties) {
-        super(pTier, pProperties);
+    public UfoEnergyHoeItem(final ToolMaterial material, final Properties properties) {
+        super(material, 0.0F, -3.0F, properties);
     }
 
-    // --- LÓGICA DE AÇÃO EM ÁREA (CORRIGIDA) ---
     @Override
-    public InteractionResult useOn(UseOnContext pContext) {
-        Level level = pContext.getLevel();
-        BlockPos originPos = pContext.getClickedPos();
-        Player player = pContext.getPlayer();
-        ItemStack stack = pContext.getItemInHand();
-        int range = getRange(stack);
+    public InteractionResult useOn(final UseOnContext pContext) {
+        final Level level = pContext.getLevel();
+        final BlockPos originPos = pContext.getClickedPos();
+        final Player player = pContext.getPlayer();
+        final ItemStack stack = pContext.getItemInHand();
+        final int range = getRange(stack);
 
         if (player == null || level.isClientSide()) {
             return InteractionResult.PASS;
         }
 
         boolean actionPerformed = false;
-        // A lógica de getPositions é a mesma usada aqui
-        for (BlockPos pos : getPositions(originPos, range)) {
-            BlockState blockState = level.getBlockState(pos);
+        for (final BlockPos pos : getPositions(originPos, range)) {
+            final BlockState blockState = level.getBlockState(pos);
 
-            BlockState modifiedState = level.getBlockState(pos).getToolModifiedState(
+            final BlockState modifiedState = level.getBlockState(pos).getToolModifiedState(
                     pContext,
                     net.neoforged.neoforge.common.ItemAbilities.HOE_TILL,
                     false
@@ -71,46 +69,41 @@ public class UfoEnergyHoeItem extends HoeItem implements IEnergyTool, IHasModeHU
         return InteractionResult.PASS;
     }
 
-    // --- MÉTODOS DE TROCA DE MODO E VISUAIS ---
 
     @Override
-    public void cycleMode(ItemStack stack, Player player) {
-        int currentRange = getRange(stack);
+    public void cycleMode(final ItemStack stack, final Player player) {
+        final int currentRange = getRange(stack);
         int currentIndex = 0;
         for (int i = 0; i < RANGES.length; i++) { if (RANGES[i] == currentRange) { currentIndex = i; break; } }
-        int nextIndex = (currentIndex + 1) % RANGES.length;
-        int newRange = RANGES[nextIndex];
+        final int nextIndex = (currentIndex + 1) % RANGES.length;
+        final int newRange = RANGES[nextIndex];
 
-        CompoundTag tag = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
+        final CompoundTag tag = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
         tag.putInt(TAG_RANGE, newRange);
         stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
     }
 
-    // --- MÉTODO CORRIGIDO ---
-    public static int getRange(ItemStack stack) {
-        CustomData data = stack.get(DataComponents.CUSTOM_DATA);
-        if (data != null) return data.copyTag().getInt(TAG_RANGE);
+    public static int getRange(final ItemStack stack) {
+        final CustomData data = stack.get(DataComponents.CUSTOM_DATA);
+        if (data != null) return data.copyTag().getInt(TAG_RANGE).orElse(RANGES[0]);
         return RANGES[0];
     }
 
-    // --- MÉTODO NOVO ADICIONADO ---
-    public static List<BlockPos> getPositions(BlockPos origin, int range) {
+    public static List<BlockPos> getPositions(final BlockPos origin, final int range) {
         return StreamSupport.stream(
                         BlockPos.betweenClosed(origin.offset(-range, 0, -range), origin.offset(range, 0, range)).spliterator(), false)
                 .map(BlockPos::immutable)
                 .collect(Collectors.toList());
     }
 
-    // Arquivo: UfoEnergyHoeItem.java
 
     @Override
-    public Component getModeHudComponent(ItemStack stack) {
-        int range = getRange(stack);
-        int dimension = (range == 0) ? 1 : (range * 2) + 1;
-        String areaText = dimension + "x" + dimension;
+    public Component getModeHudComponent(final ItemStack stack) {
+        final int range = getRange(stack);
+        final int dimension = (range == 0) ? 1 : (range * 2) + 1;
+        final String areaText = dimension + "x" + dimension;
 
-        // Define a cor baseada no range atual (com o range 5 da enxada)
-        ChatFormatting color;
+        final ChatFormatting color;
         switch (range) {
             case 1:  // 3x3
                 color = ChatFormatting.GREEN;
@@ -129,25 +122,19 @@ public class UfoEnergyHoeItem extends HoeItem implements IEnergyTool, IHasModeHU
                 break;
         }
 
-        // Cria um componente para o texto da área e aplica a cor
-        Component coloredArea = Component.literal(areaText).withStyle(color);
+        final Component coloredArea = Component.literal(areaText).withStyle(color);
 
-        // Retorna o componente final usando a nova chave de tradução
         return Component.translatable("tooltip.ufo.area_mode", coloredArea);
     }
 
     @Override
-    public Component getName(ItemStack stack) { return IEnergyTool.super.getName(stack); }
-
-    @Override
-    public void appendHoverText(ItemStack pStack, Item.TooltipContext pContext, List<Component> pTooltipComponents, TooltipFlag pTooltipFlag) {
+    public Component getName(final ItemStack stack) { return IEnergyTool.super.getName(stack); }
+    public void appendHoverText(final ItemStack pStack, final Item.TooltipContext pContext, final List<Component> pTooltipComponents, final TooltipFlag pTooltipFlag) {
         pTooltipComponents.add(getModeHudComponent(pStack));
-        IEnergyTool.super.appendHoverText(pStack, pContext, pTooltipComponents, pTooltipFlag);
-        super.appendHoverText(pStack, pContext, pTooltipComponents, pTooltipFlag);
     }
 
     @Override public int getEnergyPerUse() { return 50; }
-    @Override public boolean isBarVisible(ItemStack pStack) { return EnergyToolHelper.isBarVisible(pStack); }
-    @Override public int getBarWidth(ItemStack pStack) { return EnergyToolHelper.getBarWidth(pStack); }
-    @Override public int getBarColor(ItemStack pStack) { return EnergyToolHelper.getBarColor(pStack); }
+    @Override public boolean isBarVisible(final ItemStack pStack) { return EnergyToolHelper.isBarVisible(pStack); }
+    @Override public int getBarWidth(final ItemStack pStack) { return EnergyToolHelper.getBarWidth(pStack); }
+    @Override public int getBarColor(final ItemStack pStack) { return EnergyToolHelper.getBarColor(pStack); }
 }

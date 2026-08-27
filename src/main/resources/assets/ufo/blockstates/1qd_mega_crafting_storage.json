@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "formed=false": {
+      "model": "ufo:block/1qd_mega_crafting_storage"
+    },
+    "formed=true": {
+      "model": "ufo:block/1qd_mega_crafting_storage_formed"
+    }
+  }
+}

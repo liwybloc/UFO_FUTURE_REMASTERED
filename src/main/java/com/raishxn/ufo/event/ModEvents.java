@@ -32,6 +32,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
+import net.neoforged.neoforge.event.level.block.BreakBlockEvent;
 
 import java.util.List;
 import java.util.Optional;
@@ -39,106 +40,90 @@ import java.util.Optional;
 @EventBusSubscriber(modid = UfoMod.MOD_ID)
 public class ModEvents {
 
-    // --- PICKAXE AND HAMMER LOGIC (Block Break & Auto-Smelt) ---
     @SubscribeEvent
-    public static void onBlockBreak(BlockEvent.BreakEvent event) {
-        Player player = event.getPlayer();
-        if (player == null || player.level().isClientSide) return;
-        ItemStack stack = player.getMainHandItem();
+    public static void onBlockBreak(final BreakBlockEvent event) {
+        final Player player = event.getPlayer();
+        if (player == null || player.level().isClientSide()) return;
+        final ItemStack stack = player.getMainHandItem();
 
-        // Aplica tanto para Pickaxe quanto para Hammer
         if (stack.getItem() instanceof UfoEnergyPickaxeItem || stack.getItem() instanceof HammerItem) {
 
-            // Lógica de Fortuna Progressiva (Apenas Pickaxe)
             if (stack.getItem() instanceof UfoEnergyPickaxeItem) {
-                int currentFortune = stack.getOrDefault(ModDataComponents.PROGRESSIVE_FORTUNE.get(), 0);
+                final int currentFortune = stack.getOrDefault(ModDataComponents.PROGRESSIVE_FORTUNE.get(), 0);
 
-                // Limite de nível 100 (ou ajuste conforme necessário)
                 if (currentFortune < 300) {
-                    int newFortune = currentFortune + 1;
+                    final int newFortune = currentFortune + 1;
 
-                    // 1. Atualiza o componente customizado (para o seu controle interno e HUD)
                     stack.set(ModDataComponents.PROGRESSIVE_FORTUNE.get(), newFortune);
 
-                    // 2. [CORREÇÃO] Aplica o Encantamento Vanilla REAL no item
-                    // Isso faz o jogo entender que o item tem Fortuna X para o cálculo de drops
-                    var registry = player.level().registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
-                    var fortuneEnchant = registry.getOrThrow(Enchantments.FORTUNE);
+                    final var registry = player.level().registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
+                    final var fortuneEnchant = registry.getOrThrow(Enchantments.FORTUNE);
 
-                    // Pega os encantamentos atuais, cria uma versão mutável, atualiza a Fortuna e salva de volta
-                    ItemEnchantments.Mutable enchantmentsMap = new ItemEnchantments.Mutable(stack.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY));
+                    final ItemEnchantments.Mutable enchantmentsMap = new ItemEnchantments.Mutable(stack.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY));
                     enchantmentsMap.set(fortuneEnchant, newFortune);
 
                     stack.set(DataComponents.ENCHANTMENTS, enchantmentsMap.toImmutable());
                 }
             }
 
-            // --- AUTO SMELT LOGIC ---
             if (stack.getOrDefault(ModDataComponents.AUTO_SMELT.get(), false)) {
-                ServerLevel level = (ServerLevel) player.level();
-                BlockPos pos = event.getPos();
-                BlockState state = event.getState();
+                final ServerLevel level = (ServerLevel) player.level();
+                final BlockPos pos = event.getPos();
+                final BlockState state = event.getState();
 
-                // Simula os drops que aconteceriam (agora considerando a Fortuna aplicada acima)
-                List<ItemStack> drops = Block.getDrops(state, level, pos, level.getBlockEntity(pos), player, stack);
+                final List<ItemStack> drops = Block.getDrops(state, level, pos, level.getBlockEntity(pos), player, stack);
                 boolean smelledAny = false;
 
-                // Tenta smeltar os drops
-                for (ItemStack drop : drops) {
-                    Optional<net.minecraft.world.item.crafting.RecipeHolder<SmeltingRecipe>> recipe = level.getRecipeManager()
+                for (final ItemStack drop : drops) {
+                    final Optional<net.minecraft.world.item.crafting.RecipeHolder<SmeltingRecipe>> recipe = level.recipeAccess()
                             .getRecipeFor(RecipeType.SMELTING, new SingleRecipeInput(drop), level);
 
                     if (recipe.isPresent()) {
-                        ItemStack result = recipe.get().value().getResultItem(level.registryAccess()).copy();
-                        result.setCount(drop.getCount()); // Mantém a quantidade multiplicada pela fortuna
+                        final ItemStack result = recipe.get().value().assemble(new SingleRecipeInput(drop)).copy();
+                        result.setCount(drop.getCount());
 
                         spawnItem(level, pos, result);
                         smelledAny = true;
                     } else {
-                        spawnItem(level, pos, drop); // Drop normal se não tiver receita
+                        spawnItem(level, pos, drop);
                     }
                 }
 
                 if (smelledAny) {
-                    // Consome energia extra pelo processo
                     consumeEnergyDirect(stack, 50);
 
-                    // Impede o drop vanilla (já dropamos manualmente)
                     event.setCanceled(true);
 
-                    // Destrói o bloco manualmente (sem drops vanilla e evitando sons duplicados se possível)
                     level.setBlock(pos, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), 3);
                 }
             }
         }
     }
 
-    private static void spawnItem(Level level, BlockPos pos, ItemStack stack) {
-        ItemEntity entity = new ItemEntity(level, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, stack);
+    private static void spawnItem(final Level level, final BlockPos pos, final ItemStack stack) {
+        final ItemEntity entity = new ItemEntity(level, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, stack);
         level.addFreshEntity(entity);
     }
 
-    // --- COMBAT LOGIC (Sword and Axe) ---
 
     @SubscribeEvent
-    public static void onPlayerAttack(LivingIncomingDamageEvent event) {
-        if (event.getSource().getEntity() instanceof Player player) {
-            ItemStack stack = player.getMainHandItem();
+    public static void onPlayerAttack(final LivingIncomingDamageEvent event) {
+        if (event.getSource().getEntity() instanceof final Player player) {
+            final ItemStack stack = player.getMainHandItem();
 
-            // 1. Sword Logic
             if (stack.getItem() instanceof UfoEnergySwordItem || stack.getItem() instanceof UfoEnergyGreatswordItem) {
-                int kills = stack.getOrDefault(ModDataComponents.KILL_COUNT.get(), 0);
+                final int kills = stack.getOrDefault(ModDataComponents.KILL_COUNT.get(), 0);
                 float extraDmg = kills * 2.0f;
 
-                long lastHit = stack.getOrDefault(ModDataComponents.LAST_HIT_TIME.get(), 0L);
+                final long lastHit = stack.getOrDefault(ModDataComponents.LAST_HIT_TIME.get(), 0L);
                 int combo = stack.getOrDefault(ModDataComponents.COMBO_COUNT.get(), 0);
-                long time = player.level().getGameTime();
+                final long time = player.level().getGameTime();
 
                 if (time - lastHit < 60) {
                     combo++;
                     if (combo >= 5) {
                         extraDmg *= 1.5f;
-                        player.displayClientMessage(Component.literal("COMBO!").withStyle(ChatFormatting.GOLD), true);
+                        player.sendOverlayMessage(Component.literal("COMBO!").withStyle(ChatFormatting.GOLD));
                         combo = 0;
                     }
                 } else {
@@ -153,11 +138,10 @@ public class ModEvents {
                 }
             }
 
-            // 2. Greatsword Logic
             if (stack.getItem() instanceof UfoEnergyGreatswordItem) {
-                float maxHp = player.getMaxHealth();
-                float currentHp = player.getHealth();
-                float percent = currentHp / maxHp;
+                final float maxHp = player.getMaxHealth();
+                final float currentHp = player.getHealth();
+                final float percent = currentHp / maxHp;
 
                 float multiplier = 1.0f;
                 if (percent <= 0.10f) multiplier = 1.5f;
@@ -166,9 +150,8 @@ public class ModEvents {
                 event.setAmount(event.getAmount() * multiplier);
             }
 
-            // 3. Axe Logic
             if (stack.getItem() instanceof UfoEnergyAxeItem) {
-                float targetArmor = event.getEntity().getArmorValue();
+                final float targetArmor = event.getEntity().getArmorValue();
                 if (targetArmor > 0) {
                     event.setAmount(event.getAmount() + (targetArmor * 0.2f));
                 }
@@ -176,13 +159,11 @@ public class ModEvents {
         }
     }
 
-    // --- ARMOR LOGIC (Protection) ---
     @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public static void onPlayerDefend(LivingIncomingDamageEvent event) {
-        if (event.getEntity() instanceof ServerPlayer player) {
+    public static void onPlayerDefend(final LivingIncomingDamageEvent event) {
+        if (event.getEntity() instanceof final ServerPlayer player) {
             if (!isFullUfoArmor(player)) return;
 
-            // 1. Anti-Void
             if (event.getSource().is(DamageTypes.FELL_OUT_OF_WORLD) && event.getAmount() < Float.MAX_VALUE) {
                 if (consumeArmorEnergyDirect(player, 50000)) {
                     event.setCanceled(true);
@@ -191,7 +172,6 @@ public class ModEvents {
                 }
             }
 
-            // 2. Anti-Kill Command / Absolute Damage
             if (isExtremeDamage(event.getSource(), event.getAmount())) {
 
                 if (consumeArmorEnergyDirect(player, 100000)) {
@@ -202,7 +182,6 @@ public class ModEvents {
                 }
             }
 
-            // 3. Teleport on Low Health
             if (player.getHealth() - event.getAmount() <= 4.0f) {
                 if (consumeArmorEnergyDirect(player, 10000)) {
                     event.setCanceled(true);
@@ -215,17 +194,16 @@ public class ModEvents {
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public static void onLivingDeath(LivingDeathEvent event) {
-        // Sword Logic
-        if (event.getSource().getEntity() instanceof Player attacker) {
-            ItemStack stack = attacker.getMainHandItem();
+    public static void onLivingDeath(final LivingDeathEvent event) {
+        if (event.getSource().getEntity() instanceof final Player attacker) {
+            final ItemStack stack = attacker.getMainHandItem();
             if (stack.getItem() instanceof UfoEnergySwordItem || stack.getItem() instanceof UfoEnergyGreatswordItem) {
                 if (event.getEntity() instanceof Enemy) {
-                    int kills = stack.getOrDefault(ModDataComponents.KILL_COUNT.get(), 0);
+                    final int kills = stack.getOrDefault(ModDataComponents.KILL_COUNT.get(), 0);
                     stack.set(ModDataComponents.KILL_COUNT.get(), kills + 1);
                 } else {
-                    int kills = stack.getOrDefault(ModDataComponents.KILL_COUNT.get(), 0);
-                    int newKills = Math.max(0, kills - 1);
+                    final int kills = stack.getOrDefault(ModDataComponents.KILL_COUNT.get(), 0);
+                    final int newKills = Math.max(0, kills - 1);
                     stack.set(ModDataComponents.KILL_COUNT.get(), newKills);
                     if (kills > newKills) {
                         attacker.sendSystemMessage(Component.literal("The sword's power weakens after a non-hostile kill.").withStyle(ChatFormatting.RED));
@@ -234,8 +212,7 @@ public class ModEvents {
             }
         }
 
-        // Armor Logic
-        if (event.getEntity() instanceof ServerPlayer player) {
+        if (event.getEntity() instanceof final ServerPlayer player) {
             if (isFullUfoArmor(player)) {
                 if (isExtremeDamage(event.getSource(), Float.MAX_VALUE) || consumeArmorEnergyDirect(player, 200000)) {
                     event.setCanceled(true);
@@ -247,17 +224,16 @@ public class ModEvents {
         }
     }
 
-    // --- HELPER METHODS ---
 
-    private static boolean isFullUfoArmor(Player player) {
-        for (ItemStack stack : player.getInventory().armor) {
+    private static boolean isFullUfoArmor(final Player player) {
+        for (final ItemStack stack : armorItems(player)) {
             if (!(stack.getItem() instanceof UfoArmorItem)) return false;
         }
         return true;
     }
 
-    private static boolean isExtremeDamage(DamageSource source, float amount) {
-        String messageId = source.getMsgId();
+    private static boolean isExtremeDamage(final DamageSource source, final float amount) {
+        final String messageId = source.getMsgId();
         return source.is(DamageTypes.GENERIC_KILL)
                 || amount >= Float.MAX_VALUE
                 || (source.is(DamageTypes.FELL_OUT_OF_WORLD) && amount > 10000f)
@@ -265,11 +241,11 @@ public class ModEvents {
                 || messageId.contains("guardian");
     }
 
-    private static boolean consumeArmorEnergyDirect(Player player, int amountNeeded) {
+    private static boolean consumeArmorEnergyDirect(final Player player, final int amountNeeded) {
         int amountLeft = amountNeeded;
         int totalAvailable = 0;
 
-        for (ItemStack stack : player.getInventory().armor) {
+        for (final ItemStack stack : armorItems(player)) {
             if (stack.getItem() instanceof UfoArmorItem) {
                 totalAvailable += stack.getOrDefault(ModDataComponents.ENERGY.get(), 0);
             }
@@ -277,11 +253,11 @@ public class ModEvents {
 
         if (totalAvailable < amountNeeded) return false;
 
-        for (ItemStack stack : player.getInventory().armor) {
+        for (final ItemStack stack : armorItems(player)) {
             if (amountLeft <= 0) break;
             if (stack.getItem() instanceof UfoArmorItem) {
-                int current = stack.getOrDefault(ModDataComponents.ENERGY.get(), 0);
-                int toExtract = Math.min(current, amountLeft);
+                final int current = stack.getOrDefault(ModDataComponents.ENERGY.get(), 0);
+                final int toExtract = Math.min(current, amountLeft);
 
                 stack.set(ModDataComponents.ENERGY.get(), current - toExtract);
                 amountLeft -= toExtract;
@@ -290,23 +266,32 @@ public class ModEvents {
         return true;
     }
 
-    private static void consumeEnergyDirect(ItemStack stack, int amount) {
-        int current = stack.getOrDefault(ModDataComponents.ENERGY.get(), 0);
+    private static void consumeEnergyDirect(final ItemStack stack, final int amount) {
+        final int current = stack.getOrDefault(ModDataComponents.ENERGY.get(), 0);
         if (current >= amount) {
             stack.set(ModDataComponents.ENERGY.get(), current - amount);
         }
     }
 
-    private static void teleportToSafety(ServerPlayer player) {
-        BlockPos respawnPos = player.getRespawnPosition();
-        ServerLevel respawnLevel = player.server.getLevel(player.getRespawnDimension());
+    private static void teleportToSafety(final ServerPlayer player) {
+        final var respawnData = player.getRespawnConfig().respawnData();
+        final BlockPos respawnPos = respawnData.pos();
+        final ServerLevel respawnLevel = player.level().getServer().getLevel(respawnData.dimension());
 
         if (respawnPos != null && respawnLevel != null) {
-            player.teleportTo(respawnLevel, respawnPos.getX(), respawnPos.getY(), respawnPos.getZ(), player.getYRot(), player.getXRot());
+            player.teleportTo(respawnLevel, respawnPos.getX(), respawnPos.getY(), respawnPos.getZ(),
+                    java.util.Set.of(), respawnData.yaw(), respawnData.pitch(), false);
         } else {
-            BlockPos worldSpawn = player.level().getSharedSpawnPos();
-            player.teleportTo(worldSpawn.getX(), 300, worldSpawn.getZ());
+            player.teleportTo(player.getX(), 300, player.getZ());
             player.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING, 1200));
         }
+    }
+
+    private static java.util.List<ItemStack> armorItems(final Player player) {
+        return java.util.List.of(
+                player.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.HEAD),
+                player.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.CHEST),
+                player.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.LEGS),
+                player.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.FEET));
     }
 }

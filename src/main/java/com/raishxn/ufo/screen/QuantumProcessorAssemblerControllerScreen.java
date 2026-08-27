@@ -6,7 +6,7 @@ import net.minecraft.world.entity.player.Inventory;
 
 public class QuantumProcessorAssemblerControllerScreen extends AbstractUniversalMultiblockControllerScreen<QuantumProcessorAssemblerControllerMenu> {
 
-    public QuantumProcessorAssemblerControllerScreen(QuantumProcessorAssemblerControllerMenu menu, Inventory playerInventory, Component title, ScreenStyle style) {
+    public QuantumProcessorAssemblerControllerScreen(final QuantumProcessorAssemblerControllerMenu menu, final Inventory playerInventory, final Component title, final ScreenStyle style) {
         super(menu, playerInventory, title, style);
     }
 }

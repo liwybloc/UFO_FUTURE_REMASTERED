@@ -19,26 +19,25 @@ public class QuantumPatternProviderLogic extends PatternProviderLogic {
 
     private final QuantumPatternHatchBE hatch;
 
-    public QuantumPatternProviderLogic(QuantumPatternHatchBE hatch, int patternInventorySize) {
+    public QuantumPatternProviderLogic(final QuantumPatternHatchBE hatch, final int patternInventorySize) {
         super(hatch.getMainNode(), hatch, patternInventorySize);
         this.hatch = hatch;
         this.getConfigManager().putSetting(Settings.PATTERN_ACCESS_TERMINAL, YesNo.NO);
     }
 
     @Override
-    public boolean pushPattern(IPatternDetails patternDetails, appeng.api.stacks.KeyCounter[] inputHolder) {
-        @Nullable Level level = hatch.getLevel();
-        @Nullable BlockPos controllerPos = hatch.getControllerPos();
+    public boolean pushPattern(final IPatternDetails patternDetails, final appeng.api.stacks.KeyCounter[] inputHolder) {
+        @Nullable final Level level = hatch.getLevel();
+        @Nullable final BlockPos controllerPos = hatch.getControllerPos();
 
         if (level != null && controllerPos != null) {
-            var controllerBe = level.getBlockEntity(controllerPos);
-            if (controllerBe instanceof ICraftingMachine machine && machine.acceptsPlans()) {
-                Direction direction = hatch.getPushDirectionForController();
+            final var controllerBe = level.getBlockEntity(controllerPos);
+            if (controllerBe instanceof final ICraftingMachine machine && machine.acceptsPlans()) {
+                final Direction direction = hatch.getPushDirectionForController();
                 return machine.pushPattern(patternDetails, inputHolder, direction);
             }
 
             // If the hatch is linked to a multiblock controller, do not fall back to the
-            // default adjacent-inventory behavior. The controller is the only valid target.
             return false;
         }
 

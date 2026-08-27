@@ -10,7 +10,7 @@ import net.neoforged.neoforge.common.TagConventionLogWarning;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.tags.ItemTagsProvider;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
@@ -21,13 +21,13 @@ import org.jetbrains.annotations.Nullable;
 import java.util.concurrent.CompletableFuture;
 
 public class ModItemTagProvider extends ItemTagsProvider {
-    public ModItemTagProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider,
-                              CompletableFuture<TagLookup<Block>> blockTags, @Nullable ExistingFileHelper existingFileHelper) {
+    public ModItemTagProvider(final PackOutput output, final CompletableFuture<HolderLookup.Provider> lookupProvider,
+                              final CompletableFuture<TagLookup<Block>> blockTags, @Nullable final ExistingFileHelper existingFileHelper) {
         super(output, lookupProvider, blockTags, UfoMod.MOD_ID, existingFileHelper);
     }
 
     @Override
-    protected void addTags(HolderLookup.Provider provider) {
+    protected void addTags(final HolderLookup.Provider provider) {
         tag(ModTags.Items.TRANSFORMABLE_ITEMS)
                 .add(ModItems.BISMUTH.get())
                 .add(Items.COAL)
@@ -125,7 +125,7 @@ public class ModItemTagProvider extends ItemTagsProvider {
         ModItems.DIMENSIONAL_CATALYST.get()
         );
 
-        tag(ItemTags.create(ResourceLocation.parse("ae2:p2p_attunements/fe_p2p_tunnel")))
+        tag(ItemTags.create(Identifier.parse("ae2:p2p_attunements/fe_p2p_tunnel")))
                 .add(
                         com.raishxn.ufo.block.ModBlocks.UFO_ENERGY_CELL.get().asItem(),
                         com.raishxn.ufo.block.ModBlocks.QUANTUM_ENERGY_CELL.get().asItem()

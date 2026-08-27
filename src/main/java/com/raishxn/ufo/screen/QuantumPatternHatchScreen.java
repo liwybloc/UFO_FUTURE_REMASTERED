@@ -15,9 +15,8 @@ public class QuantumPatternHatchScreen extends AEBaseScreen<QuantumPatternHatchM
     private final SettingToggleButton<YesNo> blockingModeButton;
     private final SettingToggleButton<LockCraftingMode> lockCraftingModeButton;
     private final SettingToggleButton<YesNo> showInPatternAccessTerminalButton;
-    private final QuantumPatternHatchLockReason lockReason;
 
-    public QuantumPatternHatchScreen(QuantumPatternHatchMenu menu, Inventory playerInventory, Component title, ScreenStyle style) {
+    public QuantumPatternHatchScreen(final QuantumPatternHatchMenu menu, final Inventory playerInventory, final Component title, final ScreenStyle style) {
         super(menu, playerInventory, title, style);
 
         this.blockingModeButton = new ServerSettingToggleButton<>(Settings.BLOCKING_MODE, YesNo.NO);
@@ -31,9 +30,6 @@ public class QuantumPatternHatchScreen extends AEBaseScreen<QuantumPatternHatchM
         this.showInPatternAccessTerminalButton = new ServerSettingToggleButton<>(Settings.PATTERN_ACCESS_TERMINAL, YesNo.NO);
         this.addToLeftToolbar(this.showInPatternAccessTerminalButton);
 
-        this.lockReason = new QuantumPatternHatchLockReason(this);
-        widgets.add("lockReason", this.lockReason);
-
         if (menu.getToolbox().isPresent()) {
             this.widgets.add("toolbox", new ToolboxPanel(style, menu.getToolbox().getName()));
         }
@@ -43,7 +39,6 @@ public class QuantumPatternHatchScreen extends AEBaseScreen<QuantumPatternHatchM
     protected void updateBeforeRender() {
         super.updateBeforeRender();
 
-        this.lockReason.setVisible(menu.getLockCraftingMode() != LockCraftingMode.NONE);
         this.blockingModeButton.set(this.menu.getBlockingMode());
         this.lockCraftingModeButton.set(this.menu.getLockCraftingMode());
         this.showInPatternAccessTerminalButton.set(this.menu.getShowInAccessTerminal());

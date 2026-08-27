@@ -31,7 +31,7 @@ public class EntropicAssemblerMatrixBE extends AbstractEntropicMachineBE impleme
     private static final int MAX_JOBS = 256;
     private final List<JobState> jobs = new ArrayList<>();
 
-    public EntropicAssemblerMatrixBE(BlockPos pos, BlockState state) {
+    public EntropicAssemblerMatrixBE(final BlockPos pos, final BlockState state) {
         super(ModBlockEntities.ENTROPIC_ASSEMBLER_MATRIX_BE.get(), pos, state);
     }
 
@@ -48,21 +48,21 @@ public class EntropicAssemblerMatrixBE extends AbstractEntropicMachineBE impleme
             return;
         }
 
-        var grid = getActionableNode().getGrid();
+        final var grid = getActionableNode().getGrid();
         if (grid == null) {
             return;
         }
 
-        MEStorage inventory = grid.getStorageService().getInventory();
-        var source = appeng.api.networking.security.IActionSource.ofMachine(this);
+        final MEStorage inventory = grid.getStorageService().getInventory();
+        final var source = appeng.api.networking.security.IActionSource.ofMachine(this);
         this.running = !this.jobs.isEmpty();
         this.progress = this.jobs.isEmpty() ? 0 : this.jobs.get(0).progress;
         this.maxProgress = this.jobs.isEmpty() ? 0 : this.jobs.get(0).maxProgress;
         this.displayedRecipes.clear();
 
-        Iterator<JobState> iterator = this.jobs.iterator();
+        final Iterator<JobState> iterator = this.jobs.iterator();
         while (iterator.hasNext()) {
-            JobState job = iterator.next();
+            final JobState job = iterator.next();
             job.progress += getProgressPerTick();
 
             this.displayedRecipes.add(new UniversalDisplayedRecipe(
@@ -77,7 +77,7 @@ public class EntropicAssemblerMatrixBE extends AbstractEntropicMachineBE impleme
                 continue;
             }
 
-            for (GenericStack output : job.outputs) {
+            for (final GenericStack output : job.outputs) {
                 inventory.insert(output.what(), output.amount(), Actionable.MODULATE, source);
             }
             iterator.remove();
@@ -114,13 +114,13 @@ public class EntropicAssemblerMatrixBE extends AbstractEntropicMachineBE impleme
 
     @Nullable
     @Override
-    public AbstractContainerMenu createMenu(int id, Inventory playerInventory, Player player) {
+    public AbstractContainerMenu createMenu(final int id, final Inventory playerInventory, final Player player) {
         return new EntropicAssemblerMatrixMenu(id, playerInventory, this);
     }
 
     @Override
-    public boolean pushPattern(IPatternDetails patternDetails, KeyCounter[] inputs, net.minecraft.core.Direction ejectionDirection) {
-        EntropicAssemblerMatrixBE primary = getPrimaryAssembler();
+    public boolean pushPattern(final IPatternDetails patternDetails, final KeyCounter[] inputs, final net.minecraft.core.Direction ejectionDirection) {
+        final EntropicAssemblerMatrixBE primary = getPrimaryAssembler();
         if (primary != null && primary != this) {
             return primary.pushPattern(patternDetails, inputs, ejectionDirection);
         }
@@ -129,14 +129,14 @@ public class EntropicAssemblerMatrixBE extends AbstractEntropicMachineBE impleme
             return false;
         }
 
-        List<GenericStack> outputs = patternDetails.getOutputs();
+        final List<GenericStack> outputs = patternDetails.getOutputs();
         if (!(patternDetails instanceof IMolecularAssemblerSupportedPattern) || outputs.isEmpty()) {
             return false;
         }
 
-        GenericStack primaryOutput = outputs.getFirst();
-        var itemIcon = primaryOutput.what() instanceof AEItemKey itemKey ? itemKey.toStack() : net.minecraft.world.item.ItemStack.EMPTY;
-        var fluidIcon = primaryOutput.what() instanceof AEFluidKey fluidKey
+        final GenericStack primaryOutput = outputs.getFirst();
+        final var itemIcon = primaryOutput.what() instanceof final AEItemKey itemKey ? itemKey.toStack() : net.minecraft.world.item.ItemStack.EMPTY;
+        final var fluidIcon = primaryOutput.what() instanceof final AEFluidKey fluidKey
                 ? new FluidStack(fluidKey.getFluid(), (int) Math.min(Integer.MAX_VALUE, primaryOutput.amount()))
                 : FluidStack.EMPTY;
 
@@ -148,7 +148,7 @@ public class EntropicAssemblerMatrixBE extends AbstractEntropicMachineBE impleme
                 outputs.stream().mapToLong(GenericStack::amount).sum(),
                 getJobDuration()));
 
-        for (KeyCounter input : inputs) {
+        for (final KeyCounter input : inputs) {
             input.clear();
         }
 
@@ -158,7 +158,7 @@ public class EntropicAssemblerMatrixBE extends AbstractEntropicMachineBE impleme
 
     @Override
     public boolean acceptsPlans() {
-        EntropicAssemblerMatrixBE primary = getPrimaryAssembler();
+        final EntropicAssemblerMatrixBE primary = getPrimaryAssembler();
         if (primary != null && primary != this) {
             return primary.acceptsPlans();
         }
@@ -183,7 +183,7 @@ public class EntropicAssemblerMatrixBE extends AbstractEntropicMachineBE impleme
     }
 
     private int getProgressPerTick() {
-        int base = switch (this.machineTier) {
+        final int base = switch (this.machineTier) {
             case 3 -> 400;
             case 2 -> 100;
             default -> 25;
@@ -205,8 +205,8 @@ public class EntropicAssemblerMatrixBE extends AbstractEntropicMachineBE impleme
             return this.isPrimaryMachine() ? this : null;
         }
 
-        var be = this.level.getBlockEntity(this.anchorPos);
-        return be instanceof EntropicAssemblerMatrixBE machine ? machine : (this.isPrimaryMachine() ? this : null);
+        final var be = this.level.getBlockEntity(this.anchorPos);
+        return be instanceof final EntropicAssemblerMatrixBE machine ? machine : (this.isPrimaryMachine() ? this : null);
     }
 
     private static final class JobState {
@@ -218,8 +218,8 @@ public class EntropicAssemblerMatrixBE extends AbstractEntropicMachineBE impleme
         private final int maxProgress;
         private int progress;
 
-        private JobState(List<GenericStack> outputs, Component label, net.minecraft.world.item.ItemStack itemIcon,
-                         FluidStack fluidIcon, long totalOutputAmount, int maxProgress) {
+        private JobState(final List<GenericStack> outputs, final Component label, final net.minecraft.world.item.ItemStack itemIcon,
+                         final FluidStack fluidIcon, final long totalOutputAmount, final int maxProgress) {
             this.outputs = outputs;
             this.label = label;
             this.itemIcon = itemIcon;

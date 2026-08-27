@@ -12,7 +12,7 @@ public class MixinAppEngBase {
     private static boolean ufo$postInitComplete = false;
 
     @Inject(method = "postRegistrationInitialization", at = @At("HEAD"), cancellable = true)
-    private void onPostRegistrationInitialization(CallbackInfo ci) {
+    private void onPostRegistrationInitialization(final CallbackInfo ci) {
         if (ufo$postInitComplete) {
             ci.cancel();
         }

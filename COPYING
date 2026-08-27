@@ -1,0 +1,15 @@
+UFO FUTURE - COMMUNITY EDITING
+
+Original work
+UFO Future was originally created by Raishxn. The source code, gameplay concepts, resources, documentation, and project history in this repository are from the original project.
+
+Maintained version
+This repository contains a modified, community-maintained version of UFO Future. I am porting the project to Minecraft 26.1.2 and making compatibility, maintenance, and performance changes. This is not a release from raishxns.
+Copyright from raishxns may not be modified, changed in any way, or misrepresented.
+
+Licenses
+Unless a file states otherwise:
+
+- Source code is licensed under the GNU Lesser General Public License version 3.0 or later (LGPL-3.0-or-later).
+- Art, textures, models, sounds, guide images, and other non-code creative assets are licensed under Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported (CC BY-NC-SA 3.0).
+- NeoForge MDK template material is covered by the notice in TEMPLATE_LICENSE.txt.

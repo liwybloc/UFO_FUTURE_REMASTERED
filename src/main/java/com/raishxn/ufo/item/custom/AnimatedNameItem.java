@@ -10,15 +10,15 @@ public class AnimatedNameItem extends Item {
 
     private final ChatFormatting[] colors;
 
-    public AnimatedNameItem(Properties props, ChatFormatting... colors) {
+    public AnimatedNameItem(final Properties props, final ChatFormatting... colors) {
         super(props);
         this.colors = colors;
     }
 
     @Override
-    public Component getName(ItemStack stack) {
+    public Component getName(final ItemStack stack) {
         return ColorHelper.getSolidColoredText(
-                Component.translatable(stack.getDescriptionId()).getString(),
+                Component.translatable(stack.getItem().getDescriptionId()).getString(),
                 this.colors
         );
     }

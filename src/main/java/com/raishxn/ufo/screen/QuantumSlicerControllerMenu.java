@@ -14,11 +14,11 @@ import org.jetbrains.annotations.NotNull;
 
 public class QuantumSlicerControllerMenu extends AbstractUniversalMultiblockControllerMenu<QuantumSlicerControllerBE> {
 
-    public QuantumSlicerControllerMenu(int id, Inventory inv, FriendlyByteBuf extraData) {
+    public QuantumSlicerControllerMenu(final int id, final Inventory inv, final FriendlyByteBuf extraData) {
         this(id, inv, inv.player.level().getBlockEntity(extraData.readBlockPos()));
     }
 
-    public QuantumSlicerControllerMenu(int id, Inventory inv, BlockEntity entity) {
+    public QuantumSlicerControllerMenu(final int id, final Inventory inv, final BlockEntity entity) {
         super(
                 ModMenus.QUANTUM_SLICER_CONTROLLER_MENU.get(),
                 id,
@@ -28,12 +28,12 @@ public class QuantumSlicerControllerMenu extends AbstractUniversalMultiblockCont
     }
 
     @Override
-    public @NotNull ItemStack quickMoveStack(@NotNull Player player, int index) {
+    public @NotNull ItemStack quickMoveStack(@NotNull final Player player, final int index) {
         return ItemStack.EMPTY;
     }
 
     @Override
-    public boolean stillValid(@NotNull Player player) {
+    public boolean stillValid(@NotNull final Player player) {
         return stillValid(this.levelAccess, player, getValidBlock());
     }
 

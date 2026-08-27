@@ -54,8 +54,8 @@ public abstract class AbstractUniversalMultiblockControllerMenu<T extends BlockE
     @GuiSync(38)
     protected int maxParallels = 1;
 
-    protected AbstractUniversalMultiblockControllerMenu(net.minecraft.world.inventory.MenuType<?> menuType, int id, Inventory playerInventory,
-                                                        T blockEntity, ContainerLevelAccess levelAccess) {
+    protected AbstractUniversalMultiblockControllerMenu(final net.minecraft.world.inventory.MenuType<?> menuType, final int id, final Inventory playerInventory,
+                                                        final T blockEntity, final ContainerLevelAccess levelAccess) {
         super(menuType, id, playerInventory, blockEntity);
         this.levelAccess = levelAccess;
     }
@@ -76,8 +76,8 @@ public abstract class AbstractUniversalMultiblockControllerMenu<T extends BlockE
             this.safeMode = this.getHost().isGuiSafeMode() ? 1 : 0;
             this.overclocked = this.getHost().isGuiOverclocked() ? 1 : 0;
             this.machineTier = this.getHost().getGuiMachineTier();
-            long storedEnergy = this.getHost().getGuiStoredEnergy();
-            long maxEnergy = this.getHost().getGuiMaxEnergy();
+            final long storedEnergy = this.getHost().getGuiStoredEnergy();
+            final long maxEnergy = this.getHost().getGuiMaxEnergy();
             this.storedEnergyLow = splitLong(storedEnergy, 0);
             this.storedEnergyMidLow = splitLong(storedEnergy, 16);
             this.storedEnergyMidHigh = splitLong(storedEnergy, 32);
@@ -148,11 +148,11 @@ public abstract class AbstractUniversalMultiblockControllerMenu<T extends BlockE
         return this.getHost().getDisplayedRecipes();
     }
 
-    private static int splitLong(long value, int shift) {
+    private static int splitLong(final long value, final int shift) {
         return (int) ((value >> shift) & 0xFFFFL);
     }
 
-    private static long assembleLong(int low, int midLow, int midHigh, int high) {
+    private static long assembleLong(final int low, final int midLow, final int midHigh, final int high) {
         return ((long) low & 0xFFFFL)
                 | (((long) midLow & 0xFFFFL) << 16)
                 | (((long) midHigh & 0xFFFFL) << 32)

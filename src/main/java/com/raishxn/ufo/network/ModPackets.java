@@ -86,8 +86,8 @@ public class ModPackets {
 
     private static void handleCycleToolKey(final CycleToolKeyPacket packet, final IPayloadContext context) {
         context.enqueueWork(() -> {
-            ServerPlayer player = (ServerPlayer) context.player();
-            if (player.getMainHandItem().getItem() instanceof IEnergyTool tool) {
+            final ServerPlayer player = (ServerPlayer) context.player();
+            if (player.getMainHandItem().getItem() instanceof final IEnergyTool tool) {
                 tool.transformTool(player.level(), player, InteractionHand.MAIN_HAND, packet.forward());
             }
         });
@@ -95,15 +95,15 @@ public class ModPackets {
 
     private static void handleCycleModeKey(final CycleModeKeyPacket packet, final IPayloadContext context) {
         context.enqueueWork(() -> {
-            ServerPlayer player = (ServerPlayer) context.player();
-            ItemStack stack = player.getMainHandItem();
-            if (stack.getItem() instanceof IHasCycleableModes tool) {
+            final ServerPlayer player = (ServerPlayer) context.player();
+            final ItemStack stack = player.getMainHandItem();
+            if (stack.getItem() instanceof final IHasCycleableModes tool) {
                 tool.cycleMode(stack, player);
             }
         });
     }
 
-    public static void sendToServer(CustomPacketPayload packet) {
-        PacketDistributor.sendToServer(packet);
+    public static void sendToServer(final CustomPacketPayload packet) {
+        net.minecraft.client.Minecraft.getInstance().getConnection().send(packet);
     }
 }

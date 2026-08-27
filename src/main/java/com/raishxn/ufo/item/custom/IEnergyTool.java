@@ -13,7 +13,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.energy.IEnergyStorage;
+import net.neoforged.neoforge.transfer.energy.EnergyHandler;
 
 import java.util.List;
 import java.util.function.Supplier;
@@ -28,20 +28,20 @@ public interface IEnergyTool {
 
     int getEnergyPerUse();
 
-    default boolean consumeEnergy(ItemStack pStack) {
-        IEnergyStorage energyStorage = pStack.getCapability(Capabilities.EnergyStorage.ITEM);
-        if (energyStorage != null && energyStorage.getEnergyStored() >= getEnergyPerUse()) {
-            energyStorage.extractEnergy(getEnergyPerUse(), false);
+    default boolean consumeEnergy(final ItemStack pStack) {
+        final EnergyHandler energyStorage = com.raishxn.ufo.util.EnergyToolHelper.getEnergyHandler(pStack);
+        if (energyStorage != null && energyStorage.getAmountAsInt() >= getEnergyPerUse()) {
+            com.raishxn.ufo.util.EnergyToolHelper.extractEnergy(energyStorage, getEnergyPerUse(), false);
             return true;
         }
         return false;
     }
 
-    default void appendHoverText(ItemStack pStack, Item.TooltipContext pContext, List<Component> pTooltipComponents, TooltipFlag pTooltipFlag) {
-        if (Screen.hasShiftDown()) {
-            IEnergyStorage energyStorage = pStack.getCapability(Capabilities.EnergyStorage.ITEM);
+    default void appendHoverText(final ItemStack pStack, final Item.TooltipContext pContext, final List<Component> pTooltipComponents, final TooltipFlag pTooltipFlag) {
+        if (net.minecraft.client.Minecraft.getInstance().hasShiftDown()) {
+            final EnergyHandler energyStorage = com.raishxn.ufo.util.EnergyToolHelper.getEnergyHandler(pStack);
             if (energyStorage != null) {
-                String energyText = String.format("%,d / %,d RF", energyStorage.getEnergyStored(), energyStorage.getMaxEnergyStored());
+                final String energyText = String.format("%,d / %,d RF", energyStorage.getAmountAsInt(), energyStorage.getCapacityAsInt());
                 pTooltipComponents.add(Component.literal(energyText).withStyle(ChatFormatting.GRAY));
             }
         } else {
@@ -49,29 +49,29 @@ public interface IEnergyTool {
         }
     }
 
-    default void transformTool(Level level, Player player, InteractionHand hand, boolean forward) {
+    default void transformTool(final Level level, final Player player, final InteractionHand hand, final boolean forward) {
         if (!level.isClientSide()) {
-            ItemStack currentStack = player.getItemInHand(hand);
-            int currentIndex = currentStack.getOrDefault(ModDataComponents.TOOL_MODE_INDEX.get(), 0);
+            final ItemStack currentStack = player.getItemInHand(hand);
+            final int currentIndex = currentStack.getOrDefault(ModDataComponents.TOOL_MODE_INDEX.get(), 0);
 
-            int nextIndex;
+            final int nextIndex;
             if (forward) {
                 nextIndex = (currentIndex + 1) % TOOL_CYCLE.size();
             } else {
                 nextIndex = (currentIndex - 1 + TOOL_CYCLE.size()) % TOOL_CYCLE.size();
             }
 
-            Item nextItem = TOOL_CYCLE.get(nextIndex).get();
-            ItemStack nextStack = currentStack.transmuteCopy(nextItem, 1);
+            final Item nextItem = TOOL_CYCLE.get(nextIndex).get();
+            final ItemStack nextStack = currentStack.transmuteCopy(nextItem, 1);
             nextStack.set(ModDataComponents.TOOL_MODE_INDEX.get(), nextIndex);
             player.setItemInHand(hand, nextStack);
         }
     }
 
-    default Component getName(ItemStack stack) {
-        String text = Component.translatable(stack.getDescriptionId()).getString();
+    default Component getName(final ItemStack stack) {
+        final String text = Component.translatable(stack.getItem().getDescriptionId()).getString();
 
-        ChatFormatting[] rainbowColors = new ChatFormatting[]{
+        final ChatFormatting[] rainbowColors = new ChatFormatting[]{
                 ChatFormatting.RED, ChatFormatting.GOLD, ChatFormatting.YELLOW,
                 ChatFormatting.GREEN, ChatFormatting.AQUA, ChatFormatting.BLUE,
                 ChatFormatting.LIGHT_PURPLE

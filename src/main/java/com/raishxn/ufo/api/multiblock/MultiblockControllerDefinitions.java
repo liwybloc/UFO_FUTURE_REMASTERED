@@ -11,7 +11,7 @@ import com.raishxn.ufo.block.entity.pattern.QpaPatternFactory;
 import com.raishxn.ufo.block.entity.pattern.QuantumCryoforgePatternFactory;
 import com.raishxn.ufo.block.entity.pattern.QuantumSlicerPatternFactory;
 import com.raishxn.ufo.block.entity.pattern.StellarNexusPatternFactory;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
@@ -24,40 +24,40 @@ import java.util.Optional;
 
 public final class MultiblockControllerDefinitions {
 
-    public record PreviewEntry(ResourceLocation id, ItemStack iconStack, MultiblockControllerDefinition definition) {
+    public record PreviewEntry(Identifier id, ItemStack iconStack, MultiblockControllerDefinition definition) {
     }
 
     private static final List<PreviewEntry> PREVIEW_ENTRIES = List.of(
             new PreviewEntry(
-                    ResourceLocation.fromNamespaceAndPath("ufo", "stellar_nexus"),
+                    Identifier.fromNamespaceAndPath("ufo", "stellar_nexus"),
                     MultiblockBlocks.STELLAR_NEXUS_CONTROLLER.get().asItem().getDefaultInstance(),
                     new MultiblockControllerDefinition(
                             Component.translatable("block.ufo.stellar_nexus_controller"),
                             StellarNexusPatternFactory.getPattern(),
                             StellarNexusPatternFactory.getDefaultCreativeStates())),
             new PreviewEntry(
-                    ResourceLocation.fromNamespaceAndPath("ufo", "quantum_matter_fabricator"),
+                    Identifier.fromNamespaceAndPath("ufo", "quantum_matter_fabricator"),
                     MultiblockBlocks.QUANTUM_MATTER_FABRICATOR_CONTROLLER.get().asItem().getDefaultInstance(),
                     new MultiblockControllerDefinition(
                             Component.translatable("block.ufo.quantum_matter_fabricator_controller"),
                             QmfPatternFactory.getPattern(),
                             QmfPatternFactory.getDefaultCreativeStates())),
             new PreviewEntry(
-                    ResourceLocation.fromNamespaceAndPath("ufo", "quantum_slicer"),
+                    Identifier.fromNamespaceAndPath("ufo", "quantum_slicer"),
                     MultiblockBlocks.QUANTUM_SLICER_CONTROLLER.get().asItem().getDefaultInstance(),
                     new MultiblockControllerDefinition(
                             Component.translatable("block.ufo.quantum_slicer_controller"),
                             QuantumSlicerPatternFactory.getPattern(),
                             QuantumSlicerPatternFactory.getDefaultCreativeStates())),
             new PreviewEntry(
-                    ResourceLocation.fromNamespaceAndPath("ufo", "quantum_processor_assembler"),
+                    Identifier.fromNamespaceAndPath("ufo", "quantum_processor_assembler"),
                     MultiblockBlocks.QUANTUM_PROCESSOR_ASSEMBLER_CONTROLLER.get().asItem().getDefaultInstance(),
                     new MultiblockControllerDefinition(
                             Component.translatable("block.ufo.quantum_processor_assembler_controller"),
                             QpaPatternFactory.getPattern(),
                             QpaPatternFactory.getDefaultCreativeStates())),
             new PreviewEntry(
-                    ResourceLocation.fromNamespaceAndPath("ufo", "quantum_cryoforge"),
+                    Identifier.fromNamespaceAndPath("ufo", "quantum_cryoforge"),
                     MultiblockBlocks.QUANTUM_CRYOFORGE_CONTROLLER.get().asItem().getDefaultInstance(),
                     new MultiblockControllerDefinition(
                             Component.translatable("block.ufo.quantum_cryoforge_controller"),
@@ -72,7 +72,7 @@ public final class MultiblockControllerDefinitions {
         return PREVIEW_ENTRIES;
     }
 
-    public static Optional<MultiblockControllerDefinition> getDefinition(BlockEntity be) {
+    public static Optional<MultiblockControllerDefinition> getDefinition(final BlockEntity be) {
         if (be instanceof StellarNexusControllerBE) {
             return Optional.of(getPreviewEntries().get(0).definition());
         }
@@ -91,8 +91,8 @@ public final class MultiblockControllerDefinitions {
         return Optional.empty();
     }
 
-    public static Direction getPatternFacing(BlockEntity be, BlockState state) {
-        Direction facing = state.hasProperty(DirectionalBlock.FACING)
+    public static Direction getPatternFacing(final BlockEntity be, final BlockState state) {
+        final Direction facing = state.hasProperty(DirectionalBlock.FACING)
                 ? state.getValue(DirectionalBlock.FACING)
                 : Direction.NORTH;
         if (be instanceof QuantumCryoforgeControllerBE) {
@@ -101,7 +101,7 @@ public final class MultiblockControllerDefinitions {
         return facing;
     }
 
-    public static boolean isSupportedController(BlockState state) {
+    public static boolean isSupportedController(final BlockState state) {
         return state.is(MultiblockBlocks.STELLAR_NEXUS_CONTROLLER.get())
                 || state.is(MultiblockBlocks.QUANTUM_MATTER_FABRICATOR_CONTROLLER.get())
                 || state.is(MultiblockBlocks.QUANTUM_SLICER_CONTROLLER.get())

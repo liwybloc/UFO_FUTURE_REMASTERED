@@ -9,7 +9,7 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 public class ModLootTableProvider {
-    public static LootTableProvider create(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider) {
+    public static LootTableProvider create(final PackOutput output, final CompletableFuture<HolderLookup.Provider> lookupProvider) {
         return new LootTableProvider(
                 output,
                 Set.of(),

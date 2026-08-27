@@ -18,7 +18,7 @@ import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.inventory.ContainerData;
@@ -29,6 +29,8 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -58,31 +60,31 @@ public abstract class AbstractSimpleMultiblockControllerBE extends BlockEntity i
 
     protected final ContainerData data = new ContainerData() {
         @Override
-        public int get(int index) {
+        public int get(final int index) {
             return switch (index) {
-                case 0 -> AbstractSimpleMultiblockControllerBE.this.assembled ? 1 : 0;
-                case 1 -> AbstractSimpleMultiblockControllerBE.this.running ? 1 : 0;
-                case 2 -> AbstractSimpleMultiblockControllerBE.this.progress;
-                case 3 -> AbstractSimpleMultiblockControllerBE.this.maxProgress;
-                case 4 -> AbstractSimpleMultiblockControllerBE.this.temperature;
-                case 5 -> AbstractSimpleMultiblockControllerBE.this.maxTemperature;
-                case 6 -> AbstractSimpleMultiblockControllerBE.this.safeMode ? 1 : 0;
-                case 7 -> AbstractSimpleMultiblockControllerBE.this.overclocked ? 1 : 0;
+                case 0 -> assembled ? 1 : 0;
+                case 1 -> running ? 1 : 0;
+                case 2 -> progress;
+                case 3 -> maxProgress;
+                case 4 -> temperature;
+                case 5 -> maxTemperature;
+                case 6 -> safeMode ? 1 : 0;
+                case 7 -> overclocked ? 1 : 0;
                 default -> 0;
             };
         }
 
         @Override
-        public void set(int index, int value) {
+        public void set(final int index, final int value) {
             switch (index) {
-                case 0 -> AbstractSimpleMultiblockControllerBE.this.assembled = value == 1;
-                case 1 -> AbstractSimpleMultiblockControllerBE.this.running = value == 1;
-                case 2 -> AbstractSimpleMultiblockControllerBE.this.progress = value;
-                case 3 -> AbstractSimpleMultiblockControllerBE.this.maxProgress = value;
-                case 4 -> AbstractSimpleMultiblockControllerBE.this.temperature = value;
-                case 5 -> AbstractSimpleMultiblockControllerBE.this.maxTemperature = value;
-                case 6 -> AbstractSimpleMultiblockControllerBE.this.safeMode = value == 1;
-                case 7 -> AbstractSimpleMultiblockControllerBE.this.overclocked = value == 1;
+                case 0 -> assembled = value == 1;
+                case 1 -> running = value == 1;
+                case 2 -> progress = value;
+                case 3 -> maxProgress = value;
+                case 4 -> temperature = value;
+                case 5 -> maxTemperature = value;
+                case 6 -> safeMode = value == 1;
+                case 7 -> overclocked = value == 1;
                 default -> {
                 }
             }
@@ -94,7 +96,7 @@ public abstract class AbstractSimpleMultiblockControllerBE extends BlockEntity i
         }
     };
 
-    protected AbstractSimpleMultiblockControllerBE(BlockEntityType<?> type, BlockPos pos, BlockState state) {
+    protected AbstractSimpleMultiblockControllerBE(final BlockEntityType<?> type, final BlockPos pos, final BlockState state) {
         super(type, pos, state);
         this.upgrades = UpgradeInventories.forMachine(state.getBlock().asItem(), 4, this::saveChanges);
     }
@@ -102,10 +104,6 @@ public abstract class AbstractSimpleMultiblockControllerBE extends BlockEntity i
     protected abstract MultiblockPattern getControllerPattern();
 
     protected abstract String getControllerTranslationKey();
-
-    public ContainerData getContainerData() {
-        return this.data;
-    }
 
     public void serverTick() {
         if (this.level == null || this.level.isClientSide()) {
@@ -144,17 +142,17 @@ public abstract class AbstractSimpleMultiblockControllerBE extends BlockEntity i
     }
 
     @Override
-    public void scanStructure(Level level) {
-        BlockState state = level.getBlockState(this.worldPosition);
-        Direction facing = MultiblockControllerDefinitions.getPatternFacing(this, state);
+    public void scanStructure(final Level level) {
+        final BlockState state = level.getBlockState(this.worldPosition);
+        final Direction facing = MultiblockControllerDefinitions.getPatternFacing(this, state);
 
-        MultiblockPattern.MatchResult result = getControllerPattern().match(level, this.worldPosition, facing);
-        boolean wasAssembled = this.assembled;
+        final MultiblockPattern.MatchResult result = getControllerPattern().match(level, this.worldPosition, facing);
+        final boolean wasAssembled = this.assembled;
         this.assembled = result.isValid();
 
-        for (BlockPos existingPart : new ArrayList<>(this.parts)) {
+        for (final BlockPos existingPart : new ArrayList<>(this.parts)) {
             if (!result.partPositions().contains(existingPart)
-                    && level.getBlockEntity(existingPart) instanceof IMultiblockPart part) {
+                    && level.getBlockEntity(existingPart) instanceof final IMultiblockPart part) {
                 part.unlinkFromController();
             }
         }
@@ -162,10 +160,10 @@ public abstract class AbstractSimpleMultiblockControllerBE extends BlockEntity i
         this.parts.clear();
         if (this.assembled) {
             this.machineTier = resolveMachineTier(result);
-            for (BlockPos partPos : result.partPositions()) {
+            for (final BlockPos partPos : result.partPositions()) {
                 if (!partPos.equals(this.worldPosition)) {
                     this.parts.add(partPos);
-                    if (level.getBlockEntity(partPos) instanceof IMultiblockPart part) {
+                    if (level.getBlockEntity(partPos) instanceof final IMultiblockPart part) {
                         part.linkToController(this.worldPosition);
                     }
                 }
@@ -182,13 +180,13 @@ public abstract class AbstractSimpleMultiblockControllerBE extends BlockEntity i
         this.setChanged();
     }
 
-    private void updateControllerBlockState(BlockState currentState, boolean wasAssembled) {
+    private void updateControllerBlockState(final BlockState currentState, final boolean wasAssembled) {
         if (this.level == null || wasAssembled == this.assembled) {
             return;
         }
 
-        for (var property : currentState.getProperties()) {
-            if (property instanceof BooleanProperty booleanProperty && "active".equals(booleanProperty.getName())) {
+        for (final var property : currentState.getProperties()) {
+            if (property instanceof final BooleanProperty booleanProperty && "active".equals(booleanProperty.getName())) {
                 this.level.setBlock(this.worldPosition, currentState.setValue(booleanProperty, this.assembled), Block.UPDATE_CLIENTS);
                 return;
             }
@@ -202,7 +200,7 @@ public abstract class AbstractSimpleMultiblockControllerBE extends BlockEntity i
         this.scanCooldown = 0;
     }
 
-    protected int resolveMachineTier(MultiblockPattern.MatchResult result) {
+    protected int resolveMachineTier(final MultiblockPattern.MatchResult result) {
         return MultiblockMachineTier.MK1.level();
     }
 
@@ -215,8 +213,8 @@ public abstract class AbstractSimpleMultiblockControllerBE extends BlockEntity i
             return;
         }
 
-        for (BlockPos partPos : this.parts) {
-            if (this.level.getBlockEntity(partPos) instanceof IMultiblockPart part) {
+        for (final BlockPos partPos : this.parts) {
+            if (this.level.getBlockEntity(partPos) instanceof final IMultiblockPart part) {
                 part.unlinkFromController();
             }
         }
@@ -232,14 +230,14 @@ public abstract class AbstractSimpleMultiblockControllerBE extends BlockEntity i
     }
 
     @Override
-    public void addPart(BlockPos partPos) {
+    public void addPart(final BlockPos partPos) {
         if (!this.parts.contains(partPos)) {
             this.parts.add(partPos);
         }
     }
 
     @Override
-    public void removePart(BlockPos partPos) {
+    public void removePart(final BlockPos partPos) {
         this.parts.remove(partPos);
         markStructureDirty();
     }
@@ -260,67 +258,47 @@ public abstract class AbstractSimpleMultiblockControllerBE extends BlockEntity i
     }
 
     @Override
-    protected void saveAdditional(@NotNull CompoundTag tag, HolderLookup.@NotNull Provider registries) {
-        super.saveAdditional(tag, registries);
-        tag.putBoolean("assembled", this.assembled);
-        tag.putBoolean("running", this.running);
-        tag.putInt("progress", this.progress);
-        tag.putInt("maxProgress", this.maxProgress);
-        tag.putInt("temperature", this.temperature);
-        tag.putInt("maxTemperature", this.maxTemperature);
-        tag.putInt("machineTier", this.machineTier);
-        tag.putLong("storedEnergy", this.storedEnergy);
-        tag.putLong("maxStoredEnergy", this.maxStoredEnergy);
-        tag.putBoolean("safeMode", this.safeMode);
-        tag.putBoolean("overclocked", this.overclocked);
-        this.upgrades.writeToNBT(tag, "upgrades", registries);
-
-        ListTag partsList = new ListTag();
-        for (BlockPos pos : this.parts) {
-            partsList.add(NbtUtils.writeBlockPos(pos));
-        }
-        tag.put("parts", partsList);
-        tag.put("displayedRecipes", saveDisplayedRecipes());
+    protected void saveAdditional(@NotNull final ValueOutput output) {
+        super.saveAdditional(output);
+        output.putBoolean("assembled", this.assembled);
+        output.putBoolean("running", this.running);
+        output.putInt("progress", this.progress);
+        output.putInt("maxProgress", this.maxProgress);
+        output.putInt("temperature", this.temperature);
+        output.putInt("maxTemperature", this.maxTemperature);
+        output.putInt("machineTier", this.machineTier);
+        output.putLong("storedEnergy", this.storedEnergy);
+        output.putLong("maxStoredEnergy", this.maxStoredEnergy);
+        output.putBoolean("safeMode", this.safeMode);
+        output.putBoolean("overclocked", this.overclocked);
+        this.upgrades.writeToNBT(output, "upgrades");
+        final var partsList = output.list("parts", BlockPos.CODEC);
+        this.parts.forEach(partsList::add);
+        saveDisplayedRecipes(output);
     }
 
     @Override
-    protected void loadAdditional(@NotNull CompoundTag tag, HolderLookup.@NotNull Provider registries) {
-        super.loadAdditional(tag, registries);
-        this.assembled = tag.getBoolean("assembled");
-        this.running = tag.getBoolean("running");
-        this.progress = tag.getInt("progress");
-        this.maxProgress = tag.getInt("maxProgress");
-        this.temperature = tag.getInt("temperature");
-        if (tag.contains("maxTemperature")) {
-            this.maxTemperature = tag.getInt("maxTemperature");
-        }
-        if (tag.contains("machineTier")) {
-            this.machineTier = Math.max(MultiblockMachineTier.MK1.level(), tag.getInt("machineTier"));
-        }
-        this.storedEnergy = tag.getLong("storedEnergy");
-        this.maxStoredEnergy = tag.getLong("maxStoredEnergy");
-        this.safeMode = !tag.contains("safeMode") || tag.getBoolean("safeMode");
-        this.overclocked = tag.getBoolean("overclocked");
+    protected void loadAdditional(@NotNull final ValueInput input) {
+        super.loadAdditional(input);
+        this.assembled = input.getBooleanOr("assembled", false);
+        this.running = input.getBooleanOr("running", false);
+        this.progress = input.getIntOr("progress", 0);
+        this.maxProgress = input.getIntOr("maxProgress", 0);
+        this.temperature = input.getIntOr("temperature", 0);
+        this.maxTemperature = input.getIntOr("maxTemperature", this.maxTemperature);
+        this.machineTier = Math.max(MultiblockMachineTier.MK1.level(), input.getIntOr("machineTier", this.machineTier));
+        this.storedEnergy = input.getLongOr("storedEnergy", 0L);
+        this.maxStoredEnergy = input.getLongOr("maxStoredEnergy", 0L);
+        this.safeMode = input.getBooleanOr("safeMode", true);
+        this.overclocked = input.getBooleanOr("overclocked", false);
 
         this.parts.clear();
-        if (tag.contains("parts", Tag.TAG_LIST)) {
-            ListTag partsList = tag.getList("parts", Tag.TAG_COMPOUND);
-            for (int i = 0; i < partsList.size(); i++) {
-                NbtUtils.readBlockPos(partsList.getCompound(i), "").ifPresent(this.parts::add);
-            }
-        }
-        this.upgrades.readFromNBT(tag, "upgrades", registries);
-        loadDisplayedRecipes(tag);
+        input.listOrEmpty("parts", BlockPos.CODEC).forEach(this.parts::add);
+        this.upgrades.readFromNBT(input, "upgrades");
+        loadDisplayedRecipes(input);
 
         this.structureDirty = true;
         this.scanCooldown = 0;
-    }
-
-    @Override
-    public @NotNull CompoundTag getUpdateTag(HolderLookup.@NotNull Provider registries) {
-        CompoundTag tag = super.getUpdateTag(registries);
-        saveAdditional(tag, registries);
-        return tag;
     }
 
     @Nullable
@@ -452,64 +430,54 @@ public abstract class AbstractSimpleMultiblockControllerBE extends BlockEntity i
         }
     }
 
-    private ListTag saveDisplayedRecipes() {
-        ListTag recipeList = new ListTag();
-        for (UniversalDisplayedRecipe recipe : this.displayedRecipes) {
-            CompoundTag recipeTag = new CompoundTag();
+    private void saveDisplayedRecipes(final ValueOutput output) {
+        final var recipeList = output.childrenList("displayedRecipes");
+        for (final UniversalDisplayedRecipe recipe : this.displayedRecipes) {
+            final ValueOutput recipeTag = recipeList.addChild();
             if (!recipe.itemIcon().isEmpty()) {
-                ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(recipe.itemIcon().getItem());
-                if (itemId != null) {
-                    recipeTag.putString("itemIcon", itemId.toString());
-                }
+                final Identifier itemId = BuiltInRegistries.ITEM.getKey(recipe.itemIcon().getItem());
+                recipeTag.putString("itemIcon", itemId.toString());
             }
             if (!recipe.fluidIcon().isEmpty()) {
-                ResourceLocation fluidId = BuiltInRegistries.FLUID.getKey(recipe.fluidIcon().getFluid());
-                if (fluidId != null) {
-                    recipeTag.putString("fluidIcon", fluidId.toString());
-                }
+                final Identifier fluidId = BuiltInRegistries.FLUID.getKey(recipe.fluidIcon().getFluid());
+                recipeTag.putString("fluidIcon", fluidId.toString());
             }
             recipeTag.putString("label", recipe.label().getString());
             recipeTag.putLong("outputAmount", recipe.outputAmount());
             recipeTag.putInt("progress", recipe.progress());
             recipeTag.putInt("maxProgress", recipe.maxProgress());
-            recipeList.add(recipeTag);
         }
-        return recipeList;
     }
 
-    private void loadDisplayedRecipes(CompoundTag tag) {
+    private void loadDisplayedRecipes(final ValueInput input) {
         this.displayedRecipes.clear();
-        if (!tag.contains("displayedRecipes", Tag.TAG_LIST)) {
-            return;
-        }
-
-        ListTag recipeList = tag.getList("displayedRecipes", Tag.TAG_COMPOUND);
-        for (int i = 0; i < recipeList.size(); i++) {
-            CompoundTag recipeTag = recipeList.getCompound(i);
+        for (final ValueInput recipeTag : input.childrenListOrEmpty("displayedRecipes")) {
             ItemStack itemIcon = ItemStack.EMPTY;
             net.neoforged.neoforge.fluids.FluidStack fluidIcon = net.neoforged.neoforge.fluids.FluidStack.EMPTY;
 
-            if (recipeTag.contains("itemIcon", Tag.TAG_STRING)) {
-                ResourceLocation itemId = ResourceLocation.tryParse(recipeTag.getString("itemIcon"));
+            final String itemIconId = recipeTag.getStringOr("itemIcon", "");
+            if (!itemIconId.isEmpty()) {
+                final Identifier itemId = Identifier.tryParse(itemIconId);
                 if (itemId != null && BuiltInRegistries.ITEM.containsKey(itemId)) {
-                    itemIcon = new ItemStack(BuiltInRegistries.ITEM.get(itemId));
+                    itemIcon = new ItemStack(BuiltInRegistries.ITEM.getValue(itemId));
                 }
             }
 
-            if (recipeTag.contains("fluidIcon", Tag.TAG_STRING)) {
-                ResourceLocation fluidId = ResourceLocation.tryParse(recipeTag.getString("fluidIcon"));
+            final String fluidIconId = recipeTag.getStringOr("fluidIcon", "");
+            if (!fluidIconId.isEmpty()) {
+                final Identifier fluidId = Identifier.tryParse(fluidIconId);
                 if (fluidId != null && BuiltInRegistries.FLUID.containsKey(fluidId)) {
-                    fluidIcon = new net.neoforged.neoforge.fluids.FluidStack(BuiltInRegistries.FLUID.get(fluidId), 1);
+                    fluidIcon = new net.neoforged.neoforge.fluids.FluidStack(BuiltInRegistries.FLUID.getValue(fluidId), 1);
                 }
             }
 
             this.displayedRecipes.add(new UniversalDisplayedRecipe(
                     itemIcon,
                     fluidIcon,
-                    Component.literal(recipeTag.getString("label")),
-                    recipeTag.getLong("outputAmount"),
-                    recipeTag.getInt("progress"),
-                    recipeTag.getInt("maxProgress")));
+                    Component.literal(recipeTag.getStringOr("label", "")),
+                    recipeTag.getLongOr("outputAmount", 0L),
+                    recipeTag.getIntOr("progress", 0),
+                    recipeTag.getIntOr("maxProgress", 0)));
         }
     }
 }

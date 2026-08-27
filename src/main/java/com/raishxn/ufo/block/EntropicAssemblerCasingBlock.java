@@ -16,17 +16,19 @@ public class EntropicAssemblerCasingBlock extends AbstractEntropicMachineBlock<E
                 .lightLevel(state -> state.getValue(FORMED) ? 12 : 0));
     }
 
-    private EntropicAssemblerCasingBlock(BlockBehaviour.Properties properties) {
-        super(properties);
+    public EntropicAssemblerCasingBlock(final BlockBehaviour.Properties properties) {
+        super(properties.strength(30.0f, 1200.0f)
+                .requiresCorrectToolForDrops()
+                .lightLevel(state -> state.getValue(FORMED) ? 12 : 0));
     }
 
     @Override
     protected MapCodec<? extends AbstractEntropicMachineBlock<EntropicAssemblerMatrixBE>> codec() {
-        return (MapCodec) CODEC;
+        return CODEC;
     }
 
     @Override
-    public EntropicAssemblerMatrixBE newBlockEntity(BlockPos pos, BlockState state) {
+    public EntropicAssemblerMatrixBE newBlockEntity(final BlockPos pos, final BlockState state) {
         return new EntropicAssemblerMatrixBE(pos, state);
     }
 }

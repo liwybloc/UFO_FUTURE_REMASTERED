@@ -9,15 +9,14 @@ import com.raishxn.ufo.api.tutorial.UfoTutorialScene;
 import com.raishxn.ufo.api.tutorial.UfoTutorialStep;
 import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
@@ -57,7 +56,7 @@ public class UfoTutorialScreen extends Screen {
     private double lastDragY;
     private BlockFilter blockFilter = BlockFilter.ALL;
 
-    public UfoTutorialScreen(UfoTutorialEntry entry) {
+    public UfoTutorialScreen(final UfoTutorialEntry entry) {
         super(entry.title());
         this.entry = entry;
         this.scene = entry.scenes().getFirst();
@@ -66,7 +65,7 @@ public class UfoTutorialScreen extends Screen {
 
     @Override
     protected void init() {
-        int sidebarX = this.width - SIDEBAR_WIDTH;
+        final int sidebarX = this.width - SIDEBAR_WIDTH;
         this.addRenderableWidget(Button.builder(Component.translatable("gui.back"), button -> onClose())
                 .bounds(14, 12, 78, 24)
                 .build());
@@ -119,7 +118,7 @@ public class UfoTutorialScreen extends Screen {
         super.tick();
         if (this.playing) {
             this.buildTick += TimelapseSpeed.values()[this.speedIndex].ticksPerClientTick();
-            int totalTicks = totalBuildTicks(currentStep());
+            final int totalTicks = totalBuildTicks(currentStep());
             if (this.buildTick > totalTicks) {
                 this.buildTick = totalTicks;
                 this.playing = false;
@@ -128,24 +127,24 @@ public class UfoTutorialScreen extends Screen {
     }
 
     @Override
-    public void renderBackground(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+    public void renderBackground(final GuiGraphicsExtractor guiGraphics, final int mouseX, final int mouseY, final float partialTick) {
     }
 
     @Override
-    public void renderTransparentBackground(GuiGraphics guiGraphics) {
+    public void renderTransparentBackground(final GuiGraphicsExtractor guiGraphics) {
     }
 
     @Override
-    protected void renderBlurredBackground(float partialTick) {
+    protected void renderBlurredBackground(final float partialTick) {
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        UfoTutorialStep step = currentStep();
-        int sceneWidth = this.width - SIDEBAR_WIDTH;
-        int sceneHeight = this.height - TIMELINE_HEIGHT;
-        int sidebarX = sceneWidth;
-        SceneLayout layout = createLayout(step, sceneWidth, sceneHeight);
+    public void render(final GuiGraphicsExtractor guiGraphics, final int mouseX, final int mouseY, final float partialTick) {
+        final UfoTutorialStep step = currentStep();
+        final int sceneWidth = this.width - SIDEBAR_WIDTH;
+        final int sceneHeight = this.height - TIMELINE_HEIGHT;
+        final int sidebarX = sceneWidth;
+        final SceneLayout layout = createLayout(step, sceneWidth, sceneHeight);
         this.lastSceneWidth = sceneWidth;
         this.lastSceneHeight = sceneHeight;
 
@@ -154,7 +153,7 @@ public class UfoTutorialScreen extends Screen {
         guiGraphics.fill(sceneWidth - 1, 0, sceneWidth + 1, sceneHeight, 0xFF51D8FF);
         guiGraphics.fill(0, sceneHeight - 1, sceneWidth, sceneHeight + 1, 0xFF51D8FF);
 
-        int visibleBuildBlocks = visibleBuildBlocks(step);
+        final int visibleBuildBlocks = visibleBuildBlocks(step);
         renderScene(guiGraphics, sceneWidth, sceneHeight, step, layout, partialTick, visibleBuildBlocks);
         renderBottomCaption(guiGraphics, sceneWidth, sceneHeight, step);
         renderTimeline(guiGraphics, sceneWidth, sceneHeight, step, visibleBuildBlocks);
@@ -164,9 +163,9 @@ public class UfoTutorialScreen extends Screen {
         renderHoveredBlockTooltip(guiGraphics, step, layout, mouseX, mouseY);
     }
 
-    private void renderScene(GuiGraphics guiGraphics, int sceneWidth, int sceneHeight, UfoTutorialStep step,
-                             SceneLayout layout, float partialTick, int visibleBuildBlocks) {
-        List<RenderBlock> visibleBlocks = visibleBlocksForStep(step).stream()
+    private void renderScene(final GuiGraphicsExtractor guiGraphics, final int sceneWidth, final int sceneHeight, final UfoTutorialStep step,
+                             final SceneLayout layout, final float partialTick, final int visibleBuildBlocks) {
+        final List<RenderBlock> visibleBlocks = visibleBlocksForStep(step).stream()
                 .limit(visibleBuildBlocks)
                 .sorted(Comparator.comparingInt(RenderBlock::row).reversed()
                         .thenComparingInt(RenderBlock::col))
@@ -181,16 +180,16 @@ public class UfoTutorialScreen extends Screen {
         renderBlockModels(guiGraphics, visibleBlocks, step, layout, sceneWidth, sceneHeight, partialTick);
     }
 
-    private void renderBlockModels(GuiGraphics guiGraphics, List<RenderBlock> visibleBlocks, UfoTutorialStep step,
-                                   SceneLayout layout, int sceneWidth, int sceneHeight, float partialTick) {
-        Minecraft minecraft = Minecraft.getInstance();
-        PoseStack poseStack = guiGraphics.pose();
-        MultiBufferSource.BufferSource bufferSource = minecraft.renderBuffers().bufferSource();
-        float scale = layout.modelScale() * this.cameraZoom;
-        float centerX = (layout.minCol() + layout.maxCol()) / 2.0F;
-        float centerY = (layout.minLayer() + layout.maxLayer()) / 2.0F;
-        float centerZ = (layout.minRow() + layout.maxRow()) / 2.0F;
-        float pulse = (float) (Math.sin((minecraft.level == null ? 0 : minecraft.level.getGameTime() + partialTick) * 0.18F) * 0.5F + 0.5F);
+    private void renderBlockModels(final GuiGraphicsExtractor guiGraphics, final List<RenderBlock> visibleBlocks, final UfoTutorialStep step,
+                                   final SceneLayout layout, final int sceneWidth, final int sceneHeight, final float partialTick) {
+        final Minecraft minecraft = Minecraft.getInstance();
+        final PoseStack poseStack = guiGraphics.pose();
+        final MultiBufferSource.BufferSource bufferSource = minecraft.renderBuffers().bufferSource();
+        final float scale = layout.modelScale() * this.cameraZoom;
+        final float centerX = (layout.minCol() + layout.maxCol()) / 2.0F;
+        final float centerY = (layout.minLayer() + layout.maxLayer()) / 2.0F;
+        final float centerZ = (layout.minRow() + layout.maxRow()) / 2.0F;
+        final float pulse = (float) (Math.sin((minecraft.level == null ? 0 : minecraft.level.getGameTime() + partialTick) * 0.18F) * 0.5F + 0.5F);
 
         RenderSystem.enableDepthTest();
         poseStack.pushPose();
@@ -199,18 +198,18 @@ public class UfoTutorialScreen extends Screen {
         poseStack.mulPose(Axis.XP.rotationDegrees(this.cameraPitch));
         poseStack.mulPose(Axis.YP.rotationDegrees(this.cameraYaw));
 
-        for (RenderBlock block : visibleBlocks) {
-            boolean highlighted = step.highlightedSymbols().isEmpty() || step.highlightedSymbols().contains(block.symbol());
+        for (final RenderBlock block : visibleBlocks) {
+            final boolean highlighted = step.highlightedSymbols().isEmpty() || step.highlightedSymbols().contains(block.symbol());
             poseStack.pushPose();
             poseStack.translate(block.col() - centerX, block.layer() - centerY, block.row() - centerZ);
-            minecraft.getBlockRenderer().renderSingleBlock(block.state(), poseStack, bufferSource, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY);
+            minecraft.getBlockRenderer().renderSingleBlock(block.state(), poseStack, bufferSource, 0x00F000F0, OverlayTexture.NO_OVERLAY);
             poseStack.popPose();
 
             if (highlighted) {
                 poseStack.pushPose();
                 poseStack.translate(block.col() - centerX - 0.015F, block.layer() - centerY - 0.015F, block.row() - centerZ - 0.015F);
                 poseStack.scale(1.03F + pulse * 0.025F, 1.03F + pulse * 0.025F, 1.03F + pulse * 0.025F);
-                minecraft.getBlockRenderer().renderSingleBlock(block.state(), poseStack, bufferSource, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY);
+                minecraft.getBlockRenderer().renderSingleBlock(block.state(), poseStack, bufferSource, 0x00F000F0, OverlayTexture.NO_OVERLAY);
                 poseStack.popPose();
             }
         }
@@ -219,13 +218,13 @@ public class UfoTutorialScreen extends Screen {
         RenderSystem.disableDepthTest();
     }
 
-    private void renderBasePlate(GuiGraphics guiGraphics, SceneLayout layout) {
-        int sceneWidth = this.width - SIDEBAR_WIDTH;
-        int sceneHeight = this.height - TIMELINE_HEIGHT;
-        int left = 24;
-        int top = 36;
-        int right = Math.max(left + 120, sceneWidth - 24);
-        int bottom = Math.max(top + 90, sceneHeight - 72);
+    private void renderBasePlate(final GuiGraphicsExtractor guiGraphics, final SceneLayout layout) {
+        final int sceneWidth = this.width - SIDEBAR_WIDTH;
+        final int sceneHeight = this.height - TIMELINE_HEIGHT;
+        final int left = 24;
+        final int top = 36;
+        final int right = Math.max(left + 120, sceneWidth - 24);
+        final int bottom = Math.max(top + 90, sceneHeight - 72);
         guiGraphics.fill(left, top, right, bottom, 0xFF11151C);
         for (int y = top; y < bottom; y += 10) {
             guiGraphics.fill(left, y, right, y + 1, 0xFF28303A);
@@ -239,7 +238,7 @@ public class UfoTutorialScreen extends Screen {
         guiGraphics.fill(right - 1, top, right, bottom, 0xFF3A4452);
     }
 
-    private void renderSidebar(GuiGraphics guiGraphics, int x, UfoTutorialStep step) {
+    private void renderSidebar(final GuiGraphicsExtractor guiGraphics, final int x, final UfoTutorialStep step) {
         guiGraphics.drawString(this.font, this.entry.title(), x + 12, 44, 0xFF76F4E8, false);
         guiGraphics.fill(x + 8, 60, this.width, 62, 0xFF3D4052);
         guiGraphics.drawString(this.font, Component.literal("Show:"), x + 12, 78, 0xFF8A90A4, false);
@@ -249,7 +248,7 @@ public class UfoTutorialScreen extends Screen {
 
         guiGraphics.drawString(this.font, step.title(), x + 12, 264, 0xFFF5F7FA, false);
         int lineY = 282;
-        for (var line : this.font.split(step.text(), 144)) {
+        for (final var line : this.font.split(step.text(), 144)) {
             guiGraphics.drawString(this.font, line, x + 12, lineY, 0xFFD4DCEC, false);
             lineY += this.font.lineHeight + 2;
         }
@@ -257,20 +256,20 @@ public class UfoTutorialScreen extends Screen {
         renderMaterials(guiGraphics, x + 12, 374, step);
     }
 
-    private void renderMaterials(GuiGraphics guiGraphics, int x, int y, UfoTutorialStep step) {
-        List<MaterialLine> materials = collectMaterials(step);
+    private void renderMaterials(final GuiGraphicsExtractor guiGraphics, final int x, final int y, final UfoTutorialStep step) {
+        final List<MaterialLine> materials = collectMaterials(step);
         guiGraphics.drawString(this.font, Component.translatable("ufo.tutorial.materials"), x, y, 0xFFF5F7FA, false);
         if (materials.isEmpty()) {
             guiGraphics.drawString(this.font, Component.literal("-"), x, y + 14, 0xFF8E99AA, false);
             return;
         }
 
-        int shown = Math.min(5, materials.size());
+        final int shown = Math.min(5, materials.size());
         for (int i = 0; i < shown; i++) {
-            MaterialLine material = materials.get(i);
-            int rowY = y + 14 + i * 18;
+            final MaterialLine material = materials.get(i);
+            final int rowY = y + 14 + i * 18;
             guiGraphics.renderItem(material.stack(), x, rowY - 4);
-            String text = material.count() + "x " + material.stack().getHoverName().getString();
+            final String text = material.count() + "x " + material.stack().getHoverName().getString();
             guiGraphics.drawString(this.font, this.font.plainSubstrByWidth(text, 92), x + 20, rowY, 0xFFD4DCEC, false);
         }
         if (materials.size() > shown) {
@@ -278,29 +277,29 @@ public class UfoTutorialScreen extends Screen {
         }
     }
 
-    private void renderBottomCaption(GuiGraphics guiGraphics, int sceneWidth, int sceneHeight, UfoTutorialStep step) {
-        String text = step.text().getString();
-        int textWidth = Math.min(sceneWidth - 120, this.font.width(text) + 20);
-        int x = (sceneWidth - textWidth) / 2;
-        int y = sceneHeight - 44;
+    private void renderBottomCaption(final GuiGraphicsExtractor guiGraphics, final int sceneWidth, final int sceneHeight, final UfoTutorialStep step) {
+        final String text = step.text().getString();
+        final int textWidth = Math.min(sceneWidth - 120, this.font.width(text) + 20);
+        final int x = (sceneWidth - textWidth) / 2;
+        final int y = sceneHeight - 44;
         guiGraphics.fill(x, y, x + textWidth, y + 18, 0xAA000000);
         guiGraphics.drawString(this.font, this.font.plainSubstrByWidth(text, textWidth - 12), x + 6, y + 5, 0xFFFFFFFF, false);
     }
 
-    private void renderTimeline(GuiGraphics guiGraphics, int sceneWidth, int sceneHeight, UfoTutorialStep step, int visibleBuildBlocks) {
-        int y = sceneHeight + 18;
-        int startX = 140;
-        int endX = sceneWidth - 90;
-        int totalTicks = totalBuildTicks(step);
-        double progress = totalTicks <= 0 ? 1.0D : Math.min(1.0D, this.buildTick / (double) totalTicks);
-        int progressX = startX + (int) ((endX - startX) * progress);
+    private void renderTimeline(final GuiGraphicsExtractor guiGraphics, final int sceneWidth, final int sceneHeight, final UfoTutorialStep step, final int visibleBuildBlocks) {
+        final int y = sceneHeight + 18;
+        final int startX = 140;
+        final int endX = sceneWidth - 90;
+        final int totalTicks = totalBuildTicks(step);
+        final double progress = totalTicks <= 0 ? 1.0D : Math.min(1.0D, this.buildTick / (double) totalTicks);
+        final int progressX = startX + (int) ((endX - startX) * progress);
         guiGraphics.drawString(this.font, this.playing ? "||" : ">", 14, y - 7, 0xFF76F4E8, false);
         guiGraphics.drawString(this.font, TimelapseSpeed.values()[this.speedIndex].label(), 78, y - 7, 0xFFD4DCEC, false);
         guiGraphics.fill(startX, y, endX, y + 5, 0xFF172335);
         guiGraphics.fill(startX, y, progressX, y + 5, 0xFF51D8FF);
-        int count = this.scene.steps().size();
+        final int count = this.scene.steps().size();
         for (int i = 0; i < count; i++) {
-            int x = count == 1 ? startX : startX + (endX - startX) * i / (count - 1);
+            final int x = count == 1 ? startX : startX + (endX - startX) * i / (count - 1);
             guiGraphics.fill(x - 2, y - 5, x + 2, y + 9, i == this.stepIndex ? 0xFF51D8FF : 0xFFE5EDF8);
         }
         guiGraphics.fill(progressX - 4, y - 8, progressX + 4, y + 13, 0xFF51D8FF);
@@ -313,7 +312,7 @@ public class UfoTutorialScreen extends Screen {
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    public boolean keyPressed(final int keyCode, final int scanCode, final int modifiers) {
         if (keyCode == GLFW.GLFW_KEY_RIGHT || keyCode == GLFW.GLFW_KEY_D) {
             moveStep(1);
             return true;
@@ -363,7 +362,7 @@ public class UfoTutorialScreen extends Screen {
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+    public boolean mouseScrolled(final double mouseX, final double mouseY, final double scrollX, final double scrollY) {
         if (mouseX >= this.lastSceneWidth) {
             moveLayer(scrollY > 0 ? 1 : -1);
             return true;
@@ -376,19 +375,19 @@ public class UfoTutorialScreen extends Screen {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(final double mouseX, final double mouseY, final int button) {
         if (button == 0 && mouseY >= this.lastSceneHeight && mouseX < this.lastSceneWidth) {
-            int count = this.scene.steps().size();
-            int startX = 140;
-            int endX = this.lastSceneWidth - 90;
+            final int count = this.scene.steps().size();
+            final int startX = 140;
+            final int endX = this.lastSceneWidth - 90;
             if (mouseX >= startX && mouseX <= endX && count > 1) {
-                if (Screen.hasShiftDown()) {
-                    double stepProgress = (mouseX - startX) / Math.max(1.0D, endX - startX);
+                if (net.minecraft.client.Minecraft.getInstance().hasShiftDown()) {
+                    final double stepProgress = (mouseX - startX) / Math.max(1.0D, endX - startX);
                     this.stepIndex = Math.max(0, Math.min(count - 1, (int) Math.round(stepProgress * (count - 1))));
                     this.layerOverride = ALL_LAYERS;
                     this.buildTick = 0;
                 } else {
-                    double progress = (mouseX - startX) / Math.max(1.0D, endX - startX);
+                    final double progress = (mouseX - startX) / Math.max(1.0D, endX - startX);
                     this.buildTick = Math.max(0, Math.min(totalBuildTicks(currentStep()), (int) Math.round(progress * totalBuildTicks(currentStep()))));
                 }
                 return true;
@@ -404,7 +403,7 @@ public class UfoTutorialScreen extends Screen {
     }
 
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
+    public boolean mouseDragged(final double mouseX, final double mouseY, final int button, final double dragX, final double dragY) {
         if (button == 0 && this.draggingScene) {
             this.cameraYaw += (float) (mouseX - this.lastDragX) * 0.35F;
             this.cameraPitch = Math.max(15.0F, Math.min(70.0F, this.cameraPitch + (float) (mouseY - this.lastDragY) * 0.25F));
@@ -416,7 +415,7 @@ public class UfoTutorialScreen extends Screen {
     }
 
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+    public boolean mouseReleased(final double mouseX, final double mouseY, final int button) {
         if (button == 0 && this.draggingScene) {
             this.draggingScene = false;
             return true;
@@ -424,8 +423,8 @@ public class UfoTutorialScreen extends Screen {
         return super.mouseReleased(mouseX, mouseY, button);
     }
 
-    private void renderHoveredBlockTooltip(GuiGraphics guiGraphics, UfoTutorialStep step, SceneLayout layout, int mouseX, int mouseY) {
-        RenderBlock hovered = getHoveredBlock(step, layout, mouseX, mouseY);
+    private void renderHoveredBlockTooltip(final GuiGraphicsExtractor guiGraphics, final UfoTutorialStep step, final SceneLayout layout, final int mouseX, final int mouseY) {
+        final RenderBlock hovered = getHoveredBlock(step, layout, mouseX, mouseY);
         if (hovered != null) {
             RenderSystem.disableDepthTest();
             guiGraphics.pose().pushPose();
@@ -435,15 +434,15 @@ public class UfoTutorialScreen extends Screen {
         }
     }
 
-    private RenderBlock getHoveredBlock(UfoTutorialStep step, SceneLayout layout, int mouseX, int mouseY) {
-        List<RenderBlock> hoverableBlocks = visibleBlocksForStep(step).stream()
+    private RenderBlock getHoveredBlock(final UfoTutorialStep step, final SceneLayout layout, final int mouseX, final int mouseY) {
+        final List<RenderBlock> hoverableBlocks = visibleBlocksForStep(step).stream()
                 .limit(visibleBuildBlocks(step))
                 .sorted(Comparator.comparingInt(RenderBlock::row)
                         .thenComparingInt(RenderBlock::layer).reversed())
                 .toList();
-        float pickRadius = Math.max(8.0F, layout.modelScale() * this.cameraZoom * 0.65F);
-        for (RenderBlock block : hoverableBlocks) {
-            ProjectedPoint point = projectBlock(block, layout);
+        final float pickRadius = Math.max(8.0F, layout.modelScale() * this.cameraZoom * 0.65F);
+        for (final RenderBlock block : hoverableBlocks) {
+            final ProjectedPoint point = projectBlock(block, layout);
             if (Math.abs(mouseX - point.x()) <= pickRadius && Math.abs(mouseY - point.y()) <= pickRadius) {
                 return block;
             }
@@ -451,17 +450,17 @@ public class UfoTutorialScreen extends Screen {
         return null;
     }
 
-    private ProjectedPoint projectBlock(RenderBlock block, SceneLayout layout) {
-        float scale = layout.modelScale() * this.cameraZoom;
-        float x = block.col() - (layout.minCol() + layout.maxCol()) / 2.0F;
-        float y = block.layer() - (layout.minLayer() + layout.maxLayer()) / 2.0F;
-        float z = block.row() - (layout.minRow() + layout.maxRow()) / 2.0F;
-        double pitch = Math.toRadians(this.cameraPitch);
-        double yaw = Math.toRadians(this.cameraYaw);
-        float y1 = (float) (y * Math.cos(pitch) - z * Math.sin(pitch));
-        float z1 = (float) (y * Math.sin(pitch) + z * Math.cos(pitch));
-        float x2 = (float) (x * Math.cos(yaw) + z1 * Math.sin(yaw));
-        float y2 = y1;
+    private ProjectedPoint projectBlock(final RenderBlock block, final SceneLayout layout) {
+        final float scale = layout.modelScale() * this.cameraZoom;
+        final float x = block.col() - (layout.minCol() + layout.maxCol()) / 2.0F;
+        final float y = block.layer() - (layout.minLayer() + layout.maxLayer()) / 2.0F;
+        final float z = block.row() - (layout.minRow() + layout.maxRow()) / 2.0F;
+        final double pitch = Math.toRadians(this.cameraPitch);
+        final double yaw = Math.toRadians(this.cameraYaw);
+        final float y1 = (float) (y * Math.cos(pitch) - z * Math.sin(pitch));
+        final float z1 = (float) (y * Math.sin(pitch) + z * Math.cos(pitch));
+        final float x2 = (float) (x * Math.cos(yaw) + z1 * Math.sin(yaw));
+        final float y2 = y1;
         return new ProjectedPoint(this.lastSceneWidth / 2.0F + x2 * scale, this.lastSceneHeight * 0.54F - y2 * scale);
     }
 
@@ -469,22 +468,22 @@ public class UfoTutorialScreen extends Screen {
         return this.scene.steps().get(this.stepIndex);
     }
 
-    private void moveStep(int delta) {
+    private void moveStep(final int delta) {
         this.stepIndex = Math.max(0, Math.min(this.scene.steps().size() - 1, this.stepIndex + delta));
         this.layerOverride = ALL_LAYERS;
         this.buildTick = 0;
         this.playing = true;
     }
 
-    private void moveLayer(int delta) {
-        int minLayer = this.renderBlocks.stream().mapToInt(RenderBlock::layer).min().orElse(0);
-        int maxLayer = this.renderBlocks.stream().mapToInt(RenderBlock::layer).max().orElse(0);
+    private void moveLayer(final int delta) {
+        final int minLayer = this.renderBlocks.stream().mapToInt(RenderBlock::layer).min().orElse(0);
+        final int maxLayer = this.renderBlocks.stream().mapToInt(RenderBlock::layer).max().orElse(0);
         if (this.layerOverride == ALL_LAYERS) {
             this.layerOverride = findNextLayer(delta > 0 ? minLayer - 1 : maxLayer + 1, delta, minLayer, maxLayer);
             clampBuildTick();
             return;
         }
-        int nextLayer = findNextLayer(this.layerOverride, delta, minLayer, maxLayer);
+        final int nextLayer = findNextLayer(this.layerOverride, delta, minLayer, maxLayer);
         if (nextLayer < minLayer || nextLayer > maxLayer) {
             this.layerOverride = ALL_LAYERS;
         } else {
@@ -493,7 +492,7 @@ public class UfoTutorialScreen extends Screen {
         clampBuildTick();
     }
 
-    private int findNextLayer(int currentLayer, int delta, int minLayer, int maxLayer) {
+    private int findNextLayer(final int currentLayer, final int delta, final int minLayer, final int maxLayer) {
         int candidate = currentLayer + delta;
         while (candidate >= minLayer && candidate <= maxLayer) {
             if (hasVisibleBlocksInLayer(candidate)) {
@@ -504,12 +503,12 @@ public class UfoTutorialScreen extends Screen {
         return -1;
     }
 
-    private boolean hasVisibleBlocksInLayer(int layer) {
+    private boolean hasVisibleBlocksInLayer(final int layer) {
         return this.renderBlocks.stream()
                 .anyMatch(block -> block.layer() == layer && isFilterVisible(block));
     }
 
-    private void setBlockFilter(BlockFilter blockFilter) {
+    private void setBlockFilter(final BlockFilter blockFilter) {
         this.blockFilter = blockFilter;
         this.layerOverride = ALL_LAYERS;
         this.buildTick = 0;
@@ -529,8 +528,8 @@ public class UfoTutorialScreen extends Screen {
         }
     }
 
-    private Component currentVisibleLayerText(UfoTutorialStep step) {
-        int layer = activeLayer(step);
+    private Component currentVisibleLayerText(final UfoTutorialStep step) {
+        final int layer = activeLayer(step);
         return layer != ALL_LAYERS
                 ? Component.translatable("ufo.tutorial.visible_layer", layer)
                 : Component.translatable("ufo.tutorial.visible_layer_all");
@@ -540,7 +539,7 @@ public class UfoTutorialScreen extends Screen {
         return Component.translatable(this.blockFilter.translationKey());
     }
 
-    private SceneLayout createLayout(UfoTutorialStep step, int sceneWidth, int sceneHeight) {
+    private SceneLayout createLayout(final UfoTutorialStep step, final int sceneWidth, final int sceneHeight) {
         int minCol = 0;
         int minRow = 0;
         int minLayer = 0;
@@ -548,7 +547,7 @@ public class UfoTutorialScreen extends Screen {
         int maxRow = 0;
         int maxLayer = 0;
         boolean found = false;
-        for (RenderBlock block : this.renderBlocks) {
+        for (final RenderBlock block : this.renderBlocks) {
             if (!isVisible(block, step) || !isFilterVisible(block)) {
                 continue;
             }
@@ -567,17 +566,17 @@ public class UfoTutorialScreen extends Screen {
             maxLayer = Math.max(maxLayer, block.layer());
         }
 
-        int colSpan = maxCol - minCol + 1;
-        int rowSpan = maxRow - minRow + 1;
-        int layerSpan = maxLayer - minLayer + 1;
-        int offsetX = layerSpan > 10 ? 1 : 5;
-        int offsetY = layerSpan > 10 ? 1 : 6;
-        int cellByWidth = Math.max(3, (sceneWidth - 120 - layerSpan * offsetX) / Math.max(1, colSpan));
-        int cellByHeight = Math.max(3, (sceneHeight - 140 - layerSpan * offsetY) / Math.max(1, rowSpan));
-        int cellSize = Math.max(3, Math.min(24, Math.min(cellByWidth, cellByHeight)));
-        int usedWidth = colSpan * cellSize + layerSpan * offsetX;
-        int usedHeight = rowSpan * cellSize + layerSpan * offsetY;
-        float modelScale = Math.max(4.0F, Math.min(22.0F, Math.min(
+        final int colSpan = maxCol - minCol + 1;
+        final int rowSpan = maxRow - minRow + 1;
+        final int layerSpan = maxLayer - minLayer + 1;
+        final int offsetX = layerSpan > 10 ? 1 : 5;
+        final int offsetY = layerSpan > 10 ? 1 : 6;
+        final int cellByWidth = Math.max(3, (sceneWidth - 120 - layerSpan * offsetX) / Math.max(1, colSpan));
+        final int cellByHeight = Math.max(3, (sceneHeight - 140 - layerSpan * offsetY) / Math.max(1, rowSpan));
+        final int cellSize = Math.max(3, Math.min(24, Math.min(cellByWidth, cellByHeight)));
+        final int usedWidth = colSpan * cellSize + layerSpan * offsetX;
+        final int usedHeight = rowSpan * cellSize + layerSpan * offsetY;
+        final float modelScale = Math.max(4.0F, Math.min(22.0F, Math.min(
                 (sceneWidth - 160.0F) / Math.max(1.0F, colSpan + rowSpan + 2.0F),
                 (sceneHeight - 170.0F) / Math.max(1.0F, layerSpan + Math.max(colSpan, rowSpan) * 0.6F + 2.0F))));
         return new SceneLayout(
@@ -595,12 +594,12 @@ public class UfoTutorialScreen extends Screen {
                 modelScale);
     }
 
-    private boolean isVisible(RenderBlock block, UfoTutorialStep step) {
-        int layer = activeLayer(step);
+    private boolean isVisible(final RenderBlock block, final UfoTutorialStep step) {
+        final int layer = activeLayer(step);
         return layer == ALL_LAYERS || block.layer() == layer;
     }
 
-    private boolean isFilterVisible(RenderBlock block) {
+    private boolean isFilterVisible(final RenderBlock block) {
         return switch (this.blockFilter) {
             case ALL -> true;
             case HATCHES -> block.role() == BlockRole.HATCH;
@@ -609,26 +608,26 @@ public class UfoTutorialScreen extends Screen {
         };
     }
 
-    private int activeLayer(UfoTutorialStep step) {
+    private int activeLayer(final UfoTutorialStep step) {
         if (this.layerOverride != ALL_LAYERS) {
             return this.layerOverride;
         }
-        OptionalInt visibleLayer = step.visibleLayer();
+        final OptionalInt visibleLayer = step.visibleLayer();
         return visibleLayer.isPresent()
                 ? visibleLayer.getAsInt() - this.entry.previewEntry().definition().pattern().getControllerLayer()
                 : ALL_LAYERS;
     }
 
-    private List<MaterialLine> collectMaterials(UfoTutorialStep step) {
-        Map<String, MaterialLine> materials = new LinkedHashMap<>();
-        for (RenderBlock block : this.renderBlocks) {
+    private List<MaterialLine> collectMaterials(final UfoTutorialStep step) {
+        final Map<String, MaterialLine> materials = new LinkedHashMap<>();
+        for (final RenderBlock block : this.renderBlocks) {
             if (!isVisible(block, step) || !isFilterVisible(block)) {
                 continue;
             }
             if (!step.highlightedSymbols().isEmpty() && !step.highlightedSymbols().contains(block.symbol())) {
                 continue;
             }
-            ResourceLocation key = BuiltInRegistries.ITEM.getKey(block.stack().getItem());
+            final Identifier key = BuiltInRegistries.ITEM.getKey(block.stack().getItem());
             materials.compute(String.valueOf(key), (ignored, existing) -> existing == null
                     ? new MaterialLine(block.stack().copyWithCount(1), 1)
                     : new MaterialLine(existing.stack(), existing.count() + 1));
@@ -638,7 +637,7 @@ public class UfoTutorialScreen extends Screen {
                 .toList();
     }
 
-    private List<RenderBlock> visibleBlocksForStep(UfoTutorialStep step) {
+    private List<RenderBlock> visibleBlocksForStep(final UfoTutorialStep step) {
         return this.renderBlocks.stream()
                 .filter(block -> isVisible(block, step))
                 .filter(this::isFilterVisible)
@@ -646,84 +645,84 @@ public class UfoTutorialScreen extends Screen {
                 .toList();
     }
 
-    private int visibleBuildBlocks(UfoTutorialStep step) {
-        List<RenderBlock> blocks = visibleBlocksForStep(step);
+    private int visibleBuildBlocks(final UfoTutorialStep step) {
+        final List<RenderBlock> blocks = visibleBlocksForStep(step);
         if (blocks.isEmpty()) {
             return 0;
         }
         return Math.max(1, Math.min(blocks.size(), this.buildTick / TICKS_PER_BLOCK + 1));
     }
 
-    private int totalBuildTicks(UfoTutorialStep step) {
+    private int totalBuildTicks(final UfoTutorialStep step) {
         return Math.max(TICKS_PER_BLOCK, visibleBlocksForStep(step).size() * TICKS_PER_BLOCK);
     }
 
-    private static String formatTime(int ticks) {
-        int totalTenths = Math.max(0, ticks) / 2;
+    private static String formatTime(final int ticks) {
+        final int totalTenths = Math.max(0, ticks) / 2;
         return (totalTenths / 10) + "." + (totalTenths % 10) + "s";
     }
 
-    private static List<RenderBlock> buildRenderBlocks(UfoTutorialEntry entry) {
-        MultiblockControllerDefinition definition = entry.previewEntry().definition();
-        MultiblockPattern pattern = definition.pattern();
-        char[][][] chars = pattern.getPattern();
-        BlockState controllerState = resolveControllerState(entry.previewEntry().iconStack());
-        List<RenderBlock> blocks = new ArrayList<>();
+    private static List<RenderBlock> buildRenderBlocks(final UfoTutorialEntry entry) {
+        final MultiblockControllerDefinition definition = entry.previewEntry().definition();
+        final MultiblockPattern pattern = definition.pattern();
+        final char[][][] chars = pattern.getPattern();
+        final BlockState controllerState = resolveControllerState(entry.previewEntry().iconStack());
+        final List<RenderBlock> blocks = new ArrayList<>();
 
         for (int layer = 0; layer < chars.length; layer++) {
             for (int row = 0; row < chars[layer].length; row++) {
                 for (int col = 0; col < chars[layer][row].length; col++) {
-                    char symbol = chars[layer][row][col];
-                    BlockState state = symbol == pattern.getControllerChar()
+                    final char symbol = chars[layer][row][col];
+                    final BlockState state = symbol == pattern.getControllerChar()
                             ? controllerState
                             : definition.defaultCreativeStates().get(symbol);
                     if (state == null || state.isAir()) {
                         continue;
                     }
-                    ItemStack stack = new ItemStack(state.getBlock());
+                    final ItemStack stack = new ItemStack(state.getBlock());
                     if (!stack.isEmpty()) {
-                        BlockRole role = classifyBlock(pattern, symbol, state);
-                        int relativeLayer = layer - pattern.getControllerLayer();
-                        int relativeRow = pattern.getControllerRow() - row;
-                        int relativeCol = col - pattern.getControllerCol();
+                        final BlockRole role = classifyBlock(pattern, symbol, state);
+                        final int relativeLayer = layer - pattern.getControllerLayer();
+                        final int relativeRow = pattern.getControllerRow() - row;
+                        final int relativeCol = col - pattern.getControllerCol();
                         blocks.add(new RenderBlock(relativeLayer, relativeRow, relativeCol, symbol, role, state, stack, colorFor(symbol), 0, buildTooltip(pattern, symbol, state, role)));
                     }
                 }
             }
         }
-        List<RenderBlock> ordered = blocks.stream()
+        final List<RenderBlock> ordered = blocks.stream()
                 .sorted(Comparator.comparingInt(RenderBlock::layer)
                         .thenComparingInt(RenderBlock::row)
                         .thenComparingInt(RenderBlock::col))
                 .toList();
-        List<RenderBlock> indexed = new ArrayList<>();
+        final List<RenderBlock> indexed = new ArrayList<>();
         for (int i = 0; i < ordered.size(); i++) {
-            RenderBlock block = ordered.get(i);
+            final RenderBlock block = ordered.get(i);
             indexed.add(new RenderBlock(block.layer(), block.row(), block.col(), block.symbol(), block.role(), block.state(), block.stack(), block.color(), i, block.tooltip()));
         }
         return indexed;
     }
 
-    private static List<Component> buildTooltip(MultiblockPattern pattern, char symbol, BlockState state, BlockRole role) {
-        ResourceLocation key = BuiltInRegistries.BLOCK.getKey(state.getBlock());
+    private static List<Component> buildTooltip(final MultiblockPattern pattern, final char symbol, final BlockState state, final BlockRole role) {
+        final Identifier key = BuiltInRegistries.BLOCK.getKey(state.getBlock());
         return List.of(
                 pattern.getLegendName(symbol),
                 Component.literal(symbol + " - " + key),
                 Component.translatable(functionTooltipKey(role, key.getPath())));
     }
 
-    private static BlockRole classifyBlock(MultiblockPattern pattern, char symbol, BlockState state) {
+    private static BlockRole classifyBlock(final MultiblockPattern pattern, final char symbol, final BlockState state) {
         if (symbol == pattern.getControllerChar()) {
             return BlockRole.CONTROLLER;
         }
-        String path = BuiltInRegistries.BLOCK.getKey(state.getBlock()).getPath();
+        final String path = BuiltInRegistries.BLOCK.getKey(state.getBlock()).getPath();
         if (path.contains("hatch") || path.contains("input") || path.contains("output") || path.contains("fuel") || path.contains("energy") || path.contains("pattern")) {
             return BlockRole.HATCH;
         }
         return BlockRole.STRUCTURE;
     }
 
-    private static String functionTooltipKey(BlockRole role, String blockPath) {
+    private static String functionTooltipKey(final BlockRole role, final String blockPath) {
         if (role == BlockRole.CONTROLLER) {
             return "ufo.tutorial.role.controller";
         }
@@ -751,18 +750,18 @@ public class UfoTutorialScreen extends Screen {
         return "ufo.tutorial.role.hatch";
     }
 
-    private static BlockState resolveControllerState(ItemStack iconStack) {
-        if (iconStack.getItem() instanceof BlockItem blockItem) {
+    private static BlockState resolveControllerState(final ItemStack iconStack) {
+        if (iconStack.getItem() instanceof final BlockItem blockItem) {
             return blockItem.getBlock().defaultBlockState();
         }
         return Blocks.IRON_BLOCK.defaultBlockState();
     }
 
-    private static int colorFor(char symbol) {
-        int hue = Math.abs(symbol * 1103515245);
-        int r = 80 + hue % 130;
-        int g = 80 + (hue / 17) % 130;
-        int b = 80 + (hue / 37) % 130;
+    private static int colorFor(final char symbol) {
+        final int hue = Math.abs(symbol * 1103515245);
+        final int r = 80 + hue % 130;
+        final int g = 80 + (hue / 17) % 130;
+        final int b = 80 + (hue / 37) % 130;
         return 0xFF000000 | r << 16 | g << 8 | b;
     }
 
@@ -794,7 +793,7 @@ public class UfoTutorialScreen extends Screen {
         private final String label;
         private final int ticksPerClientTick;
 
-        TimelapseSpeed(String label, int ticksPerClientTick) {
+        TimelapseSpeed(final String label, final int ticksPerClientTick) {
             this.label = label;
             this.ticksPerClientTick = ticksPerClientTick;
         }
@@ -816,7 +815,7 @@ public class UfoTutorialScreen extends Screen {
 
         private final String translationKey;
 
-        BlockFilter(String translationKey) {
+        BlockFilter(final String translationKey) {
             this.translationKey = translationKey;
         }
 

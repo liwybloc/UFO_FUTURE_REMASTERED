@@ -6,6 +6,8 @@ import com.raishxn.ufo.block.entity.MassiveOutputHatchBE;
 import com.raishxn.ufo.block.entity.StellarNexusControllerBE;
 import com.raishxn.ufo.init.ModBlockEntities;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.redstone.Orientation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -33,7 +35,7 @@ import org.jetbrains.annotations.Nullable;
  */
 public class MassiveOutputHatchBlock extends DirectionalBlock implements net.minecraft.world.level.block.EntityBlock {
 
-    public MassiveOutputHatchBlock(BlockBehaviour.Properties properties) {
+    public MassiveOutputHatchBlock(final BlockBehaviour.Properties properties) {
         super(properties);
         this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH));
     }
@@ -45,74 +47,68 @@ public class MassiveOutputHatchBlock extends DirectionalBlock implements net.min
     }
 
     @Override
-    public BlockState getStateForPlacement(BlockPlaceContext context) {
+    public BlockState getStateForPlacement(final BlockPlaceContext context) {
         return this.defaultBlockState().setValue(FACING, context.getNearestLookingDirection().getOpposite());
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+    protected void createBlockStateDefinition(final StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(FACING);
     }
 
-    // --- Block Entity ---
 
     @Nullable
     @Override
-    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+    public BlockEntity newBlockEntity(final BlockPos pos, final BlockState state) {
         return new MassiveOutputHatchBE(ModBlockEntities.ME_MASSIVE_OUTPUT_HATCH_BE.get(), pos, state);
     }
 
-    // --- Interactions ---
 
     @Override
-    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
-        if (!level.isClientSide() && level.getBlockEntity(pos) instanceof MassiveOutputHatchBE be) {
-            String status = be.isNetworkReady()
+    protected InteractionResult useWithoutItem(final BlockState state, final Level level, final BlockPos pos, final Player player, final BlockHitResult hitResult) {
+        if (!level.isClientSide() && level.getBlockEntity(pos) instanceof final MassiveOutputHatchBE be) {
+            final String status = be.isNetworkReady()
                     ? "§a" + (be.isLinked() ? "Online — Linked to Controller" : "Online — Standalone")
                     : "§cOffline — No ME Network";
-            player.displayClientMessage(
-                    net.minecraft.network.chat.Component.literal("ME Massive Output Hatch: " + status), true);
+            player.sendOverlayMessage(net.minecraft.network.chat.Component.literal("ME Massive Output Hatch: " + status));
             return InteractionResult.SUCCESS;
         }
-        return InteractionResult.sidedSuccess(level.isClientSide());
+        return level.isClientSide() ? InteractionResult.SUCCESS : InteractionResult.SUCCESS_SERVER;
     }
 
-    // --- Multiblock integration ---
 
     @Override
-    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean moved) {
-        if (!state.is(newState.getBlock())) {
-            if (level.getBlockEntity(pos) instanceof MassiveOutputHatchBE hatch) {
-                BlockPos controllerPos = hatch.getControllerPos();
-                if (controllerPos != null && level.getBlockEntity(controllerPos) instanceof IMultiblockController controller) {
-                    controller.removePart(pos);
-                    controller.scanStructure(level);
-                }
-                hatch.unlinkFromController();
+    protected void affectNeighborsAfterRemoval(final BlockState state, final ServerLevel level, final BlockPos pos, final boolean moved) {
+        if (level.getBlockEntity(pos) instanceof final MassiveOutputHatchBE hatch) {
+            final BlockPos controllerPos = hatch.getControllerPos();
+            if (controllerPos != null && level.getBlockEntity(controllerPos) instanceof final IMultiblockController controller) {
+                controller.removePart(pos);
+                controller.scanStructure(level);
             }
+            hatch.unlinkFromController();
         }
-        super.onRemove(state, level, pos, newState, moved);
+        super.affectNeighborsAfterRemoval(state, level, pos, moved);
     }
 
     @Override
-    public void neighborChanged(BlockState state, Level level, BlockPos pos, Block changedBlock, BlockPos changedPos, boolean isMoving) {
-        super.neighborChanged(state, level, pos, changedBlock, changedPos, isMoving);
-        if (!level.isClientSide() && level.getBlockEntity(pos) instanceof MassiveOutputHatchBE hatch) {
+    protected void neighborChanged(final BlockState state, final Level level, final BlockPos pos, final Block changedBlock, final Orientation orientation, final boolean isMoving) {
+        super.neighborChanged(state, level, pos, changedBlock, orientation, isMoving);
+        if (!level.isClientSide() && level.getBlockEntity(pos) instanceof final MassiveOutputHatchBE hatch) {
             hatch.refreshGridConnection();
-            BlockPos controllerPos = hatch.getControllerPos();
+            final BlockPos controllerPos = hatch.getControllerPos();
             if (controllerPos != null) {
                 markControllerDirty(level, controllerPos);
             }
         }
     }
 
-    private static void markControllerDirty(Level level, BlockPos controllerPos) {
-        BlockEntity entity = level.getBlockEntity(controllerPos);
-        if (entity instanceof AbstractSimpleMultiblockControllerBE controller) {
+    private static void markControllerDirty(final Level level, final BlockPos controllerPos) {
+        final BlockEntity entity = level.getBlockEntity(controllerPos);
+        if (entity instanceof final AbstractSimpleMultiblockControllerBE controller) {
             controller.markStructureDirty();
-        } else if (entity instanceof StellarNexusControllerBE controller) {
+        } else if (entity instanceof final StellarNexusControllerBE controller) {
             controller.markStructureDirty();
-        } else if (entity instanceof IMultiblockController controller) {
+        } else if (entity instanceof final IMultiblockController controller) {
             controller.scanStructure(level);
         }
     }

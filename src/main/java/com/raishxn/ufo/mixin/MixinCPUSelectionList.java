@@ -29,7 +29,7 @@ public class MixinCPUSelectionList {
                     target = "Lappeng/core/localization/Tooltips;ofBytes(J)Lnet/minecraft/network/chat/MutableComponent;"
             )
     )
-    private MutableComponent storageTooltip(long bytes) {
+    private MutableComponent storageTooltip(final long bytes) {
         return Component.literal(ufo$formatStorage(bytes)).withStyle(Tooltips.NUMBER_TEXT);
     }
 
@@ -40,7 +40,7 @@ public class MixinCPUSelectionList {
                     target = "Lappeng/core/localization/Tooltips;ofNumber(J)Lnet/minecraft/network/chat/MutableComponent;"
             )
     )
-    private MutableComponent ufo$formatCoProcessorsTooltip(long value) {
+    private MutableComponent ufo$formatCoProcessorsTooltip(final long value) {
         if (value >= ufo$INFINITE_THREADS_THRESHOLD) {
             return Component.literal("\u221E").withStyle(Tooltips.NUMBER_TEXT);
         }
@@ -48,12 +48,12 @@ public class MixinCPUSelectionList {
     }
 
     @Unique
-    private static String ufo$formatStorage(long bytes) {
+    private static String ufo$formatStorage(final long bytes) {
         if (bytes >= ufo$INFINITE_STORAGE_THRESHOLD) {
             return "\u221E";
         }
         if (bytes < 1024) return ufo$DF.format(bytes);
-        int unit = Math.min((int) (Math.log(bytes) / Math.log(1024)), ufo$UNITS.length - 1);
+        final int unit = Math.min((int) (Math.log(bytes) / Math.log(1024)), ufo$UNITS.length - 1);
         return ufo$DF.format(bytes / Math.pow(1024, unit)) + ufo$UNITS[unit];
     }
 
@@ -64,8 +64,8 @@ public class MixinCPUSelectionList {
                     target = "Lappeng/client/gui/widgets/CPUSelectionList;formatStorage(Lappeng/menu/me/crafting/CraftingStatusMenu$CraftingCpuListEntry;)Ljava/lang/String;"
             )
     )
-    private String ufo$formatVisibleStorage(appeng.client.gui.widgets.CPUSelectionList instance,
-                                            CraftingStatusMenu.CraftingCpuListEntry cpu) {
+    private String ufo$formatVisibleStorage(final appeng.client.gui.widgets.CPUSelectionList instance,
+                                            final CraftingStatusMenu.CraftingCpuListEntry cpu) {
         return ufo$formatStorage(cpu.storage());
     }
 
@@ -76,7 +76,7 @@ public class MixinCPUSelectionList {
                     target = "Ljava/lang/String;valueOf(I)Ljava/lang/String;"
             )
     )
-    private String ufo$formatVisibleCoProcessors(int coProcessors) {
+    private String ufo$formatVisibleCoProcessors(final int coProcessors) {
         if (coProcessors >= ufo$INFINITE_THREADS_THRESHOLD) {
             return "\u221E";
         }
@@ -84,9 +84,9 @@ public class MixinCPUSelectionList {
     }
 
     @Unique
-    private static String ufo$formatDecimal(long amount) {
+    private static String ufo$formatDecimal(final long amount) {
         if (amount < 1000) return ufo$DF.format(amount);
-        int unit = Math.min((int) (Math.log10(amount) / 3), ufo$UNITS.length - 1);
+        final int unit = Math.min((int) (Math.log10(amount) / 3), ufo$UNITS.length - 1);
         return ufo$DF.format(amount / Math.pow(1000, unit)) + ufo$UNITS[unit];
     }
 }

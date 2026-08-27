@@ -1,7 +1,7 @@
 plugins {
     id 'java-library'
     id 'maven-publish'
-    id 'net.neoforged.moddev' version '2.0.115'
+    id 'net.neoforged.moddev' version '2.0.144'
     id 'idea'
 }
 
@@ -13,29 +13,20 @@ version = mod_version
 group = mod_group_id
 
 repositories {
-    mavenCentral() // AE2, GuideMe, ae2addonlib (published on Sonatype Maven Central)
+    mavenCentral()
     maven {
-        // CurseMaven - for mods without their own Maven repo
-        name 'CurseMaven'
-        url "https://cursemaven.com/"
+        name = 'CurseMaven'
+        url = "https://cursemaven.com/"
         content {
             includeGroup "curse.maven"
         }
     }
     maven {
-        // ModMaven - Mekanism
-        name 'ModMaven'
-        url "https://modmaven.dev/"
-        content {
-            includeGroup "mekanism"
-        }
-    }
-    maven {
         // GeckoLib
-        name 'GeckoLib'
-        url 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/'
+        name = 'GeckoLib'
+        url = 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/'
         content {
-            includeGroup "software.bernie.geckolib"
+            includeGroup "com.geckolib"
         }
     }
 }
@@ -44,15 +35,11 @@ base {
     archivesName = mod_id
 }
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+java.toolchain.languageVersion = JavaLanguageVersion.of(25)
 
 neoForge {
     version = project.neo_version
 
-    parchment {
-        mappingsVersion = project.parchment_mappings_version
-        minecraftVersion = project.parchment_minecraft_version
-    }
     runs {
         client {
             client()
@@ -71,8 +58,8 @@ neoForge {
         }
 
         data {
-            data()
-            programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+            clientData()
+            programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/main/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
         }
 
         configureEach {
@@ -83,89 +70,62 @@ neoForge {
     }
 
     mods {
-        // define mod <-> source bindings
-        // these are used to tell the game which sources are for which mod
-        // multi mod projects should define one per mod
         "${mod_id}" {
             sourceSet(sourceSets.main)
         }
     }
 }
 
-// Include generated resources ahead of src/main/resources so generated models/data
-// win when paths collide during release builds.
-sourceSets.main.resources.setSrcDirs([
-        'src/generated/resources',
-        'src/main/resources'
-])
+sourceSets.main.resources.setSrcDirs(['src/main/resources'])
+
+sourceSets.main.java.exclude(
+        'com/raishxn/ufo/datagen/DataGenerators.java',
+        'com/raishxn/ufo/datagen/ModBlockStateProvider.java',
+        'com/raishxn/ufo/datagen/ModBlockTagProvider.java',
+        'com/raishxn/ufo/datagen/ModFluidTagProvider.java',
+        'com/raishxn/ufo/datagen/ModItemModelProvider.java',
+        'com/raishxn/ufo/datagen/ModItemTagProvider.java',
+        'com/raishxn/ufo/datagen/DMARecipeBuilder.java',
+        'com/raishxn/ufo/datagen/ModRecipeProvider.java',
+        'com/raishxn/ufo/datagen/StellarSimulationRecipeBuilder.java',
+        'com/raishxn/ufo/datagen/UniversalMultiblockRecipeBuilder.java',
+        'com/raishxn/ufo/item/custom/ThermalResistorExosuitItem.java',
+        'com/raishxn/ufo/mixin/AccessorBuiltInModelHooks.java',
+        'com/raishxn/ufo/mixin/MixinModelBakery.java',
+        'com/raishxn/ufo/mixin/MixinMEStorageScreen.java',
+        'com/raishxn/ufo/util/ModItemProperties.java',
+        'com/raishxn/ufo/screen/QuantumPatternHatchLockReason.java'
+        ,'com/raishxn/ufo/client/render/FluidTankRenderer.java'
+        ,'com/raishxn/ufo/client/tutorial/screen/UfoTutorialScreen.java'
+        ,'com/raishxn/ufo/compat/jei/**'
+        ,'com/raishxn/ufo/compat/appflux/**'
+        ,'com/raishxn/ufo/screen/*Screen.java'
+        ,'com/raishxn/ufo/registry/RegistryHandler.java'
+)
 
 configurations {
     runtimeClasspath.extendsFrom localRuntime
 }
 
 dependencies {
-    // ===========================================
-    // Implementation - Maven (version by name)
-    // ===========================================
     implementation "org.appliedenergistics:appliedenergistics2:${ae2_version}"
-    implementation "io.github.pedroksl:ae2addonlib:${ae2addonlib_version}-${minecraft_version}"
+    implementation "io.github.pedroksl:ae2addonlib:${ae2addonlib_version}"
     implementation "org.appliedenergistics:guideme:${guideme_version}"
-    implementation "software.bernie.geckolib:geckolib-neoforge-${minecraft_version}:${geckolib_version}"
-    compileOnly "org.appliedenergistics.yoga:yoga:${yoga_version}"
-    compileOnly "dev.vfyjxf:taffy:${taffy_version}"
-    // GeckoLib was removed since it's not being used.
+    implementation "com.geckolib:geckolib-neoforge-${minecraft_version}:${geckolib_version}"
 
-    // ===========================================
-    // Implementation - CurseForge (file ID)
-    // ===========================================
-    implementation "curse.maven:ldlib-626676:${ldlib_file_id}"
-    implementation "curse.maven:glodium-957920:${glodium_file_id}"
-
-    // ===========================================
-    // CompileOnly - API access only (not bundled)
-    // ===========================================
-    compileOnly "mekanism:Mekanism:${mekanism_version}"
-    compileOnly "mekanism:Mekanism:${mekanism_version}:generators"
-    compileOnly "curse.maven:jei-238222:${jei_file_id}"
+    // for api access
     compileOnly "curse.maven:kubejs-238086:${kubejs_file_id}"
     compileOnly "curse.maven:rhino-416294:${rhino_file_id}"
-    compileOnly "curse.maven:applied-flux-965012:${applied_flux_file_id}"
 
-    // ===========================================
-    // RuntimeOnly - Optional integrations
-    // ===========================================
-    runtimeOnly "curse.maven:applied-flux-965012:${applied_flux_file_id}"
-    runtimeOnly "curse.maven:mega-cells-622112:${mega_file_id}"
-
-    // ===========================================
-    // Local Runtime - Dev test mods
-    // ===========================================
-    localRuntime "curse.maven:building-gadgets-298187:6850515"
-    localRuntime "curse.maven:applied-mekanistics-574300:7096962"
-    localRuntime "curse.maven:avaritianeo-1083158:7353987"
-    localRuntime "software.bernie.geckolib:geckolib-neoforge-${minecraft_version}:${geckolib_version}"
-    localRuntime "curse.maven:applied-flux-965012:${applied_flux_file_id}"
-    localRuntime "curse.maven:mega-cells-622112:${mega_file_id}"
-    localRuntime "mekanism:Mekanism:${mekanism_version}"
-    localRuntime "mekanism:Mekanism:${mekanism_version}:generators"
-    localRuntime "curse.maven:ex-pattern-provider-892005:${ex_pattern_file_id}"
-    localRuntime "curse.maven:jei-238222:${jei_file_id}"
-    localRuntime "curse.maven:ae2-jei-integration-1074338:${ae2_jei_integration_file_id}"
-    localRuntime "curse.maven:mmmmmmmmmmmm-225738:${mmmmmmmmmmmm_file_id}"
-    localRuntime "curse.maven:selene-499980:${selene_file_id}"
-    localRuntime "curse.maven:kubejs-238086:${kubejs_file_id}"
-    localRuntime "curse.maven:rhino-416294:${rhino_file_id}"
-    localRuntime "curse.maven:advancedae-1084104:${advancedae_file_id}"
+    // dev test mods
+    localRuntime "com.geckolib:geckolib-neoforge-${minecraft_version}:${geckolib_version}"
 }
 
-// This block of code expands all declared replace properties in the specified resource targets.
-// A missing property will result in an error. Properties are expanded using ${} Groovy notation.
 var generateModMetadata = tasks.register("generateModMetadata", ProcessResources) {
     var replaceProperties = [
             minecraft_version      : minecraft_version,
             minecraft_version_range: minecraft_version_range,
             neo_version            : neo_version,
-            loader_version_range   : loader_version_range,
             mod_id                 : mod_id,
             mod_name               : mod_name,
             mod_license            : mod_license,
@@ -188,14 +148,15 @@ publishing {
     }
     repositories {
         maven {
-            url "file://${project.projectDir}/repo"
+            url = "file://${project.projectDir}/repo"
         }
     }
-    }
+}
 
 
 tasks.withType(JavaCompile).configureEach {
-    options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
+    options.encoding = 'UTF-8'
+    options.compilerArgs.addAll('-Xlint:deprecation', '-Xlint:unchecked')
 }
 
 tasks.withType(ProcessResources).configureEach {
@@ -203,8 +164,7 @@ tasks.withType(ProcessResources).configureEach {
 }
 
 def syncReleaseResources = tasks.register('syncReleaseResources', Sync) {
-    dependsOn tasks.named('runData'), generateModMetadata
-    from('src/generated/resources')
+    dependsOn generateModMetadata
     from('src/main/resources')
     from(generateModMetadata)
     into layout.buildDirectory.dir('resources/main')
@@ -219,5 +179,5 @@ idea {
     module {
         downloadSources = true
         downloadJavadoc = true
-    }
+}
 }

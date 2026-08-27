@@ -8,7 +8,7 @@ import com.raishxn.ufo.core.MegaCoProcessorTier;
 import com.raishxn.ufo.core.MegaCraftingStorageTier;
 import net.minecraft.core.Direction;
 import net.minecraft.data.PackOutput;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.DirectionalBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -20,21 +20,18 @@ import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import net.neoforged.neoforge.registries.DeferredBlock;
 
 public class ModBlockStateProvider extends BlockStateProvider {
-    public ModBlockStateProvider(PackOutput output, ExistingFileHelper exFileHelper) {
+    public ModBlockStateProvider(final PackOutput output, final ExistingFileHelper exFileHelper) {
         super(output, UfoMod.MOD_ID, exFileHelper);
     }
 
     @Override
     protected void registerStatesAndModels() {
-        // --- Blocos Simples Originais ---
         simpleBlockWithItem(ModBlocks.QUANTUM_LATTICE_FRAME);
         simpleBlockWithItem(ModBlocks.GRAVITON_PLATED_CASING);
         blockWithFluidTexture(ModBlocks.WHITE_DWARF_FRAGMENT_BLOCK, "white_dwarf_fragment");
         blockWithFluidTexture(ModBlocks.PULSAR_FRAGMENT_BLOCK, "pulsar_fragment");
         blockWithFluidTexture(ModBlocks.NEUTRON_STAR_FRAGMENT_BLOCK, "neutron_star_fragment");
 
-        // --- Registro dos Novos Blocos Multiblock ---
-        // Blocos que são um cubo simples
         multiblockCube(MultiblockBlocks.ENTROPY_ASSEMBLER_CORE_CASING);
         multiblockCube(MultiblockBlocks.ENTROPY_SINGULARITY_CASING);
         craftingLikeCube(MultiblockBlocks.ENTROPY_COMPUTER_CONDENSATION_MATRIX, "entropy_computer_condensation_matrix");
@@ -49,7 +46,6 @@ public class ModBlockStateProvider extends BlockStateProvider {
         controllerWithBase(MultiblockBlocks.QUANTUM_PROCESSOR_ASSEMBLER_CONTROLLER, "quantum_hyper_mechanical_casing");
         controllerWithBase(MultiblockBlocks.QUANTUM_CRYOFORGE_CONTROLLER, "quantum_hyper_mechanical_casing");
 
-        // ═══════════════════ STELLAR NEXUS ═══════════════════
         stellarNexusControllerBlock(MultiblockBlocks.STELLAR_NEXUS_CONTROLLER);
         hatchWithOverlay(MultiblockBlocks.ME_MASSIVE_OUTPUT_HATCH, "me_massive_output_hatch_overlay");
         hatchWithOverlay(MultiblockBlocks.ME_MASSIVE_FLUID_HATCH, "me_massive_fluid_hatch_overlay");
@@ -60,12 +56,11 @@ public class ModBlockStateProvider extends BlockStateProvider {
         multiblockCube(MultiblockBlocks.STELLAR_FIELD_GENERATOR_T3);
 
 
-        // --- Blocos com Variantes (Crafting Units) ---
-        for (var tier : MegaCraftingStorageTier.values()) {
-            var block = ModBlocks.CRAFTING_STORAGE_BLOCKS.get(tier);
-            String registryName = block.getId().getPath();
-            ModelFile unformedModel = models().cubeAll(registryName, modLoc("block/" + registryName));
-            ModelFile formedModel = models().getBuilder(registryName + "_formed");
+        for (final var tier : MegaCraftingStorageTier.values()) {
+            final var block = ModBlocks.CRAFTING_STORAGE_BLOCKS.get(tier);
+            final String registryName = block.getId().getPath();
+            final ModelFile unformedModel = models().cubeAll(registryName, modLoc("block/" + registryName));
+            final ModelFile formedModel = models().getBuilder(registryName + "_formed");
 
             getVariantBuilder(block.get())
                     .partialState().with(AbstractCraftingUnitBlock.FORMED, false)
@@ -76,11 +71,11 @@ public class ModBlockStateProvider extends BlockStateProvider {
             simpleBlockItem(block.get(), unformedModel);
         }
 
-        for (var tier : MegaCoProcessorTier.values()) {
-            var block = ModBlocks.CO_PROCESSOR_BLOCKS.get(tier);
-            String registryName = block.getId().getPath();
-            ModelFile unformedModel = models().cubeAll(registryName, modLoc("block/" + registryName));
-            ModelFile formedModel = models().getBuilder(registryName + "_formed");
+        for (final var tier : MegaCoProcessorTier.values()) {
+            final var block = ModBlocks.CO_PROCESSOR_BLOCKS.get(tier);
+            final String registryName = block.getId().getPath();
+            final ModelFile unformedModel = models().cubeAll(registryName, modLoc("block/" + registryName));
+            final ModelFile formedModel = models().getBuilder(registryName + "_formed");
 
             getVariantBuilder(block.get())
                     .partialState().with(AbstractCraftingUnitBlock.FORMED, false)
@@ -92,36 +87,35 @@ public class ModBlockStateProvider extends BlockStateProvider {
         }
     }
 
-    private void simpleBlockWithItem(DeferredBlock<Block> blockHolder) {
-        String registryName = blockHolder.getId().getPath();
-        ModelFile model = models().cubeAll(registryName, modLoc("block/" + registryName));
+    private void simpleBlockWithItem(final DeferredBlock<Block> blockHolder) {
+        final String registryName = blockHolder.getId().getPath();
+        final ModelFile model = models().cubeAll(registryName, modLoc("block/" + registryName));
         simpleBlock(blockHolder.get(), model);
         simpleBlockItem(blockHolder.get(), model);
     }
 
-    // --- MÉTODOS AUXILIARES PARA OS NOVOS BLOCOS ---
 
     /**
      * Registra um bloco de multiblock que é um cubo simples.
      */
-    private void multiblockCube(DeferredBlock<? extends Block> block) {
-        String name = block.getId().getPath();
-        ResourceLocation texture = modLoc("block/multiblock/" + name);
+    private void multiblockCube(final DeferredBlock<? extends Block> block) {
+        final String name = block.getId().getPath();
+        final Identifier texture = modLoc("block/multiblock/" + name);
         simpleBlock(block.get(), models().cubeAll(name, texture));
         simpleBlockItem(block.get(), models().getExistingFile(modLoc("block/" + name)));
     }
 
-    private void multiblockCubeWithTexture(DeferredBlock<? extends Block> block, String textureName) {
-        String name = block.getId().getPath();
-        ResourceLocation texture = modLoc("block/multiblock/" + textureName);
+    private void multiblockCubeWithTexture(final DeferredBlock<? extends Block> block, final String textureName) {
+        final String name = block.getId().getPath();
+        final Identifier texture = modLoc("block/multiblock/" + textureName);
         simpleBlock(block.get(), models().cubeAll(name, texture));
         simpleBlockItem(block.get(), models().getExistingFile(modLoc("block/" + name)));
     }
 
-    private void craftingLikeCube(DeferredBlock<? extends Block> block, String textureName) {
-        String name = block.getId().getPath();
-        ResourceLocation texture = modLoc("block/multiblock/" + textureName);
-        ModelFile model = models().cubeAll(name, texture);
+    private void craftingLikeCube(final DeferredBlock<? extends Block> block, final String textureName) {
+        final String name = block.getId().getPath();
+        final Identifier texture = modLoc("block/multiblock/" + textureName);
+        final ModelFile model = models().cubeAll(name, texture);
 
         getVariantBuilder(block.get())
                 .partialState().with(AbstractCraftingUnitBlock.FORMED, false)
@@ -132,13 +126,13 @@ public class ModBlockStateProvider extends BlockStateProvider {
         simpleBlockItem(block.get(), model);
     }
 
-    private void entropicMachineCube(DeferredBlock<? extends Block> block, String textureName) {
-        String name = block.getId().getPath();
-        ResourceLocation texture = modLoc("block/multiblock/" + textureName);
-        ModelFile model = models().cubeAll(name, texture);
+    private void entropicMachineCube(final DeferredBlock<? extends Block> block, final String textureName) {
+        final String name = block.getId().getPath();
+        final Identifier texture = modLoc("block/multiblock/" + textureName);
+        final ModelFile model = models().cubeAll(name, texture);
 
         getVariantBuilder(block.get()).forAllStates(state -> {
-            boolean formed = getBooleanPropertyByName(state, "formed");
+            final boolean formed = getBooleanPropertyByName(state, "formed");
             return ConfiguredModel.builder()
                     .modelFile(model)
                     .build();
@@ -147,9 +141,9 @@ public class ModBlockStateProvider extends BlockStateProvider {
         simpleBlockItem(block.get(), model);
     }
 
-    private boolean getBooleanPropertyByName(BlockState state, String propertyName) {
-        for (var property : state.getProperties()) {
-            if (property.getName().equals(propertyName) && property instanceof BooleanProperty booleanProperty) {
+    private boolean getBooleanPropertyByName(final BlockState state, final String propertyName) {
+        for (final var property : state.getProperties()) {
+            if (property.getName().equals(propertyName) && property instanceof final BooleanProperty booleanProperty) {
                 return state.getValue(booleanProperty);
             }
         }
@@ -159,13 +153,13 @@ public class ModBlockStateProvider extends BlockStateProvider {
     /**
      * Directional multiblock cube — same texture on all faces, rotated by FACING.
      */
-    private void directionalMultiblockCube(DeferredBlock<? extends Block> block) {
-        String name = block.getId().getPath();
-        ResourceLocation texture = modLoc("block/multiblock/" + name);
-        ModelFile model = models().cubeAll(name, texture);
+    private void directionalMultiblockCube(final DeferredBlock<? extends Block> block) {
+        final String name = block.getId().getPath();
+        final Identifier texture = modLoc("block/multiblock/" + name);
+        final ModelFile model = models().cubeAll(name, texture);
 
         getVariantBuilder(block.get()).forAllStates(state -> {
-            Direction dir = state.getValue(DirectionalBlock.FACING);
+            final Direction dir = state.getValue(DirectionalBlock.FACING);
             return ConfiguredModel.builder()
                     .modelFile(model)
                     .rotationX(dir == Direction.DOWN ? 90 : dir == Direction.UP ? -90 : 0)
@@ -176,20 +170,20 @@ public class ModBlockStateProvider extends BlockStateProvider {
         simpleBlockItem(block.get(), model);
     }
 
-    private void blockWithFluidTexture(DeferredBlock<Block> block, String fluidTextureName) {
-        String name = block.getId().getPath();
-        ResourceLocation texture = modLoc("block/fluid/" + fluidTextureName);
-        ModelFile model = models().cubeAll(name, texture);
+    private void blockWithFluidTexture(final DeferredBlock<Block> block, final String fluidTextureName) {
+        final String name = block.getId().getPath();
+        final Identifier texture = modLoc("block/fluid/" + fluidTextureName);
+        final ModelFile model = models().cubeAll(name, texture);
         simpleBlock(block.get(), model);
         simpleBlockItem(block.get(), model);
     }
-    private void multiblockComponentBlock(DeferredBlock<Block> block) {
-        String name = block.getId().getPath();
-        ResourceLocation baseTexture = modLoc("block/multiblock/entropy_assembler_core_casing_base");
-        ResourceLocation overlayTexture = modLoc("block/multiblock/" + name);
+    private void multiblockComponentBlock(final DeferredBlock<Block> block) {
+        final String name = block.getId().getPath();
+        final Identifier baseTexture = modLoc("block/multiblock/entropy_assembler_core_casing_base");
+        final Identifier overlayTexture = modLoc("block/multiblock/" + name);
 
-        ModelFile modelFile = models().withExistingParent(name, "block/block")
-                .renderType("cutout") // <<-- CORREÇÃO: renderType aplicado ao ModelBuilder
+        final ModelFile modelFile = models().withExistingParent(name, "block/block")
+                .renderType("cutout")
                 .texture("particle", baseTexture)
                 .texture("base", baseTexture)
                 .texture("overlay", overlayTexture)
@@ -203,7 +197,7 @@ public class ModBlockStateProvider extends BlockStateProvider {
                 .end();
 
         getVariantBuilder(block.get()).forAllStates(state -> {
-            Direction dir = state.getValue(DirectionalBlock.FACING);
+            final Direction dir = state.getValue(DirectionalBlock.FACING);
             return ConfiguredModel.builder()
                     .modelFile(modelFile)
                     .rotationX(dir == Direction.DOWN ? 90 : dir == Direction.UP ? -90 : 0)
@@ -214,21 +208,21 @@ public class ModBlockStateProvider extends BlockStateProvider {
         simpleBlockItem(block.get(), modelFile);
     }
 
-    private void controllerBlock(DeferredBlock<Block> block) {
-        ResourceLocation baseTexture = modLoc("block/multiblock/entropy_assembler_core_casing_base");
-        ResourceLocation overlayInactive = modLoc("block/general1/overlay_front");
-        ResourceLocation overlayActive = modLoc("block/general1/overlay_front_active");
+    private void controllerBlock(final DeferredBlock<Block> block) {
+        final Identifier baseTexture = modLoc("block/multiblock/entropy_assembler_core_casing_base");
+        final Identifier overlayInactive = modLoc("block/general1/overlay_front");
+        final Identifier overlayActive = modLoc("block/general1/overlay_front_active");
 
-        var inactiveModel = models().withExistingParent(block.getId().getPath(), "block/block")
-                .renderType("cutout") // <<-- CORREÇÃO: renderType aplicado ao ModelBuilder
+        final var inactiveModel = models().withExistingParent(block.getId().getPath(), "block/block")
+                .renderType("cutout")
                 .texture("particle", baseTexture)
                 .texture("base", baseTexture)
                 .texture("overlay", overlayInactive)
                 .element().from(0, 0, 0).to(16, 16, 16).allFaces((dir, face) -> face.texture("#base").cullface(dir)).end()
                 .element().from(0, 0, 0).to(16, 16, 16).face(Direction.NORTH).texture("#overlay").cullface(Direction.NORTH).end();
 
-        var activeModel = models().withExistingParent(block.getId().getPath() + "_active", "block/block")
-                .renderType("cutout") // <<-- CORREÇÃO: renderType aplicado ao ModelBuilder
+        final var activeModel = models().withExistingParent(block.getId().getPath() + "_active", "block/block")
+                .renderType("cutout")
                 .texture("particle", baseTexture)
                 .texture("base", baseTexture)
                 .texture("overlay", overlayActive)
@@ -236,8 +230,8 @@ public class ModBlockStateProvider extends BlockStateProvider {
                 .element().from(0, 0, 0).to(16, 16, 16).face(Direction.NORTH).texture("#overlay").cullface(Direction.NORTH).end();
 
         getVariantBuilder(block.get()).forAllStates(state -> {
-            Direction dir = state.getValue(DirectionalBlock.FACING);
-            boolean isActive = state.getValue(MultiblockBlocks.ControllerBlock.ACTIVE);
+            final Direction dir = state.getValue(DirectionalBlock.FACING);
+            final boolean isActive = state.getValue(MultiblockBlocks.ControllerBlock.ACTIVE);
             return ConfiguredModel.builder()
                     .modelFile((isActive ? activeModel : inactiveModel).end())
                     .rotationX(dir == Direction.DOWN ? 90 : dir == Direction.UP ? -90 : 0)
@@ -248,12 +242,12 @@ public class ModBlockStateProvider extends BlockStateProvider {
         simpleBlockItem(block.get(), inactiveModel.end());
     }
 
-    private void controllerWithBase(DeferredBlock<? extends Block> block, String baseTextureName) {
-        String name = block.getId().getPath();
-        ResourceLocation baseTexture = modLoc("block/multiblock/" + baseTextureName);
-        ResourceLocation overlayTexture = modLoc("block/multiblock/overlay_front");
+    private void controllerWithBase(final DeferredBlock<? extends Block> block, final String baseTextureName) {
+        final String name = block.getId().getPath();
+        final Identifier baseTexture = modLoc("block/multiblock/" + baseTextureName);
+        final Identifier overlayTexture = modLoc("block/multiblock/overlay_front");
 
-        ModelFile model = models().withExistingParent(name, "block/block")
+        final ModelFile model = models().withExistingParent(name, "block/block")
                 .renderType("cutout")
                 .texture("particle", baseTexture)
                 .texture("base", baseTexture)
@@ -262,7 +256,7 @@ public class ModBlockStateProvider extends BlockStateProvider {
                 .element().from(0, 0, 0).to(16, 16, 16).face(Direction.NORTH).texture("#overlay").cullface(Direction.NORTH).end().end();
 
         getVariantBuilder(block.get()).forAllStates(state -> {
-            Direction dir = state.getValue(DirectionalBlock.FACING);
+            final Direction dir = state.getValue(DirectionalBlock.FACING);
             return ConfiguredModel.builder()
                     .modelFile(model)
                     .rotationX(dir == Direction.DOWN ? 90 : dir == Direction.UP ? -90 : 0)
@@ -273,13 +267,13 @@ public class ModBlockStateProvider extends BlockStateProvider {
         simpleBlockItem(block.get(), model);
     }
 
-    private void qmfControllerBlock(DeferredBlock<? extends Block> block) {
-        String name = block.getId().getPath();
-        ResourceLocation baseTexture = modLoc("block/multiblock/quantum_hyper_mechanical_casing");
-        ResourceLocation overlayInactive = modLoc("block/qmf/overlay_front");
-        ResourceLocation overlayActive = modLoc("block/qmf/overlay_front_active");
+    private void qmfControllerBlock(final DeferredBlock<? extends Block> block) {
+        final String name = block.getId().getPath();
+        final Identifier baseTexture = modLoc("block/multiblock/quantum_hyper_mechanical_casing");
+        final Identifier overlayInactive = modLoc("block/qmf/overlay_front");
+        final Identifier overlayActive = modLoc("block/qmf/overlay_front_active");
 
-        ModelFile inactiveModel = models().withExistingParent(name, "block/block")
+        final ModelFile inactiveModel = models().withExistingParent(name, "block/block")
                 .renderType("cutout")
                 .texture("particle", baseTexture)
                 .texture("base", baseTexture)
@@ -287,7 +281,7 @@ public class ModBlockStateProvider extends BlockStateProvider {
                 .element().from(0, 0, 0).to(16, 16, 16).allFaces((dir, face) -> face.texture("#base").cullface(dir)).end()
                 .element().from(0, 0, 0).to(16, 16, 16).face(Direction.NORTH).texture("#overlay").cullface(Direction.NORTH).end().end();
 
-        ModelFile activeModel = models().withExistingParent(name + "_active", "block/block")
+        final ModelFile activeModel = models().withExistingParent(name + "_active", "block/block")
                 .renderType("cutout")
                 .texture("particle", baseTexture)
                 .texture("base", baseTexture)
@@ -296,8 +290,8 @@ public class ModBlockStateProvider extends BlockStateProvider {
                 .element().from(0, 0, 0).to(16, 16, 16).face(Direction.NORTH).texture("#overlay").cullface(Direction.NORTH).end().end();
 
         getVariantBuilder(block.get()).forAllStates(state -> {
-            Direction dir = state.getValue(DirectionalBlock.FACING);
-            boolean active = state.getValue(com.raishxn.ufo.block.MultiblockBlocks.ControllerBlock.ACTIVE);
+            final Direction dir = state.getValue(DirectionalBlock.FACING);
+            final boolean active = state.getValue(com.raishxn.ufo.block.MultiblockBlocks.ControllerBlock.ACTIVE);
             return ConfiguredModel.builder()
                     .modelFile(active ? activeModel : inactiveModel)
                     .rotationX(dir == Direction.DOWN ? 90 : dir == Direction.UP ? -90 : 0)
@@ -308,12 +302,12 @@ public class ModBlockStateProvider extends BlockStateProvider {
         simpleBlockItem(block.get(), inactiveModel);
     }
 
-    private void stellarNexusControllerBlock(DeferredBlock<? extends Block> block) {
-        String name = block.getId().getPath();
-        ResourceLocation baseTexture = modLoc("block/multiblock/entropy_singularity_casing");
-        ResourceLocation overlayTexture = modLoc("block/multiblock/overlay_front");
+    private void stellarNexusControllerBlock(final DeferredBlock<? extends Block> block) {
+        final String name = block.getId().getPath();
+        final Identifier baseTexture = modLoc("block/multiblock/entropy_singularity_casing");
+        final Identifier overlayTexture = modLoc("block/multiblock/overlay_front");
 
-        ModelFile normalModel = models().withExistingParent(name, "block/block")
+        final ModelFile normalModel = models().withExistingParent(name, "block/block")
                 .renderType("cutout")
                 .texture("particle", baseTexture)
                 .texture("base", baseTexture)
@@ -321,8 +315,8 @@ public class ModBlockStateProvider extends BlockStateProvider {
                 .element().from(0, 0, 0).to(16, 16, 16).allFaces((dir, face) -> face.texture("#base").cullface(dir)).end()
                 .element().from(0, 0, 0).to(16, 16, 16).face(Direction.NORTH).texture("#overlay").cullface(Direction.NORTH).end().end();
 
-        ResourceLocation assembledBase = modLoc("block/multiblock/entropy_assembler_core_casing");
-        ModelFile assembledModel = models().withExistingParent(name + "_assembled", "block/block")
+        final Identifier assembledBase = modLoc("block/multiblock/entropy_assembler_core_casing");
+        final ModelFile assembledModel = models().withExistingParent(name + "_assembled", "block/block")
                 .renderType("cutout")
                 .texture("particle", assembledBase)
                 .texture("base", assembledBase)
@@ -331,8 +325,8 @@ public class ModBlockStateProvider extends BlockStateProvider {
                 .element().from(0, 0, 0).to(16, 16, 16).face(Direction.NORTH).texture("#overlay").cullface(Direction.NORTH).end().end();
 
         getVariantBuilder(block.get()).forAllStates(state -> {
-            Direction dir = state.getValue(DirectionalBlock.FACING);
-            boolean assembled = state.getValue(com.raishxn.ufo.block.StellarNexusControllerBlock.ASSEMBLED);
+            final Direction dir = state.getValue(DirectionalBlock.FACING);
+            final boolean assembled = state.getValue(com.raishxn.ufo.block.StellarNexusControllerBlock.ASSEMBLED);
             return ConfiguredModel.builder()
                     .modelFile(assembled ? assembledModel : normalModel)
                     .rotationX(dir == Direction.DOWN ? 90 : dir == Direction.UP ? -90 : 0)
@@ -347,12 +341,12 @@ public class ModBlockStateProvider extends BlockStateProvider {
      * Hatch block with entropy_singularity_casing as base + a per-hatch overlay on the front face.
      * Uses cutout render type to support animated overlay textures.
      */
-    private void hatchWithOverlay(DeferredBlock<? extends Block> block, String overlayName) {
-        String name = block.getId().getPath();
-        ResourceLocation baseTexture = modLoc("block/multiblock/entropy_singularity_casing");
-        ResourceLocation overlayTexture = modLoc("block/multiblock/" + overlayName);
+    private void hatchWithOverlay(final DeferredBlock<? extends Block> block, final String overlayName) {
+        final String name = block.getId().getPath();
+        final Identifier baseTexture = modLoc("block/multiblock/entropy_singularity_casing");
+        final Identifier overlayTexture = modLoc("block/multiblock/" + overlayName);
 
-        ModelFile modelFile = models().withExistingParent(name, "block/block")
+        final ModelFile modelFile = models().withExistingParent(name, "block/block")
                 .renderType("cutout")
                 .texture("particle", baseTexture)
                 .texture("base", baseTexture)
@@ -367,7 +361,7 @@ public class ModBlockStateProvider extends BlockStateProvider {
                 .end();
 
         getVariantBuilder(block.get()).forAllStates(state -> {
-            Direction dir = state.getValue(DirectionalBlock.FACING);
+            final Direction dir = state.getValue(DirectionalBlock.FACING);
             return ConfiguredModel.builder()
                     .modelFile(modelFile)
                     .rotationX(dir == Direction.DOWN ? 90 : dir == Direction.UP ? -90 : 0)

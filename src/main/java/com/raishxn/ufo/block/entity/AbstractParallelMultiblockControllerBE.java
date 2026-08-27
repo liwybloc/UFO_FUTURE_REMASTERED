@@ -22,8 +22,6 @@ import com.raishxn.ufo.api.multiblock.MultiblockControllerDefinitions;
 import com.raishxn.ufo.block.MultiblockBlocks;
 import com.raishxn.ufo.block.entity.processing.MultiblockProcessingRecipe;
 import com.raishxn.ufo.block.entity.processing.ParallelProcessState;
-import com.raishxn.ufo.compat.mekanism.MekanismChemicalStorage;
-import com.raishxn.ufo.compat.mekanism.UfoMekanismKey;
 import com.raishxn.ufo.fluid.ModFluids;
 import com.raishxn.ufo.init.ModSounds;
 import com.raishxn.ufo.item.custom.BaseCatalystItem;
@@ -35,11 +33,13 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.fluids.FluidStack;
@@ -70,10 +70,10 @@ public abstract class AbstractParallelMultiblockControllerBE extends AbstractSim
     @Nullable
     private List<MultiblockProcessingRecipe> cachedAvailableRecipes;
     @Nullable
-    private Map<ResourceLocation, MultiblockProcessingRecipe> cachedRecipeIndex;
+    private Map<Identifier, MultiblockProcessingRecipe> cachedRecipeIndex;
     private long lastRecipeCacheRefreshTick = Long.MIN_VALUE;
 
-    protected AbstractParallelMultiblockControllerBE(BlockEntityType<?> type, BlockPos pos, BlockState state) {
+    protected AbstractParallelMultiblockControllerBE(final BlockEntityType<?> type, final BlockPos pos, final BlockState state) {
         super(type, pos, state);
         this.maxTemperature = THERMAL_MAX;
         for (int i = 0; i < MAX_PARALLEL_THREADS; i++) {
@@ -95,11 +95,11 @@ public abstract class AbstractParallelMultiblockControllerBE extends AbstractSim
             return;
         }
 
-        RecipeSnapshot recipes = getRecipeSnapshot();
-        List<MultiblockProcessingRecipe> availableRecipes = recipes.recipes();
-        Map<ResourceLocation, MultiblockProcessingRecipe> recipeIndex = recipes.index();
+        final RecipeSnapshot recipes = getRecipeSnapshot();
+        final List<MultiblockProcessingRecipe> availableRecipes = recipes.recipes();
+        final Map<Identifier, MultiblockProcessingRecipe> recipeIndex = recipes.index();
 
-        AENetworkedBlockEntity nodeBE = getConnectedNetworkNode();
+        final AENetworkedBlockEntity nodeBE = getConnectedNetworkNode();
         if (nodeBE == null || nodeBE.getActionableNode() == null) {
             clearProcessStates();
             refreshProcessStates(recipeIndex);
@@ -114,8 +114,8 @@ public abstract class AbstractParallelMultiblockControllerBE extends AbstractSim
             return;
         }
 
-        IGridNode node = nodeBE.getActionableNode();
-        IGrid grid = node.getGrid();
+        final IGridNode node = nodeBE.getActionableNode();
+        final IGrid grid = node.getGrid();
         if (grid == null) {
             clearProcessStates();
             refreshProcessStates(recipeIndex);
@@ -130,32 +130,32 @@ public abstract class AbstractParallelMultiblockControllerBE extends AbstractSim
             return;
         }
 
-        IEnergyService energyService = grid.getEnergyService();
-        IStorageService storageService = grid.getStorageService();
-        MEStorage inventory = storageService.getInventory();
-        IActionSource src = IActionSource.ofMachine(nodeBE);
+        final IEnergyService energyService = grid.getEnergyService();
+        final IStorageService storageService = grid.getStorageService();
+        final MEStorage inventory = storageService.getInventory();
+        final IActionSource src = IActionSource.ofMachine(nodeBE);
         refreshProcessStates(recipeIndex);
-        CatalystProfile catalystProfile = getCatalystProfile();
+        final CatalystProfile catalystProfile = getCatalystProfile();
 
         boolean anyRunning = false;
         int hottestMaxProgress = 0;
         int hottestProgress = 0;
         int runningThreads = 0;
-        boolean thermalLocked = this.safeMode && this.temperature >= this.maxTemperature;
-        int parallelLimit = getParallelThreadLimit();
+        final boolean thermalLocked = this.safeMode && this.temperature >= this.maxTemperature;
+        final int parallelLimit = getParallelThreadLimit();
 
-        for (ParallelProcessState processState : this.processStates) {
+        for (final ParallelProcessState processState : this.processStates) {
             if (!processState.isActive()) {
                 continue;
             }
 
-            MultiblockProcessingRecipe recipe = recipeIndex.get(processState.getRecipeId());
+            final MultiblockProcessingRecipe recipe = recipeIndex.get(processState.getRecipeId());
             if (recipe == null) {
                 processState.clear();
                 continue;
             }
 
-            int scaledMaxProgress = getAdjustedProcessingTime(recipe, catalystProfile);
+            final int scaledMaxProgress = getAdjustedProcessingTime(recipe, catalystProfile);
             if (scaledMaxProgress > hottestMaxProgress) {
                 hottestMaxProgress = scaledMaxProgress;
                 hottestProgress = processState.getProgress();
@@ -170,9 +170,9 @@ public abstract class AbstractParallelMultiblockControllerBE extends AbstractSim
             }
 
             processState.resizeBuffers(recipe.itemInputs().size(), recipe.fluidInputs().size(), recipe.chemicalInputs().size());
-            long scaledEnergy = getAdjustedEnergyCost(recipe, catalystProfile);
+            final long scaledEnergy = getAdjustedEnergyCost(recipe, catalystProfile);
             chargeEnergy(processState, energyService, scaledEnergy);
-            boolean materialsFulfilled = pullIngredients(processState, recipe, inventory, src);
+            final boolean materialsFulfilled = pullIngredients(processState, recipe, inventory, src);
             if (!materialsFulfilled || processState.getEnergyBuffer() < scaledEnergy) {
                 continue;
             }
@@ -195,16 +195,16 @@ public abstract class AbstractParallelMultiblockControllerBE extends AbstractSim
         syncClientState(true);
     }
 
-    private Map<ResourceLocation, MultiblockProcessingRecipe> indexRecipes(List<MultiblockProcessingRecipe> availableRecipes) {
-        Map<ResourceLocation, MultiblockProcessingRecipe> recipeIndex = new HashMap<>(availableRecipes.size());
-        for (MultiblockProcessingRecipe recipe : availableRecipes) {
+    private Map<Identifier, MultiblockProcessingRecipe> indexRecipes(final List<MultiblockProcessingRecipe> availableRecipes) {
+        final Map<Identifier, MultiblockProcessingRecipe> recipeIndex = new HashMap<>(availableRecipes.size());
+        for (final MultiblockProcessingRecipe recipe : availableRecipes) {
             recipeIndex.put(recipe.id(), recipe);
         }
         return recipeIndex;
     }
 
     private RecipeSnapshot getRecipeSnapshot() {
-        long gameTime = this.level != null ? this.level.getGameTime() : 0L;
+        final long gameTime = this.level != null ? this.level.getGameTime() : 0L;
         if (this.cachedAvailableRecipes == null
                 || this.cachedRecipeIndex == null
                 || this.lastRecipeCacheRefreshTick == Long.MIN_VALUE
@@ -214,8 +214,8 @@ public abstract class AbstractParallelMultiblockControllerBE extends AbstractSim
         return new RecipeSnapshot(this.cachedAvailableRecipes, this.cachedRecipeIndex);
     }
 
-    private void refreshRecipeCache(long gameTime) {
-        List<MultiblockProcessingRecipe> recipes = List.copyOf(getAvailableRecipes());
+    private void refreshRecipeCache(final long gameTime) {
+        final List<MultiblockProcessingRecipe> recipes = List.copyOf(getAvailableRecipes());
         this.cachedAvailableRecipes = recipes;
         this.cachedRecipeIndex = indexRecipes(recipes);
         this.lastRecipeCacheRefreshTick = gameTime;
@@ -227,13 +227,13 @@ public abstract class AbstractParallelMultiblockControllerBE extends AbstractSim
         this.lastRecipeCacheRefreshTick = Long.MIN_VALUE;
     }
 
-    private void refreshProcessStates(Map<ResourceLocation, MultiblockProcessingRecipe> recipeIndex) {
-        for (ParallelProcessState state : this.processStates) {
+    private void refreshProcessStates(final Map<Identifier, MultiblockProcessingRecipe> recipeIndex) {
+        for (final ParallelProcessState state : this.processStates) {
             if (!state.isActive()) {
                 continue;
             }
 
-            MultiblockProcessingRecipe recipe = recipeIndex.get(state.getRecipeId());
+            final MultiblockProcessingRecipe recipe = recipeIndex.get(state.getRecipeId());
             if (recipe == null || !MultiblockTierScaling.canRunRecipe(this.machineTier, recipe.requiredTier())) {
                 state.clear();
                 continue;
@@ -247,7 +247,7 @@ public abstract class AbstractParallelMultiblockControllerBE extends AbstractSim
     }
 
     private void clearProcessStates() {
-        for (ParallelProcessState state : this.processStates) {
+        for (final ParallelProcessState state : this.processStates) {
             state.clear();
         }
     }
@@ -258,7 +258,7 @@ public abstract class AbstractParallelMultiblockControllerBE extends AbstractSim
 
     protected int getActiveProcessCount() {
         int count = 0;
-        for (ParallelProcessState state : this.processStates) {
+        for (final ParallelProcessState state : this.processStates) {
             if (state.isActive()) {
                 count++;
             }
@@ -274,28 +274,28 @@ public abstract class AbstractParallelMultiblockControllerBE extends AbstractSim
         return 1.0D;
     }
 
-    private void chargeEnergy(ParallelProcessState state, IEnergyService energyService, long targetEnergy) {
+    private void chargeEnergy(final ParallelProcessState state, final IEnergyService energyService, final long targetEnergy) {
         if (state.getEnergyBuffer() >= targetEnergy) {
             return;
         }
-        long needed = targetEnergy - state.getEnergyBuffer();
-        long chargeRate = 5_000_000L;
-        double extracted = energyService.extractAEPower(Math.min(needed, chargeRate), Actionable.MODULATE, PowerMultiplier.CONFIG);
+        final long needed = targetEnergy - state.getEnergyBuffer();
+        final long chargeRate = 5_000_000L;
+        final double extracted = energyService.extractAEPower(Math.min(needed, chargeRate), Actionable.MODULATE, PowerMultiplier.CONFIG);
         state.setEnergyBuffer(state.getEnergyBuffer() + (long) extracted);
     }
 
-    private boolean pullIngredients(ParallelProcessState state, MultiblockProcessingRecipe recipe, MEStorage inventory, IActionSource src) {
+    private boolean pullIngredients(final ParallelProcessState state, final MultiblockProcessingRecipe recipe, final MEStorage inventory, final IActionSource src) {
         boolean materialsFulfilled = true;
 
         for (int i = 0; i < recipe.itemInputs().size(); i++) {
-            var requirement = recipe.itemInputs().get(i);
+            final var requirement = recipe.itemInputs().get(i);
             if (state.getItemBuffers()[i] >= requirement.amount()) {
                 continue;
             }
-            long needed = requirement.amount() - state.getItemBuffers()[i];
+            final long needed = requirement.amount() - state.getItemBuffers()[i];
             long toExtract = Math.min(needed, 100_000L);
-            for (ItemStack match : requirement.ingredient().getItems()) {
-                long extracted = inventory.extract(AEItemKey.of(match), toExtract, Actionable.MODULATE, src);
+            for (final ItemStack match : requirement.ingredient().getValues().stream().map(holder -> new ItemStack(holder.value())).toList()) {
+                final long extracted = inventory.extract(AEItemKey.of(match), toExtract, Actionable.MODULATE, src);
                 state.getItemBuffers()[i] += extracted;
                 toExtract -= extracted;
                 if (toExtract <= 0) {
@@ -308,69 +308,28 @@ public abstract class AbstractParallelMultiblockControllerBE extends AbstractSim
         }
 
         for (int i = 0; i < recipe.fluidInputs().size(); i++) {
-            var requirement = recipe.fluidInputs().get(i);
+            final var requirement = recipe.fluidInputs().get(i);
             if (state.getFluidBuffers()[i] >= requirement.amount()) {
                 continue;
             }
-            long needed = requirement.amount() - state.getFluidBuffers()[i];
-            long extracted = inventory.extract(AEFluidKey.of(requirement.fluid().getFluid()), Math.min(needed, 1_000_000L), Actionable.MODULATE, src);
+            final long needed = requirement.amount() - state.getFluidBuffers()[i];
+            final long extracted = inventory.extract(AEFluidKey.of(requirement.fluid().getFluid()), Math.min(needed, 1_000_000L), Actionable.MODULATE, src);
             state.getFluidBuffers()[i] += extracted;
             if (state.getFluidBuffers()[i] < requirement.amount()) {
                 materialsFulfilled = false;
             }
         }
 
-        for (int i = 0; i < recipe.chemicalInputs().size(); i++) {
-            var requirement = recipe.chemicalInputs().get(i);
-            if (state.getChemicalBuffers()[i] >= requirement.amount()) {
-                continue;
-            }
-            long needed = requirement.amount() - state.getChemicalBuffers()[i];
-            long extracted = extractChemicalFromHatches(requirement.chemicalId(), Math.min(needed, 1_000_000L));
-            state.getChemicalBuffers()[i] += extracted;
-            if (state.getChemicalBuffers()[i] < requirement.amount()) {
-                materialsFulfilled = false;
-            }
+        if (!recipe.chemicalInputs().isEmpty()) {
+            materialsFulfilled = false;
         }
 
         return materialsFulfilled;
     }
 
-    private long extractChemicalFromHatches(ResourceLocation chemicalId, long amount) {
-        if (this.level == null || amount <= 0L) {
-            return 0L;
-        }
-
-        long remaining = amount;
-        long extractedTotal = 0L;
-        for (BlockPos partPos : this.parts) {
-            if (!(this.level.getBlockEntity(partPos) instanceof MekanismChemicalStorage storage) || !storage.supportsChemicalIO()) {
-                continue;
-            }
-
-            ResourceLocation storedId = storage.getStoredChemicalId();
-            if (storedId == null || !storedId.equals(chemicalId)) {
-                continue;
-            }
-
-            long extracted = Math.min(remaining, storage.getStoredChemicalAmount());
-            if (extracted <= 0L) {
-                continue;
-            }
-
-            storage.setStoredChemical(storedId, storage.getStoredChemicalAmount() - extracted);
-            extractedTotal += extracted;
-            remaining -= extracted;
-            if (remaining <= 0L) {
-                break;
-            }
-        }
-        return extractedTotal;
-    }
-
-    private void finishRecipe(ParallelProcessState state, MultiblockProcessingRecipe recipe, MEStorage inventory, IActionSource src) {
-        CatalystProfile catalystProfile = getCatalystProfile();
-        for (var output : recipe.outputs()) {
+    private void finishRecipe(final ParallelProcessState state, final MultiblockProcessingRecipe recipe, final MEStorage inventory, final IActionSource src) {
+        final CatalystProfile catalystProfile = getCatalystProfile();
+        for (final var output : recipe.outputs()) {
             if (!output.item().isEmpty()) {
                 inventory.insert(AEItemKey.of(output.item()), getAdjustedItemOutputAmount(output.amount(), catalystProfile), Actionable.MODULATE, src);
             }
@@ -382,24 +341,24 @@ public abstract class AbstractParallelMultiblockControllerBE extends AbstractSim
         state.clear();
     }
 
-    private void rebuildDisplayedRecipes(Map<ResourceLocation, MultiblockProcessingRecipe> recipeIndex) {
+    private void rebuildDisplayedRecipes(final Map<Identifier, MultiblockProcessingRecipe> recipeIndex) {
         rebuildDisplayedRecipes(recipeIndex, getCatalystProfile());
     }
 
-    private void rebuildDisplayedRecipes(Map<ResourceLocation, MultiblockProcessingRecipe> recipeIndex, CatalystProfile catalystProfile) {
+    private void rebuildDisplayedRecipes(final Map<Identifier, MultiblockProcessingRecipe> recipeIndex, final CatalystProfile catalystProfile) {
         this.displayedRecipes.clear();
-        for (ParallelProcessState processState : this.processStates) {
+        for (final ParallelProcessState processState : this.processStates) {
             if (!processState.isActive()) {
                 continue;
             }
-            MultiblockProcessingRecipe recipe = recipeIndex.get(processState.getRecipeId());
+            final MultiblockProcessingRecipe recipe = recipeIndex.get(processState.getRecipeId());
             if (recipe == null) {
                 continue;
             }
-            var primaryOutput = recipe.primaryOutput();
-            int scaledMaxProgress = getAdjustedProcessingTime(recipe, catalystProfile);
-            int displayedMaxProgress = getDisplayedTicks(scaledMaxProgress);
-            int displayedProgress = Math.min(displayedMaxProgress, getDisplayedTicks(processState.getProgress()));
+            final var primaryOutput = recipe.primaryOutput();
+            final int scaledMaxProgress = getAdjustedProcessingTime(recipe, catalystProfile);
+            final int displayedMaxProgress = getDisplayedTicks(scaledMaxProgress);
+            final int displayedProgress = Math.min(displayedMaxProgress, getDisplayedTicks(processState.getProgress()));
             Component label = primaryOutput.item().isEmpty()
                     ? (primaryOutput.fluid().isEmpty() ? Component.literal(recipe.name()) : primaryOutput.fluid().getHoverName())
                     : primaryOutput.item().getHoverName();
@@ -416,21 +375,21 @@ public abstract class AbstractParallelMultiblockControllerBE extends AbstractSim
         }
     }
 
-    protected int getDisplayedTicks(int rawTicks) {
-        int divisor = getProgressPerTick();
+    protected int getDisplayedTicks(final int rawTicks) {
+        final int divisor = getProgressPerTick();
         return Math.max(0, (rawTicks + divisor - 1) / divisor);
     }
 
-    private void updateDisplayedEnergy(Map<ResourceLocation, MultiblockProcessingRecipe> recipeIndex, CatalystProfile catalystProfile) {
+    private void updateDisplayedEnergy(final Map<Identifier, MultiblockProcessingRecipe> recipeIndex, final CatalystProfile catalystProfile) {
         long bufferedEnergy = 0L;
         long targetEnergy = 0L;
-        for (ParallelProcessState processState : this.processStates) {
+        for (final ParallelProcessState processState : this.processStates) {
             if (!processState.isActive()) {
                 continue;
             }
 
             bufferedEnergy += Math.max(0L, processState.getEnergyBuffer());
-            MultiblockProcessingRecipe recipe = recipeIndex.get(processState.getRecipeId());
+            final MultiblockProcessingRecipe recipe = recipeIndex.get(processState.getRecipeId());
             if (recipe != null) {
                 targetEnergy += Math.max(0L, getAdjustedEnergyCost(recipe, catalystProfile));
             }
@@ -440,7 +399,7 @@ public abstract class AbstractParallelMultiblockControllerBE extends AbstractSim
         this.maxStoredEnergy = targetEnergy;
     }
 
-    private void updateTemperature(int activeThreads, @Nullable MEStorage inventory, @Nullable IActionSource src, CatalystProfile catalystProfile) {
+    private void updateTemperature(final int activeThreads, @Nullable final MEStorage inventory, @Nullable final IActionSource src, final CatalystProfile catalystProfile) {
         this.thermalTicker++;
 
         if (catalystProfile.creative()) {
@@ -449,8 +408,8 @@ public abstract class AbstractParallelMultiblockControllerBE extends AbstractSim
             }
         } else if (activeThreads > 0) {
             if (this.thermalTicker % 2 == 0) {
-                int baseHeat = Math.max(1, activeThreads) * (this.overclocked ? 5 : 1);
-                int heatToAdd = Math.max(0, (int) Math.ceil(baseHeat * getHeatGenerationMultiplier() * catalystProfile.heatMultiplier()));
+                final int baseHeat = Math.max(1, activeThreads) * (this.overclocked ? 5 : 1);
+                final int heatToAdd = Math.max(0, (int) Math.ceil(baseHeat * getHeatGenerationMultiplier() * catalystProfile.heatMultiplier()));
                 this.temperature = Math.min(this.maxTemperature, this.temperature + heatToAdd);
             }
         } else if (this.temperature > 0 && this.thermalTicker % 40 == 0) {
@@ -491,28 +450,28 @@ public abstract class AbstractParallelMultiblockControllerBE extends AbstractSim
         }
     }
 
-    private int consumeCoolant(MEStorage inventory, IActionSource src) {
-        for (AEFluidKey coolantKey : getCoolantPriority()) {
+    private int consumeCoolant(final MEStorage inventory, final IActionSource src) {
+        for (final AEFluidKey coolantKey : getCoolantPriority()) {
             if (coolantKey == null || coolantKey.getFluid() == Fluids.EMPTY) {
                 continue;
             }
 
-            CoolantProfile profile = getCoolantProfile(coolantKey.getFluid());
-            long simulatedAvailable = inventory.extract(coolantKey, profile.maxConsumePerTick(), Actionable.SIMULATE, src);
+            final CoolantProfile profile = getCoolantProfile(coolantKey.getFluid());
+            final long simulatedAvailable = inventory.extract(coolantKey, profile.maxConsumePerTick(), Actionable.SIMULATE, src);
             if (simulatedAvailable <= 0L) {
                 continue;
             }
 
             long amountToConsume;
-            long heatCooled;
+            final long heatCooled;
             if (profile.millibucketsPerHeat() > 0) {
                 amountToConsume = Math.min(simulatedAvailable, profile.maxConsumePerTick());
-                long possibleHeat = amountToConsume / profile.millibucketsPerHeat();
+                final long possibleHeat = amountToConsume / profile.millibucketsPerHeat();
                 heatCooled = Math.min(this.temperature, possibleHeat);
                 amountToConsume = heatCooled * profile.millibucketsPerHeat();
             } else {
                 amountToConsume = Math.min(simulatedAvailable, profile.maxConsumePerTick());
-                long possibleHeat = amountToConsume * profile.heatPerMillibucket();
+                final long possibleHeat = amountToConsume * profile.heatPerMillibucket();
                 if (this.temperature < possibleHeat) {
                     amountToConsume = Math.max(1L,
                             (long) Math.ceil(this.temperature / (double) profile.heatPerMillibucket()));
@@ -524,7 +483,7 @@ public abstract class AbstractParallelMultiblockControllerBE extends AbstractSim
                 continue;
             }
 
-            long extracted = inventory.extract(coolantKey, amountToConsume, Actionable.MODULATE, src);
+            final long extracted = inventory.extract(coolantKey, amountToConsume, Actionable.MODULATE, src);
             if (extracted <= 0L) {
                 continue;
             }
@@ -540,9 +499,9 @@ public abstract class AbstractParallelMultiblockControllerBE extends AbstractSim
     }
 
     private AEFluidKey[] getCoolantPriority() {
-        AEFluidKey tier1 = AEFluidKey.of(ModFluids.SOURCE_GELID_CRYOTHEUM.get());
-        AEFluidKey tier2 = AEFluidKey.of(ModFluids.SOURCE_STABLE_COOLANT.get());
-        AEFluidKey tier3 = AEFluidKey.of(ModFluids.SOURCE_TEMPORAL_FLUID.get());
+        final AEFluidKey tier1 = AEFluidKey.of(ModFluids.SOURCE_GELID_CRYOTHEUM.get());
+        final AEFluidKey tier2 = AEFluidKey.of(ModFluids.SOURCE_STABLE_COOLANT.get());
+        final AEFluidKey tier3 = AEFluidKey.of(ModFluids.SOURCE_TEMPORAL_FLUID.get());
         return switch (this.machineTier) {
             case 3 -> new AEFluidKey[]{tier3, tier2, tier1};
             case 2 -> new AEFluidKey[]{tier2, tier3, tier1};
@@ -550,7 +509,7 @@ public abstract class AbstractParallelMultiblockControllerBE extends AbstractSim
         };
     }
 
-    private CoolantProfile getCoolantProfile(Fluid fluid) {
+    private CoolantProfile getCoolantProfile(final Fluid fluid) {
         if (fluid == ModFluids.SOURCE_TEMPORAL_FLUID.get() || fluid == ModFluids.FLOWING_TEMPORAL_FLUID.get()) {
             return new CoolantProfile(100, 0, 10);
         }
@@ -568,7 +527,7 @@ public abstract class AbstractParallelMultiblockControllerBE extends AbstractSim
             return;
         }
 
-        Level level = this.level;
+        final Level level = this.level;
         level.explode(null,
                 this.worldPosition.getX() + 0.5,
                 this.worldPosition.getY() + 0.5,
@@ -604,8 +563,8 @@ public abstract class AbstractParallelMultiblockControllerBE extends AbstractSim
         if (this.level == null) {
             return null;
         }
-        for (BlockPos position : this.parts) {
-            if (this.level.getBlockEntity(position) instanceof AENetworkedBlockEntity nodeBE) {
+        for (final BlockPos position : this.parts) {
+            if (this.level.getBlockEntity(position) instanceof final AENetworkedBlockEntity nodeBE) {
                 if (nodeBE.getActionableNode() != null && nodeBE.getActionableNode().getGrid() != null) {
                     return nodeBE;
                 }
@@ -625,7 +584,7 @@ public abstract class AbstractParallelMultiblockControllerBE extends AbstractSim
         boolean synergyPossible = true;
 
         for (int i = 0; i < this.upgrades.size(); i++) {
-            ItemStack upgradeStack = this.upgrades.getStackInSlot(i);
+            final ItemStack upgradeStack = this.upgrades.getStackInSlot(i);
             if (upgradeStack.isEmpty()) {
                 synergyPossible = false;
                 continue;
@@ -637,7 +596,7 @@ public abstract class AbstractParallelMultiblockControllerBE extends AbstractSim
                 continue;
             }
 
-            if (upgradeStack.getItem() instanceof BaseCatalystItem catalyst) {
+            if (upgradeStack.getItem() instanceof final BaseCatalystItem catalyst) {
                 heatMultiplier += catalyst.getStaticHeat() / 100.0D;
                 speedMultiplier *= catalyst.getSpeedMultiplier();
                 energyMultiplier *= catalyst.getPowerMultiplier();
@@ -682,45 +641,45 @@ public abstract class AbstractParallelMultiblockControllerBE extends AbstractSim
                 Math.max(0.0D, bonusDropChance));
     }
 
-    private int getAdjustedProcessingTime(MultiblockProcessingRecipe recipe, CatalystProfile catalystProfile) {
+    private int getAdjustedProcessingTime(final MultiblockProcessingRecipe recipe, final CatalystProfile catalystProfile) {
         if (catalystProfile.creative()) {
             return 1;
         }
-        int tierAdjustedTime = MultiblockTierScaling.adjustedTime(recipe.time(), this.machineTier, recipe.requiredTier());
+        final int tierAdjustedTime = MultiblockTierScaling.adjustedTime(recipe.time(), this.machineTier, recipe.requiredTier());
         return Math.max(1, (int) Math.ceil(tierAdjustedTime / catalystProfile.speedMultiplier()));
     }
 
-    private long getAdjustedEnergyCost(MultiblockProcessingRecipe recipe, CatalystProfile catalystProfile) {
+    private long getAdjustedEnergyCost(final MultiblockProcessingRecipe recipe, final CatalystProfile catalystProfile) {
         if (catalystProfile.creative()) {
             return 0L;
         }
-        long tierAdjustedEnergy = MultiblockTierScaling.adjustedEnergy(recipe.energy(), this.machineTier, recipe.requiredTier());
+        final long tierAdjustedEnergy = MultiblockTierScaling.adjustedEnergy(recipe.energy(), this.machineTier, recipe.requiredTier());
         return Math.max(1L, (long) Math.ceil(tierAdjustedEnergy * catalystProfile.energyMultiplier()));
     }
 
-    private long getAdjustedItemOutputAmount(long baseAmount, CatalystProfile catalystProfile) {
+    private long getAdjustedItemOutputAmount(final long baseAmount, final CatalystProfile catalystProfile) {
         if (baseAmount <= 0L) {
             return 0L;
         }
 
-        double bonusChance = Math.max(0.0D, catalystProfile.bonusDropChance());
+        final double bonusChance = Math.max(0.0D, catalystProfile.bonusDropChance());
         long bonusRolls = (long) bonusChance;
-        double fractionalBonusRoll = bonusChance - bonusRolls;
-        if (fractionalBonusRoll > 0.0D && this.level != null && this.level.random.nextDouble() < fractionalBonusRoll) {
+        final double fractionalBonusRoll = bonusChance - bonusRolls;
+        if (fractionalBonusRoll > 0.0D && this.level != null && this.level.getRandom().nextDouble() < fractionalBonusRoll) {
             bonusRolls++;
         }
 
         return saturatedMultiply(baseAmount, 1L + bonusRolls);
     }
 
-    private long getMaximumAdjustedItemOutputAmount(long baseAmount, CatalystProfile catalystProfile) {
+    private long getMaximumAdjustedItemOutputAmount(final long baseAmount, final CatalystProfile catalystProfile) {
         if (baseAmount <= 0L) {
             return 0L;
         }
         return saturatedMultiply(baseAmount, 1L + (long) Math.ceil(Math.max(0.0D, catalystProfile.bonusDropChance())));
     }
 
-    private long saturatedMultiply(long value, long multiplier) {
+    private long saturatedMultiply(final long value, final long multiplier) {
         if (value <= 0L || multiplier <= 0L) {
             return 0L;
         }
@@ -732,8 +691,8 @@ public abstract class AbstractParallelMultiblockControllerBE extends AbstractSim
 
     protected abstract List<MultiblockProcessingRecipe> getAvailableRecipes();
 
-    protected MultiblockProcessingRecipe findRecipe(List<MultiblockProcessingRecipe> availableRecipes, ResourceLocation recipeId) {
-        for (MultiblockProcessingRecipe recipe : availableRecipes) {
+    protected MultiblockProcessingRecipe findRecipe(final List<MultiblockProcessingRecipe> availableRecipes, final Identifier recipeId) {
+        for (final MultiblockProcessingRecipe recipe : availableRecipes) {
             if (recipe.id().equals(recipeId)) {
                 return recipe;
             }
@@ -754,7 +713,7 @@ public abstract class AbstractParallelMultiblockControllerBE extends AbstractSim
     }
 
     @Override
-    public boolean pushPattern(IPatternDetails patternDetails, KeyCounter[] inputs, net.minecraft.core.Direction ejectionDirection) {
+    public boolean pushPattern(final IPatternDetails patternDetails, final KeyCounter[] inputs, final net.minecraft.core.Direction ejectionDirection) {
         if (!this.assembled) {
             return false;
         }
@@ -763,12 +722,12 @@ public abstract class AbstractParallelMultiblockControllerBE extends AbstractSim
             return false;
         }
 
-        MultiblockProcessingRecipe recipe = resolvePatternRecipe(patternDetails, inputs);
+        final MultiblockProcessingRecipe recipe = resolvePatternRecipe(patternDetails, inputs);
         if (recipe == null || !MultiblockTierScaling.canRunRecipe(this.machineTier, recipe.requiredTier())) {
             return false;
         }
 
-        ParallelProcessState state = findInactiveState();
+        final ParallelProcessState state = findInactiveState();
         if (state == null) {
             return false;
         }
@@ -789,7 +748,7 @@ public abstract class AbstractParallelMultiblockControllerBE extends AbstractSim
         state.setEnergyBuffer(0L);
         state.setProgress(0);
 
-        for (KeyCounter input : inputs) {
+        for (final KeyCounter input : inputs) {
             input.clear();
         }
 
@@ -806,7 +765,7 @@ public abstract class AbstractParallelMultiblockControllerBE extends AbstractSim
     }
 
     private ParallelProcessState findInactiveState() {
-        for (ParallelProcessState state : this.processStates) {
+        for (final ParallelProcessState state : this.processStates) {
             if (!state.isActive()) {
                 return state;
             }
@@ -814,9 +773,9 @@ public abstract class AbstractParallelMultiblockControllerBE extends AbstractSim
         return null;
     }
 
-    private MultiblockProcessingRecipe resolvePatternRecipe(IPatternDetails patternDetails, KeyCounter[] inputs) {
-        List<MultiblockProcessingRecipe> outputMatches = new ArrayList<>();
-        for (MultiblockProcessingRecipe recipe : getRecipeSnapshot().recipes()) {
+    private MultiblockProcessingRecipe resolvePatternRecipe(final IPatternDetails patternDetails, final KeyCounter[] inputs) {
+        final List<MultiblockProcessingRecipe> outputMatches = new ArrayList<>();
+        for (final MultiblockProcessingRecipe recipe : getRecipeSnapshot().recipes()) {
             if (MultiblockTierScaling.canRunRecipe(this.machineTier, recipe.requiredTier())
                     && patternMatchesOutputs(patternDetails.getOutputs(), recipe.outputs(), getCatalystProfile())) {
                 outputMatches.add(recipe);
@@ -831,7 +790,7 @@ public abstract class AbstractParallelMultiblockControllerBE extends AbstractSim
             return outputMatches.getFirst();
         }
 
-        for (MultiblockProcessingRecipe recipe : outputMatches) {
+        for (final MultiblockProcessingRecipe recipe : outputMatches) {
             if (patternMatchesInputs(inputs, recipe)) {
                 return recipe;
             }
@@ -840,43 +799,41 @@ public abstract class AbstractParallelMultiblockControllerBE extends AbstractSim
         return null;
     }
 
-    private boolean patternMatchesInputs(KeyCounter[] inputs, MultiblockProcessingRecipe recipe) {
-        List<PatternStack> availableStacks = flattenInputs(inputs);
+    private boolean patternMatchesInputs(final KeyCounter[] inputs, final MultiblockProcessingRecipe recipe) {
+        final List<PatternStack> availableStacks = flattenInputs(inputs);
         if (availableStacks.isEmpty() && (!recipe.itemInputs().isEmpty() || !recipe.fluidInputs().isEmpty())) {
             return false;
         }
 
-        List<PatternStack> remaining = new ArrayList<>(availableStacks);
-        for (var requirement : recipe.itemInputs()) {
+        final List<PatternStack> remaining = new ArrayList<>(availableStacks);
+        for (final var requirement : recipe.itemInputs()) {
             if (!removeMatchingItemRequirement(remaining, requirement)) {
                 return false;
             }
         }
-        for (var requirement : recipe.fluidInputs()) {
+        for (final var requirement : recipe.fluidInputs()) {
             if (!removeMatchingFluidRequirement(remaining, requirement)) {
                 return false;
             }
         }
-        for (var requirement : recipe.chemicalInputs()) {
-            if (!removeMatchingChemicalRequirement(remaining, requirement)) {
-                return false;
-            }
+        if (!recipe.chemicalInputs().isEmpty()) {
+            return false;
         }
         return remaining.isEmpty();
     }
 
-    private boolean patternMatchesOutputs(List<GenericStack> outputs, List<MultiblockProcessingRecipe.OutputStack> recipeOutputs, CatalystProfile catalystProfile) {
+    private boolean patternMatchesOutputs(final List<GenericStack> outputs, final List<MultiblockProcessingRecipe.OutputStack> recipeOutputs, final CatalystProfile catalystProfile) {
         if (outputs.size() != recipeOutputs.size()) {
             return false;
         }
 
-        List<PatternStack> remaining = new ArrayList<>();
-        for (GenericStack output : outputs) {
+        final List<PatternStack> remaining = new ArrayList<>();
+        for (final GenericStack output : outputs) {
             remaining.add(new PatternStack(output.what(), output.amount()));
         }
 
-        for (var output : recipeOutputs) {
-            AEKey expectedKey = !output.item().isEmpty()
+        for (final var output : recipeOutputs) {
+            final AEKey expectedKey = !output.item().isEmpty()
                     ? AEItemKey.of(output.item())
                     : AEFluidKey.of(output.fluid().getFluid());
             if (expectedKey == null) {
@@ -885,7 +842,7 @@ public abstract class AbstractParallelMultiblockControllerBE extends AbstractSim
 
             boolean matched = false;
             for (int i = 0; i < remaining.size(); i++) {
-                PatternStack candidate = remaining.get(i);
+                final PatternStack candidate = remaining.get(i);
                 if (candidate.key.equals(expectedKey) && patternOutputAmountMatches(candidate.amount, output.amount(), catalystProfile)) {
                     remaining.remove(i);
                     matched = true;
@@ -901,27 +858,27 @@ public abstract class AbstractParallelMultiblockControllerBE extends AbstractSim
         return remaining.isEmpty();
     }
 
-    private boolean patternOutputAmountMatches(long patternAmount, long baseAmount, CatalystProfile catalystProfile) {
+    private boolean patternOutputAmountMatches(final long patternAmount, final long baseAmount, final CatalystProfile catalystProfile) {
         return patternAmount == baseAmount || patternAmount == getMaximumAdjustedItemOutputAmount(baseAmount, catalystProfile);
     }
 
-    private List<PatternStack> flattenInputs(KeyCounter[] inputs) {
-        List<PatternStack> stacks = new ArrayList<>();
-        for (KeyCounter counter : inputs) {
-            for (var entry : counter) {
+    private List<PatternStack> flattenInputs(final KeyCounter[] inputs) {
+        final List<PatternStack> stacks = new ArrayList<>();
+        for (final KeyCounter counter : inputs) {
+            for (final var entry : counter) {
                 stacks.add(new PatternStack(entry.getKey(), entry.getLongValue()));
             }
         }
         return stacks;
     }
 
-    private boolean removeMatchingItemRequirement(List<PatternStack> remaining, MultiblockProcessingRecipe.ItemRequirement requirement) {
+    private boolean removeMatchingItemRequirement(final List<PatternStack> remaining, final MultiblockProcessingRecipe.ItemRequirement requirement) {
         for (int i = 0; i < remaining.size(); i++) {
-            PatternStack stack = remaining.get(i);
-            if (stack.key instanceof AEItemKey itemKey
+            final PatternStack stack = remaining.get(i);
+            if (stack.key instanceof final AEItemKey itemKey
                     && stack.amount >= requirement.amount()
                     && requirement.ingredient().test(itemKey.toStack((int) stack.amount))) {
-                long leftover = stack.amount - requirement.amount();
+                final long leftover = stack.amount - requirement.amount();
                 if (leftover > 0L) {
                     remaining.set(i, new PatternStack(stack.key, leftover));
                 } else {
@@ -933,31 +890,13 @@ public abstract class AbstractParallelMultiblockControllerBE extends AbstractSim
         return false;
     }
 
-    private boolean removeMatchingFluidRequirement(List<PatternStack> remaining, MultiblockProcessingRecipe.FluidRequirement requirement) {
+    private boolean removeMatchingFluidRequirement(final List<PatternStack> remaining, final MultiblockProcessingRecipe.FluidRequirement requirement) {
         for (int i = 0; i < remaining.size(); i++) {
-            PatternStack stack = remaining.get(i);
-            if (stack.key instanceof AEFluidKey fluidKey
+            final PatternStack stack = remaining.get(i);
+            if (stack.key instanceof final AEFluidKey fluidKey
                     && stack.amount >= requirement.amount()
                     && fluidKey.getFluid() == requirement.fluid().getFluid()) {
-                long leftover = stack.amount - requirement.amount();
-                if (leftover > 0L) {
-                    remaining.set(i, new PatternStack(stack.key, leftover));
-                } else {
-                    remaining.remove(i);
-                }
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private boolean removeMatchingChemicalRequirement(List<PatternStack> remaining, MultiblockProcessingRecipe.ChemicalRequirement requirement) {
-        for (int i = 0; i < remaining.size(); i++) {
-            PatternStack stack = remaining.get(i);
-            if (stack.key instanceof UfoMekanismKey chemicalKey
-                    && stack.amount >= requirement.amount()
-                    && chemicalKey.getId().equals(requirement.chemicalId())) {
-                long leftover = stack.amount - requirement.amount();
+                final long leftover = stack.amount - requirement.amount();
                 if (leftover > 0L) {
                     remaining.set(i, new PatternStack(stack.key, leftover));
                 } else {
@@ -974,7 +913,7 @@ public abstract class AbstractParallelMultiblockControllerBE extends AbstractSim
 
     private record RecipeSnapshot(
             List<MultiblockProcessingRecipe> recipes,
-            Map<ResourceLocation, MultiblockProcessingRecipe> index) {
+            Map<Identifier, MultiblockProcessingRecipe> index) {
     }
 
     private record CoolantProfile(int heatPerMillibucket, int millibucketsPerHeat, long maxConsumePerTick) {
@@ -991,35 +930,33 @@ public abstract class AbstractParallelMultiblockControllerBE extends AbstractSim
     }
 
     @Override
-    protected void saveAdditional(@NotNull CompoundTag tag, HolderLookup.@NotNull Provider registries) {
-        super.saveAdditional(tag, registries);
-        ListTag processTags = new ListTag();
-        for (ParallelProcessState state : this.processStates) {
-            processTags.add(state.save(registries));
+    protected void saveAdditional(@NotNull final ValueOutput output) {
+        super.saveAdditional(output);
+        final var processTags = output.childrenList("processStates");
+        for (final ParallelProcessState state : this.processStates) {
+            state.save(processTags.addChild());
         }
-        tag.put("processStates", processTags);
-        tag.putInt("thermalTicker", this.thermalTicker);
-        tag.putInt("overloadTimer", this.overloadTimer);
+        output.putInt("thermalTicker", this.thermalTicker);
+        output.putInt("overloadTimer", this.overloadTimer);
     }
 
     @Override
-    protected void loadAdditional(@NotNull CompoundTag tag, HolderLookup.@NotNull Provider registries) {
-        super.loadAdditional(tag, registries);
-        if (tag.contains("processStates", Tag.TAG_LIST)) {
-            ListTag processTags = tag.getList("processStates", Tag.TAG_COMPOUND);
-            for (int i = 0; i < Math.min(processTags.size(), this.processStates.size()); i++) {
-                this.processStates.get(i).load(processTags.getCompound(i), registries);
-            }
+    protected void loadAdditional(@NotNull final ValueInput input) {
+        super.loadAdditional(input);
+        int index = 0;
+        for (final ValueInput processTag : input.childrenListOrEmpty("processStates")) {
+            if (index >= this.processStates.size()) break;
+            this.processStates.get(index++).load(processTag);
         }
-        this.thermalTicker = tag.getInt("thermalTicker");
-        this.overloadTimer = tag.contains("overloadTimer") ? tag.getInt("overloadTimer") : -1;
+        this.thermalTicker = input.getIntOr("thermalTicker", 0);
+        this.overloadTimer = input.getIntOr("overloadTimer", -1);
     }
 
     @Override
     public void onControllerBroken() {
         super.onControllerBroken();
         invalidateRecipeCache();
-        for (ParallelProcessState processState : this.processStates) {
+        for (final ParallelProcessState processState : this.processStates) {
             processState.clear();
         }
         this.storedEnergy = 0L;
@@ -1028,18 +965,18 @@ public abstract class AbstractParallelMultiblockControllerBE extends AbstractSim
     }
 
     @Override
-    protected int resolveMachineTier(com.raishxn.ufo.api.multiblock.MultiblockPattern.MatchResult result) {
+    protected int resolveMachineTier(final com.raishxn.ufo.api.multiblock.MultiblockPattern.MatchResult result) {
         if (this.level == null) {
             return com.raishxn.ufo.api.multiblock.MultiblockMachineTier.MK1.level();
         }
 
-        BlockState controllerState = this.level.getBlockState(this.worldPosition);
-        Direction facing = MultiblockControllerDefinitions.getPatternFacing(this, controllerState);
+        final BlockState controllerState = this.level.getBlockState(this.worldPosition);
+        final Direction facing = MultiblockControllerDefinitions.getPatternFacing(this, controllerState);
 
         int resolvedTier = com.raishxn.ufo.api.multiblock.MultiblockMachineTier.MK3.level();
         boolean foundField = false;
-        for (BlockPos fieldPos : getControllerPattern().getExpectedPositions(this.worldPosition, facing, 'F')) {
-            BlockState fieldState = this.level.getBlockState(fieldPos);
+        for (final BlockPos fieldPos : getControllerPattern().getExpectedPositions(this.worldPosition, facing, 'F')) {
+            final BlockState fieldState = this.level.getBlockState(fieldPos);
             if (fieldState.is(MultiblockBlocks.STELLAR_FIELD_GENERATOR_T1.get())) {
                 resolvedTier = Math.min(resolvedTier, 1);
                 foundField = true;
@@ -1056,7 +993,7 @@ public abstract class AbstractParallelMultiblockControllerBE extends AbstractSim
 
     @Override
     protected boolean hasOngoingWork() {
-        for (ParallelProcessState state : this.processStates) {
+        for (final ParallelProcessState state : this.processStates) {
             if (state.isActive()) {
                 return true;
             }
@@ -1074,17 +1011,17 @@ public abstract class AbstractParallelMultiblockControllerBE extends AbstractSim
         return getParallelThreadLimit();
     }
 
-    private void syncClientState(boolean throttle) {
+    private void syncClientState(final boolean throttle) {
         if (this.level == null || this.level.isClientSide()) {
             return;
         }
 
-        int syncHash = computeClientSyncHash();
+        final int syncHash = computeClientSyncHash();
         if (syncHash == this.lastClientSyncHash) {
             return;
         }
 
-        long gameTime = this.level.getGameTime();
+        final long gameTime = this.level.getGameTime();
         if (throttle && this.lastClientSyncTick != Long.MIN_VALUE && gameTime - this.lastClientSyncTick < 5L) {
             return;
         }
@@ -1112,7 +1049,7 @@ public abstract class AbstractParallelMultiblockControllerBE extends AbstractSim
 
     private int computeDisplayedRecipesHash() {
         int hash = 1;
-        for (UniversalDisplayedRecipe recipe : this.displayedRecipes) {
+        for (final UniversalDisplayedRecipe recipe : this.displayedRecipes) {
             hash = 31 * hash + recipe.label().getString().hashCode();
             hash = 31 * hash + recipe.progress();
             hash = 31 * hash + recipe.maxProgress();

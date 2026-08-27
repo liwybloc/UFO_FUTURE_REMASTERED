@@ -16,20 +16,20 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(MEStorageScreen.class)
 public abstract class MixinMEStorageScreen {
     @Inject(method = "handleGridInventoryEntryMouseClick", at = @At("HEAD"), cancellable = true)
-    private void ufo$allowEmptyingChemicalContainersFromHands(@Nullable GridInventoryEntry entry, int mouseButton, ClickType clickType, CallbackInfo ci) {
-        AbstractContainerMenu rawMenu = ((AccessorAbstractContainerScreen) this).ufo$getMenu();
-        if (!(rawMenu instanceof MEStorageMenu menu)) {
+    private void ufo$allowEmptyingChemicalContainersFromHands(@Nullable final GridInventoryEntry entry, final int mouseButton, final ClickType clickType, final CallbackInfo ci) {
+        final AbstractContainerMenu rawMenu = ((AccessorAbstractContainerScreen) this).ufo$getMenu();
+        if (!(rawMenu instanceof final MEStorageMenu menu)) {
             return;
         }
         if (mouseButton != 1 || !menu.getCarried().isEmpty()) {
             return;
         }
 
-        var player = menu.getPlayer();
-        var mainHand = player.getMainHandItem();
+        final var player = menu.getPlayer();
+        final var mainHand = player.getMainHandItem();
         var emptyingAction = ContainerItemStrategies.getEmptyingAction(mainHand);
         if (emptyingAction == null) {
-            var offHand = player.getOffhandItem();
+            final var offHand = player.getOffhandItem();
             emptyingAction = ContainerItemStrategies.getEmptyingAction(offHand);
         }
 

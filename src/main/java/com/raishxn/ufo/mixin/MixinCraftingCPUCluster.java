@@ -22,12 +22,12 @@ public abstract class MixinCraftingCPUCluster {
      * for UFO's larger crafting units.
      */
     @ModifyConstant(method = "addBlockEntity", constant = @Constant(intValue = 16))
-    private int ufo$allowLargeCoProcessors(int original) {
+    private int ufo$allowLargeCoProcessors(final int original) {
         return Integer.MAX_VALUE;
     }
 
     @Inject(method = "addBlockEntity", at = @At("TAIL"))
-    private void ufo$clampThreadTotal(CraftingBlockEntity te, CallbackInfo ci) {
+    private void ufo$clampThreadTotal(final CraftingBlockEntity te, final CallbackInfo ci) {
         if (this.accelerator < 0 || this.accelerator == Integer.MAX_VALUE) {
             this.accelerator = UFO_MAX_SAFE_COPROCESSORS;
         }

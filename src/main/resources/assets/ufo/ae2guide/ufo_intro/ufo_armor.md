@@ -75,7 +75,6 @@ Depending on your version of the mod, UFO Armor may also grant:
 - Bonus armor points above Netherite
 - Knockback resistance
 - Fire immunity or strong resistance
-- Radiation/energy shielding (if Mekanism integration enabled)
 - Increased mining speed
 - Explosion resistance
 

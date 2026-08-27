@@ -24,46 +24,37 @@ public abstract class TranscendingMatterFluid extends BaseFlowingFluid {
     protected TranscendingMatterFluid() {
         super(PROPERTIES);
     }
-    @Override
     public Fluid getSource() {
         return ModFluids.SOURCE_TRANSCENDING_MATTER_FLUID.get();
     }
-    @Override
     public Fluid getFlowing() {
         return ModFluids.FLOWING_TRANSCENDING_MATTER_FLUID.get();
     }
-    @Override
     public Item getBucket() {
         return ModItems.TRANSCENDING_MATTER_BUCKET.get();
     }
-    @Override
-    protected boolean canConvertToSource(Level level) {
+    protected boolean canConvertToSource(final Level level) {
         return false;
     }
     public static class Source extends TranscendingMatterFluid {
         public Source() { super(); }
-        @Override
-        public int getAmount(FluidState state) {
+        public int getAmount(final FluidState state) {
             return 8; // Bloco cheio
         }
-        @Override
-        public boolean isSource(FluidState state) {
+        public boolean isSource(final FluidState state) {
             return true;
         }
     }
     public static class Flowing extends TranscendingMatterFluid {
         public Flowing() { super(); }
-        @Override
-        protected void createFluidStateDefinition(StateDefinition.Builder<Fluid, FluidState> builder) {
+        protected void createFluidStateDefinition(final StateDefinition.Builder<Fluid, FluidState> builder) {
             super.createFluidStateDefinition(builder);
             builder.add(LEVEL);
         }
-        @Override
-        public int getAmount(FluidState state) {
+        public int getAmount(final FluidState state) {
             return state.getValue(LEVEL);
         }
-        @Override
-        public boolean isSource(FluidState state) {
+        public boolean isSource(final FluidState state) {
             return false;
         }
     }

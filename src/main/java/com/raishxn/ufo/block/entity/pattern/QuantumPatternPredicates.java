@@ -3,7 +3,7 @@ package com.raishxn.ufo.block.entity.pattern;
 import com.raishxn.ufo.block.MultiblockBlocks;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -14,17 +14,17 @@ import java.util.Map;
 
 public final class QuantumPatternPredicates {
 
-    private static final ResourceLocation AE2_QUARTZ_VIBRANT_GLASS = ResourceLocation.fromNamespaceAndPath("ae2", "quartz_vibrant_glass");
+    private static final Identifier AE2_QUARTZ_VIBRANT_GLASS = Identifier.fromNamespaceAndPath("ae2", "quartz_vibrant_glass");
 
     private QuantumPatternPredicates() {
     }
 
     public static Map<Character, BlockState> getDefaultCreativeStates() {
-        Map<Character, BlockState> map = new HashMap<>();
+        final Map<Character, BlockState> map = new HashMap<>();
         map.put('C', MultiblockBlocks.QUANTUM_HYPER_MECHANICAL_CASING.get().defaultBlockState());
         map.put('F', MultiblockBlocks.STELLAR_FIELD_GENERATOR_T1.get().defaultBlockState());
 
-        Block vibrantGlass = BuiltInRegistries.BLOCK.get(AE2_QUARTZ_VIBRANT_GLASS);
+        final Block vibrantGlass = BuiltInRegistries.BLOCK.getValue(AE2_QUARTZ_VIBRANT_GLASS);
         if (vibrantGlass != null && vibrantGlass != Blocks.AIR) {
             map.put('G', vibrantGlass.defaultBlockState());
         }
@@ -32,11 +32,11 @@ public final class QuantumPatternPredicates {
         return map;
     }
 
-    public static boolean isQuantumCasing(BlockState state) {
+    public static boolean isQuantumCasing(final BlockState state) {
         return state.is(MultiblockBlocks.QUANTUM_HYPER_MECHANICAL_CASING.get());
     }
 
-    public static boolean isUniversalHatch(BlockState state) {
+    public static boolean isUniversalHatch(final BlockState state) {
         return state.is(MultiblockBlocks.QUANTUM_PATTERN_HATCH.get())
                 || state.is(MultiblockBlocks.ME_MASSIVE_OUTPUT_HATCH.get())
                 || state.is(MultiblockBlocks.ME_MASSIVE_FLUID_HATCH.get())
@@ -44,18 +44,18 @@ public final class QuantumPatternPredicates {
                 || state.is(MultiblockBlocks.AE_ENERGY_INPUT_HATCH.get());
     }
 
-    public static boolean isQuantumCasingOrUniversalHatch(BlockState state) {
+    public static boolean isQuantumCasingOrUniversalHatch(final BlockState state) {
         return isQuantumCasing(state) || isUniversalHatch(state);
     }
 
-    public static boolean isAnyFieldGenerator(BlockState state) {
+    public static boolean isAnyFieldGenerator(final BlockState state) {
         return state.is(MultiblockBlocks.STELLAR_FIELD_GENERATOR_T1.get())
                 || state.is(MultiblockBlocks.STELLAR_FIELD_GENERATOR_T2.get())
                 || state.is(MultiblockBlocks.STELLAR_FIELD_GENERATOR_T3.get());
     }
 
-    public static boolean isQuartzVibrantGlass(BlockState state) {
-        Block block = BuiltInRegistries.BLOCK.get(AE2_QUARTZ_VIBRANT_GLASS);
+    public static boolean isQuartzVibrantGlass(final BlockState state) {
+        final Block block = BuiltInRegistries.BLOCK.getValue(AE2_QUARTZ_VIBRANT_GLASS);
         return block != null && block != Blocks.AIR && state.is(block);
     }
 
@@ -92,7 +92,7 @@ public final class QuantumPatternPredicates {
     }
 
     public static List<BlockState> glassCandidates() {
-        Block block = BuiltInRegistries.BLOCK.get(AE2_QUARTZ_VIBRANT_GLASS);
+        final Block block = BuiltInRegistries.BLOCK.getValue(AE2_QUARTZ_VIBRANT_GLASS);
         if (block == null || block == Blocks.AIR) {
             return List.of();
         }

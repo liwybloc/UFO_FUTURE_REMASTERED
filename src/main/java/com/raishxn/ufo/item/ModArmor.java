@@ -3,7 +3,7 @@ package com.raishxn.ufo.item;
 import com.raishxn.ufo.datagen.ModDataComponents;
 import com.raishxn.ufo.item.custom.AstralNexusArmorItem;
 import com.raishxn.ufo.item.custom.UfoArmorItem;
-import net.minecraft.world.item.ArmorItem;
+import net.minecraft.world.item.equipment.ArmorType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Rarity;
 import net.neoforged.bus.api.IEventBus;
@@ -15,60 +15,59 @@ import static com.raishxn.ufo.item.ModItems.ITEMS;
 
 public class ModArmor {
 
-    public static final DeferredItem<Item> UFO_HELMET = ITEMS.register("ufo_helmet",
-            () -> new UfoArmorItem(ModArmorMaterials.UFO_ARMOR, ArmorItem.Type.HELMET, new Item.Properties()
+    public static final DeferredItem<Item> UFO_HELMET = ITEMS.registerItem("ufo_helmet",
+            properties -> new UfoArmorItem(ModArmorMaterials.UFO_ARMOR, ArmorType.HELMET, properties
                     .component(ModDataComponents.ENERGY.get(), 0).stacksTo(1)));
 
-    public static final DeferredItem<Item> UFO_CHESTPLATE = ITEMS.register("ufo_chestplate",
-            () -> new UfoArmorItem(ModArmorMaterials.UFO_ARMOR, ArmorItem.Type.CHESTPLATE, new Item.Properties()
+    public static final DeferredItem<Item> UFO_CHESTPLATE = ITEMS.registerItem("ufo_chestplate",
+            properties -> new UfoArmorItem(ModArmorMaterials.UFO_ARMOR, ArmorType.CHESTPLATE, properties
                     .component(ModDataComponents.ENERGY.get(), 0).stacksTo(1)));
 
-    public static final DeferredItem<Item> UFO_LEGGINGS = ITEMS.register("ufo_leggings",
-            () -> new UfoArmorItem(ModArmorMaterials.UFO_ARMOR, ArmorItem.Type.LEGGINGS, new Item.Properties()
+    public static final DeferredItem<Item> UFO_LEGGINGS = ITEMS.registerItem("ufo_leggings",
+            properties -> new UfoArmorItem(ModArmorMaterials.UFO_ARMOR, ArmorType.LEGGINGS, properties
                     .component(ModDataComponents.ENERGY.get(), 0).stacksTo(1)));
 
-    public static final DeferredItem<Item> UFO_BOOTS = ITEMS.register("ufo_boots",
-            () -> new UfoArmorItem(ModArmorMaterials.UFO_ARMOR, ArmorItem.Type.BOOTS, new Item.Properties()
+    public static final DeferredItem<Item> UFO_BOOTS = ITEMS.registerItem("ufo_boots",
+            properties -> new UfoArmorItem(ModArmorMaterials.UFO_ARMOR, ArmorType.BOOTS, properties
                     .component(ModDataComponents.ENERGY.get(), 0).stacksTo(1)));
 
-    public static final DeferredItem<Item> ASTRAL_NEXUS_HELMET = ITEMS.register("astral_nexus_helmet",
-            () -> new AstralNexusArmorItem(ModArmorMaterials.ASTRAL_NEXUS, ArmorItem.Type.HELMET, new Item.Properties()
+    public static final DeferredItem<Item> ASTRAL_NEXUS_HELMET = ITEMS.registerItem("astral_nexus_helmet",
+            properties -> new AstralNexusArmorItem(ModArmorMaterials.ASTRAL_NEXUS, ArmorType.HELMET, properties
                     .rarity(Rarity.EPIC)
                     .fireResistant()));
 
-    public static final DeferredItem<Item> ASTRAL_NEXUS_CHESTPLATE = ITEMS.register("astral_nexus_chestplate",
-            () -> new AstralNexusArmorItem(ModArmorMaterials.ASTRAL_NEXUS, ArmorItem.Type.CHESTPLATE, new Item.Properties()
+    public static final DeferredItem<Item> ASTRAL_NEXUS_CHESTPLATE = ITEMS.registerItem("astral_nexus_chestplate",
+            properties -> new AstralNexusArmorItem(ModArmorMaterials.ASTRAL_NEXUS, ArmorType.CHESTPLATE, properties
                     .rarity(Rarity.EPIC)
                     .fireResistant()));
 
-    public static final DeferredItem<Item> ASTRAL_NEXUS_LEGGINGS = ITEMS.register("astral_nexus_leggings",
-            () -> new AstralNexusArmorItem(ModArmorMaterials.ASTRAL_NEXUS, ArmorItem.Type.LEGGINGS, new Item.Properties()
+    public static final DeferredItem<Item> ASTRAL_NEXUS_LEGGINGS = ITEMS.registerItem("astral_nexus_leggings",
+            properties -> new AstralNexusArmorItem(ModArmorMaterials.ASTRAL_NEXUS, ArmorType.LEGGINGS, properties
                     .rarity(Rarity.EPIC)
                     .fireResistant()));
 
-    public static final DeferredItem<Item> ASTRAL_NEXUS_BOOTS = ITEMS.register("astral_nexus_boots",
-            () -> new AstralNexusArmorItem(ModArmorMaterials.ASTRAL_NEXUS, ArmorItem.Type.BOOTS, new Item.Properties()
+    public static final DeferredItem<Item> ASTRAL_NEXUS_BOOTS = ITEMS.registerItem("astral_nexus_boots",
+            properties -> new AstralNexusArmorItem(ModArmorMaterials.ASTRAL_NEXUS, ArmorType.BOOTS, properties
                     .rarity(Rarity.EPIC)
                     .fireResistant()));
 
-    public static final Supplier<Item> THERMAL_RESISTOR_PLATING = ITEMS.register(
+    public static final Supplier<Item> THERMAL_RESISTOR_PLATING = ITEMS.registerItem(
             "thermal_resistor_plating",
-            () -> new Item(new Item.Properties().fireResistant())
+            properties -> new Item(properties.fireResistant())
     );
 
-    public static final Supplier<Item> THERMAL_RESISTOR_MASK = ITEMS.register("thermal_resistor_mask",
-            () -> new UfoArmorItem(ModArmorMaterials.THERMAL_EXOSUIT, ArmorItem.Type.HELMET, new Item.Properties()));
+    public static final Supplier<Item> THERMAL_RESISTOR_MASK = ITEMS.registerItem("thermal_resistor_mask",
+            properties -> new UfoArmorItem(ModArmorMaterials.THERMAL_EXOSUIT, ArmorType.HELMET, properties));
 
-    public static final Supplier<Item> THERMAL_RESISTOR_CHEST = ITEMS.register("thermal_resistor_chest",
-            () -> new UfoArmorItem(ModArmorMaterials.THERMAL_EXOSUIT, ArmorItem.Type.CHESTPLATE, new Item.Properties()));
+    public static final Supplier<Item> THERMAL_RESISTOR_CHEST = ITEMS.registerItem("thermal_resistor_chest",
+            properties -> new UfoArmorItem(ModArmorMaterials.THERMAL_EXOSUIT, ArmorType.CHESTPLATE, properties));
 
-    public static final Supplier<Item> THERMAL_RESISTOR_PANTS = ITEMS.register("thermal_resistor_pants",
-            () -> new UfoArmorItem(ModArmorMaterials.THERMAL_EXOSUIT, ArmorItem.Type.LEGGINGS, new Item.Properties()));
+    public static final Supplier<Item> THERMAL_RESISTOR_PANTS = ITEMS.registerItem("thermal_resistor_pants",
+            properties -> new UfoArmorItem(ModArmorMaterials.THERMAL_EXOSUIT, ArmorType.LEGGINGS, properties));
 
-    public static final Supplier<Item> THERMAL_RESISTOR_BOOTS = ITEMS.register("thermal_resistor_boots",
-            () -> new UfoArmorItem(ModArmorMaterials.THERMAL_EXOSUIT, ArmorItem.Type.BOOTS, new Item.Properties()));
+    public static final Supplier<Item> THERMAL_RESISTOR_BOOTS = ITEMS.registerItem("thermal_resistor_boots",
+            properties -> new UfoArmorItem(ModArmorMaterials.THERMAL_EXOSUIT, ArmorType.BOOTS, properties));
 
-    public static void register(IEventBus eventBus) {
-        // Armor is registered through ModItems.ITEMS
+    public static void register(final IEventBus eventBus) {
     }
 }

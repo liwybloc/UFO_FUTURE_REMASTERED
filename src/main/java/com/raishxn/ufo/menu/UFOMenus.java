@@ -22,7 +22,7 @@ public class UFOMenus extends MenuRegistry {
             create("dimensional_matter_assembler", DimensionalMatterAssemblerMenu::new, DimensionalMatterAssemblerBlockEntity.class);
 
     protected static <M extends AEBaseMenu, H> Supplier<MenuType<M>> create(
-            String id, MenuTypeBuilder.MenuFactory<M, H> factory, Class<H> host) {
+            final String id, final MenuTypeBuilder.MenuFactory<M, H> factory, final Class<H> host) {
         return create(UfoMod.MOD_ID, id, factory, host);
     }
 }

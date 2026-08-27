@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "bonus_rolls": 0.0,
+      "conditions": [
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "ufo:1qd_mega_crafting_storage"
+        }
+      ],
+      "rolls": 1.0
+    }
+  ],
+  "random_sequence": "ufo:blocks/1qd_mega_crafting_storage"
+}

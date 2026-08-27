@@ -6,7 +6,7 @@ import net.minecraft.world.entity.player.Inventory;
 
 public class QmfControllerScreen extends AbstractUniversalMultiblockControllerScreen<QmfControllerMenu> {
 
-    public QmfControllerScreen(QmfControllerMenu menu, Inventory playerInventory, Component title, ScreenStyle style) {
+    public QmfControllerScreen(final QmfControllerMenu menu, final Inventory playerInventory, final Component title, final ScreenStyle style) {
         super(menu, playerInventory, title, style);
     }
 }

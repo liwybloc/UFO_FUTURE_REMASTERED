@@ -2,7 +2,6 @@ package com.raishxn.ufo.client.tutorial;
 
 import com.raishxn.ufo.api.multiblock.MultiblockControllerDefinitions;
 import com.raishxn.ufo.api.tutorial.UfoTutorialRegistry;
-import com.raishxn.ufo.client.tutorial.screen.UfoTutorialScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.world.inventory.Slot;
@@ -20,32 +19,32 @@ public final class UfoTutorialScreens {
     }
 
     public static boolean openLookedAtController() {
-        Minecraft minecraft = Minecraft.getInstance();
+        final Minecraft minecraft = Minecraft.getInstance();
         if (minecraft.level == null || minecraft.hitResult == null || minecraft.hitResult.getType() != HitResult.Type.BLOCK) {
             return false;
         }
 
-        BlockEntity blockEntity = minecraft.level.getBlockEntity(((BlockHitResult) minecraft.hitResult).getBlockPos());
+        final BlockEntity blockEntity = minecraft.level.getBlockEntity(((BlockHitResult) minecraft.hitResult).getBlockPos());
         return blockEntity != null && openFor(blockEntity);
     }
 
     public static boolean openFromCurrentContext() {
-        Minecraft minecraft = Minecraft.getInstance();
+        final Minecraft minecraft = Minecraft.getInstance();
         if (minecraft.player == null) {
             return false;
         }
 
-        ItemStack hoveredStack = getHoveredContainerStack(minecraft);
+        final ItemStack hoveredStack = getHoveredContainerStack(minecraft);
         if (!hoveredStack.isEmpty() && openFor(hoveredStack)) {
             return true;
         }
 
-        ItemStack jeiStack = getHoveredJeiStack();
+        final ItemStack jeiStack = getHoveredJeiStack();
         if (!jeiStack.isEmpty() && openFor(jeiStack)) {
             return true;
         }
 
-        ItemStack carriedStack = minecraft.player.containerMenu.getCarried();
+        final ItemStack carriedStack = minecraft.player.containerMenu.getCarried();
         if (!carriedStack.isEmpty() && openFor(carriedStack)) {
             return true;
         }
@@ -57,48 +56,27 @@ public final class UfoTutorialScreens {
         return openLookedAtController();
     }
 
-    public static boolean openFor(BlockEntity blockEntity) {
-        return MultiblockControllerDefinitions.getDefinition(blockEntity)
-                .flatMap(definition -> MultiblockControllerDefinitions.getPreviewEntries().stream()
-                        .filter(entry -> entry.definition() == definition)
-                        .findFirst())
-                .flatMap(UfoTutorialRegistry::get)
-                .map(entry -> {
-                    Minecraft.getInstance().setScreen(new UfoTutorialScreen(entry));
-                    return true;
-                })
-                .orElse(false);
+    public static boolean openFor(final BlockEntity blockEntity) {
+        return false;
     }
 
-    public static boolean openFor(ItemStack stack) {
-        if (stack.isEmpty() || !(stack.getItem() instanceof BlockItem)) {
-            return false;
-        }
-
-        return MultiblockControllerDefinitions.getPreviewEntries().stream()
-                .filter(entry -> stack.is(entry.iconStack().getItem()))
-                .findFirst()
-                .flatMap(UfoTutorialRegistry::get)
-                .map(entry -> {
-                    Minecraft.getInstance().setScreen(new UfoTutorialScreen(entry));
-                    return true;
-                })
-                .orElse(false);
+    public static boolean openFor(final ItemStack stack) {
+        return false;
     }
 
-    private static ItemStack getHoveredContainerStack(Minecraft minecraft) {
-        if (!(minecraft.screen instanceof AbstractContainerScreen<?> containerScreen)) {
+    private static ItemStack getHoveredContainerStack(final Minecraft minecraft) {
+        if (!(minecraft.screen instanceof final AbstractContainerScreen<?> containerScreen)) {
             return ItemStack.EMPTY;
         }
 
         try {
-            Field hoveredSlotField = AbstractContainerScreen.class.getDeclaredField("hoveredSlot");
+            final Field hoveredSlotField = AbstractContainerScreen.class.getDeclaredField("hoveredSlot");
             hoveredSlotField.setAccessible(true);
-            Object value = hoveredSlotField.get(containerScreen);
-            if (value instanceof Slot slot && slot.hasItem()) {
+            final Object value = hoveredSlotField.get(containerScreen);
+            if (value instanceof final Slot slot && slot.hasItem()) {
                 return slot.getItem();
             }
-        } catch (ReflectiveOperationException | RuntimeException ignored) {
+        } catch (final ReflectiveOperationException | RuntimeException ignored) {
             return ItemStack.EMPTY;
         }
 
@@ -107,13 +85,13 @@ public final class UfoTutorialScreens {
 
     private static ItemStack getHoveredJeiStack() {
         try {
-            Class<?> pluginClass = Class.forName("com.raishxn.ufo.compat.jei.UfoJeiPlugin");
-            Method method = pluginClass.getDeclaredMethod("getHoveredItemStack");
-            Object value = method.invoke(null);
-            if (value instanceof ItemStack stack) {
+            final Class<?> pluginClass = Class.forName("com.raishxn.ufo.compat.jei.UfoJeiPlugin");
+            final Method method = pluginClass.getDeclaredMethod("getHoveredItemStack");
+            final Object value = method.invoke(null);
+            if (value instanceof final ItemStack stack) {
                 return stack;
             }
-        } catch (ReflectiveOperationException | LinkageError | RuntimeException ignored) {
+        } catch (final ReflectiveOperationException | LinkageError | RuntimeException ignored) {
             return ItemStack.EMPTY;
         }
 

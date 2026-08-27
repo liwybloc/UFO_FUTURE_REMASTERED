@@ -25,28 +25,28 @@ public class RegistryHandler {
     protected final List<Pair<String, DataComponentType<?>>> components = new ArrayList<>();
     protected final Object2ReferenceMap<String, Function<Block, Item>> itemBlocks = new Object2ReferenceOpenHashMap<>();
 
-    public RegistryHandler(String modid) {
+    public RegistryHandler(final String modid) {
         this.id = modid;
     }
 
-    public void block(String name, Block block) {
+    public void block(final String name, final Block block) {
         this.blocks.add(Pair.of(name, block));
     }
 
-    public void block(String name, Block block, Function<Block, Item> itemWrapper) {
+    public void block(final String name, final Block block, final Function<Block, Item> itemWrapper) {
         this.blocks.add(Pair.of(name, block));
         this.itemBlocks.put(name, itemWrapper);
     }
 
-    public void item(String name, Item item) {
+    public void item(final String name, final Item item) {
         this.items.add(Pair.of(name, item));
     }
 
-    public void tile(String name, BlockEntityType<?> type) {
+    public void tile(final String name, final BlockEntityType<?> type) {
         this.tiles.add(Pair.of(name, type));
     }
 
-    public void comp(String name, DataComponentType<?> component) {
+    public void comp(final String name, final DataComponentType<?> component) {
         this.components.add(Pair.of(name, component));
     }
 
@@ -63,8 +63,8 @@ public class RegistryHandler {
     }
 
     protected void onRegisterItems() {
-        for(Pair<String, Block> e : this.blocks) {
-            Function<Block, Item> itemFunc = this.itemBlocks.getOrDefault(e.getLeft(), (block) -> new BlockItem(block, new Item.Properties()));
+        for(final Pair<String, Block> e : this.blocks) {
+            final Function<Block, Item> itemFunc = this.itemBlocks.getOrDefault(e.getLeft(), (block) -> new BlockItem(block, new Item.Properties()));
             Registry.register(BuiltInRegistries.ITEM, Glodium.id(this.id, e.getLeft()), itemFunc.apply(e.getRight()));
         }
 

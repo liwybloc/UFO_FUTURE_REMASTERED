@@ -13,55 +13,22 @@ import net.pedroksl.ae2addonlib.recipes.IngredientStack;
 
 import appeng.api.stacks.GenericStack;
 
-/**
- * Codec-based serializer for {@link StellarSimulationRecipe}.
- * <p>
- * Supports both the new schema (energy, simulation_name, fuel_fluid, coolant_fluid)
- * and the legacy schema (fuel → energy) for backward compatibility.
- * <p>
- * JSON format:
- * <pre>{@code
- * {
- *   "type": "ufo:stellar_simulation",
- *   "simulation_name": "Netherite Mass Synthesis",
- *   "item_inputs": [...],
- *   "fluid_inputs": [...],
- *   "item_outputs": [...],
- *   "fluid_outputs": [...],
- *   "energy": 500000000,
- *   "time": 24000,
- *   "cooling_level": 2,
- *   "field_tier": 1,
- *   "fuel_fluid": "mekanism:hydrogen",
- *   "fuel_amount": 10000000,
- *   "coolant_amount": 20000000
- * }
- * }</pre>
- * <p>
- * Legacy support: if "fuel" exists but "energy" doesn't, "fuel" is read as "energy".
- */
-public class StellarSimulationRecipeSerializer implements RecipeSerializer<StellarSimulationRecipe> {
-
-    public static final StellarSimulationRecipeSerializer INSTANCE = new StellarSimulationRecipeSerializer();
+public final class StellarSimulationRecipeSerializer {
 
     private StellarSimulationRecipeSerializer() {}
 
-    // ═══════════════════════════════════════════════════════════
-    //  MapCodec — JSON datapacks
-    // ═══════════════════════════════════════════════════════════
 
     public static final MapCodec<StellarSimulationRecipe> CODEC = RecordCodecBuilder.mapCodec(builder -> builder.group(
             IngredientStack.Item.CODEC.listOf().fieldOf("item_inputs")
                     .forGetter(StellarSimulationRecipe::getItemInputs),
             IngredientStack.Fluid.CODEC.listOf().fieldOf("fluid_inputs")
                     .forGetter(StellarSimulationRecipe::getFluidInputs),
-            GenericStack.CODEC.listOf().fieldOf("item_outputs")
-                    .forGetter(StellarSimulationRecipe::getItemOutputs),
-            GenericStack.CODEC.listOf().fieldOf("fluid_outputs")
-                    .forGetter(StellarSimulationRecipe::getFluidOutputs),
+            DimensionalMatterAssemblerRecipe.ItemOutput.CODEC.listOf().fieldOf("item_outputs")
+                    .forGetter(StellarSimulationRecipe::getItemOutputDefinitions),
+            DimensionalMatterAssemblerRecipe.FluidOutput.CODEC.listOf().fieldOf("fluid_outputs")
+                    .forGetter(StellarSimulationRecipe::getFluidOutputDefinitions),
             Codec.STRING.optionalFieldOf("simulation_name", "")
                     .forGetter(StellarSimulationRecipe::getSimulationName),
-            // Support both "energy" and legacy "fuel" field
             Codec.LONG.optionalFieldOf("energy", 0L)
                     .forGetter(StellarSimulationRecipe::getEnergyCost),
             Codec.INT.fieldOf("time")
@@ -78,9 +45,6 @@ public class StellarSimulationRecipeSerializer implements RecipeSerializer<Stell
                     .forGetter(StellarSimulationRecipe::getCoolantAmount)
     ).apply(builder, StellarSimulationRecipe::new));
 
-    // ═══════════════════════════════════════════════════════════
-    //  StreamCodec — Network sync (manual, params > composite max of 6)
-    // ═══════════════════════════════════════════════════════════
 
     public static final StreamCodec<RegistryFriendlyByteBuf, StellarSimulationRecipe> STREAM_CODEC =
             StreamCodec.of(
@@ -88,20 +52,15 @@ public class StellarSimulationRecipeSerializer implements RecipeSerializer<Stell
                     StellarSimulationRecipeSerializer::decode
             );
 
-    private static void encode(RegistryFriendlyByteBuf buf, StellarSimulationRecipe recipe) {
-        // Item inputs
+    private static void encode(final RegistryFriendlyByteBuf buf, final StellarSimulationRecipe recipe) {
         IngredientStack.Item.STREAM_CODEC.apply(net.minecraft.network.codec.ByteBufCodecs.list())
                 .encode(buf, recipe.getItemInputs());
-        // Fluid inputs
         IngredientStack.Fluid.STREAM_CODEC.apply(net.minecraft.network.codec.ByteBufCodecs.list())
                 .encode(buf, recipe.getFluidInputs());
-        // Item outputs
-        GenericStack.STREAM_CODEC.apply(net.minecraft.network.codec.ByteBufCodecs.list())
-                .encode(buf, recipe.getItemOutputs());
-        // Fluid outputs
-        GenericStack.STREAM_CODEC.apply(net.minecraft.network.codec.ByteBufCodecs.list())
-                .encode(buf, recipe.getFluidOutputs());
-        // Scalars
+        DimensionalMatterAssemblerRecipe.ItemOutput.STREAM_CODEC.apply(net.minecraft.network.codec.ByteBufCodecs.list())
+                .encode(buf, recipe.getItemOutputDefinitions());
+        DimensionalMatterAssemblerRecipe.FluidOutput.STREAM_CODEC.apply(net.minecraft.network.codec.ByteBufCodecs.list())
+                .encode(buf, recipe.getFluidOutputDefinitions());
         buf.writeUtf(recipe.getSimulationName());
         buf.writeLong(recipe.getEnergyCost());
         buf.writeInt(recipe.getTime());
@@ -112,23 +71,23 @@ public class StellarSimulationRecipeSerializer implements RecipeSerializer<Stell
         buf.writeLong(recipe.getCoolantAmount());
     }
 
-    private static StellarSimulationRecipe decode(RegistryFriendlyByteBuf buf) {
-        var itemInputs = IngredientStack.Item.STREAM_CODEC
+    private static StellarSimulationRecipe decode(final RegistryFriendlyByteBuf buf) {
+        final var itemInputs = IngredientStack.Item.STREAM_CODEC
                 .apply(net.minecraft.network.codec.ByteBufCodecs.list()).decode(buf);
-        var fluidInputs = IngredientStack.Fluid.STREAM_CODEC
+        final var fluidInputs = IngredientStack.Fluid.STREAM_CODEC
                 .apply(net.minecraft.network.codec.ByteBufCodecs.list()).decode(buf);
-        var itemOutputs = GenericStack.STREAM_CODEC
+        final var itemOutputs = DimensionalMatterAssemblerRecipe.ItemOutput.STREAM_CODEC
                 .apply(net.minecraft.network.codec.ByteBufCodecs.list()).decode(buf);
-        var fluidOutputs = GenericStack.STREAM_CODEC
+        final var fluidOutputs = DimensionalMatterAssemblerRecipe.FluidOutput.STREAM_CODEC
                 .apply(net.minecraft.network.codec.ByteBufCodecs.list()).decode(buf);
-        String simulationName = buf.readUtf();
-        long energy = buf.readLong();
-        int time = buf.readInt();
-        int coolingLevel = buf.readInt();
-        int fieldTier = buf.readInt();
-        String fuelFluid = buf.readUtf();
-        long fuelAmount = buf.readLong();
-        long coolantAmount = buf.readLong();
+        final String simulationName = buf.readUtf();
+        final long energy = buf.readLong();
+        final int time = buf.readInt();
+        final int coolingLevel = buf.readInt();
+        final int fieldTier = buf.readInt();
+        final String fuelFluid = buf.readUtf();
+        final long fuelAmount = buf.readLong();
+        final long coolantAmount = buf.readLong();
 
         return new StellarSimulationRecipe(
                 itemInputs, fluidInputs, itemOutputs, fluidOutputs,
@@ -136,17 +95,7 @@ public class StellarSimulationRecipeSerializer implements RecipeSerializer<Stell
                 fuelFluid, fuelAmount, coolantAmount);
     }
 
-    // ═══════════════════════════════════════════════════════════
-    //  RecipeSerializer interface
-    // ═══════════════════════════════════════════════════════════
 
-    @Override
-    public @NotNull MapCodec<StellarSimulationRecipe> codec() {
-        return CODEC;
-    }
-
-    @Override
-    public @NotNull StreamCodec<RegistryFriendlyByteBuf, StellarSimulationRecipe> streamCodec() {
-        return STREAM_CODEC;
-    }
+    public static final RecipeSerializer<StellarSimulationRecipe> INSTANCE =
+            new RecipeSerializer<>(CODEC, STREAM_CODEC);
 }

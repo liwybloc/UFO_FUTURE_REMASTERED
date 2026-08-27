@@ -2,6 +2,10 @@
 
 UFO Future uses separate licenses for source code and assets.
 
+The original UFO Future project was created by Raishxn. This repository is a
+modified, community-maintained port and optimization effort. See `COPYING` for
+the origin, modification, and redistribution notice.
+
 ## Source Code
 
 All source code in this repository is licensed under the GNU Lesser General Public License v3.0 or later (LGPLv3+), unless a file states otherwise.

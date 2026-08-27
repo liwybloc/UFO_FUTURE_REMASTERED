@@ -12,7 +12,7 @@ public class MegaCoProcessorBlockItem extends AEBaseBlockItem {
 
     private final MegaCoProcessorTier tier;
 
-    public MegaCoProcessorBlockItem(Block block, Properties props, MegaCoProcessorTier tier) {
+    public MegaCoProcessorBlockItem(final Block block, final Properties props, final MegaCoProcessorTier tier) {
         super(block, props);
         this.tier = tier;
     }
@@ -22,9 +22,9 @@ public class MegaCoProcessorBlockItem extends AEBaseBlockItem {
     }
 
     @Override
-    public Component getName(ItemStack stack) {
-        String text = Component.translatable(stack.getDescriptionId()).getString();
-        ChatFormatting[] colors;
+    public Component getName(final ItemStack stack) {
+        final String text = Component.translatable(stack.getItem().getDescriptionId()).getString();
+        final ChatFormatting[] colors;
 
         switch (this.tier) {
             case COPROCESSOR_50M:
@@ -43,7 +43,7 @@ public class MegaCoProcessorBlockItem extends AEBaseBlockItem {
                 colors = new ChatFormatting[]{ChatFormatting.DARK_GREEN, ChatFormatting.GREEN};
                 break;
             default:
-                return Component.translatable(stack.getDescriptionId());
+                return Component.translatable(stack.getItem().getDescriptionId());
         }
 
         return ColorHelper.getSolidColoredText(text, colors);

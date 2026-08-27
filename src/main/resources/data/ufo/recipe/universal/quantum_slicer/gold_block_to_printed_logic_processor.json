@@ -4,9 +4,7 @@
   "recipe_name": "universal/quantum_slicer/gold_block_to_printed_logic_processor",
   "item_inputs": [
     {
-      "ingredient": {
-        "item": "minecraft:gold_block"
-      },
+      "ingredient": "minecraft:gold_block",
       "amount": 8192
     }
   ],

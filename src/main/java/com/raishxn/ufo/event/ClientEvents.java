@@ -8,7 +8,7 @@ import com.raishxn.ufo.network.packet.CycleModeKeyPacket;
 import com.raishxn.ufo.network.packet.CycleToolKeyPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -17,15 +17,13 @@ import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.client.event.RenderGuiLayerEvent;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 
-// Esta classe é registrada como uma instância no Forge Bus, então não precisa da anotação @EventBusSubscriber
 public class ClientEvents {
 
     @SubscribeEvent
-    public void onKeyInput(InputEvent.Key event) {
-        Minecraft mc = Minecraft.getInstance();
+    public void onKeyInput(final InputEvent.Key event) {
+        final Minecraft mc = Minecraft.getInstance();
         if (mc.player == null) return;
 
-        // consumeClick() garante que a ação só aconteça uma vez por clique
         if (ModKeyBindings.CYCLE_TOOL_FORWARD.consumeClick()) {
             if (mc.player.getMainHandItem().getItem() instanceof IEnergyTool) {
                 ModPackets.sendToServer(new CycleToolKeyPacket(true));
@@ -45,9 +43,7 @@ public class ClientEvents {
         }
     }
 
-    // Seu código de HUD está correto e pode continuar aqui.
     @SubscribeEvent
-    public void onRenderHud(RenderGuiLayerEvent.Post event) {
-        // ... (seu código de renderização do HUD permanece o mesmo)
+    public void onRenderHud(final RenderGuiLayerEvent.Post event) {
     }
 }

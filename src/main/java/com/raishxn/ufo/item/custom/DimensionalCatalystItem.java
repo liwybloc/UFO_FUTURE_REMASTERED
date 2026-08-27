@@ -18,19 +18,18 @@ import java.util.List;
  */
 public class DimensionalCatalystItem extends UpgradeCardItem {
 
-    public DimensionalCatalystItem(Properties properties) {
+    public DimensionalCatalystItem(final Properties properties) {
         super(properties);
     }
 
     @Override
-    public InteractionResult useOn(UseOnContext context) {
+    public InteractionResult useOn(final UseOnContext context) {
         return CatalystUpgradeUseHelper.tryInstallHeldCatalyst(context);
     }
 
-    @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> components, TooltipFlag flag) {
+    public void appendHoverText(final ItemStack stack, final TooltipContext context, final List<Component> components, final TooltipFlag flag) {
 
-        if (Screen.hasShiftDown()) {
+        if (net.minecraft.client.Minecraft.getInstance().hasShiftDown()) {
             components.add(Component.literal("CREATIVE MODE CATALYST").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
             components.add(Component.literal("")); // Espaçador
             components.add(Component.literal("Effects:").withStyle(ChatFormatting.AQUA));
@@ -49,6 +48,5 @@ public class DimensionalCatalystItem extends UpgradeCardItem {
                     .append(Component.literal("> for details.").withStyle(ChatFormatting.DARK_GRAY)));
         }
 
-        super.appendHoverText(stack, context, components, flag);
     }
 }

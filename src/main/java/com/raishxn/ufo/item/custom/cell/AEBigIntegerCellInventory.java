@@ -43,10 +43,10 @@ public class AEBigIntegerCellInventory implements StorageCell
     private boolean isPersisted = false;
     private final Long2ObjectOpenHashMap<BigInteger> bucketSums = new Long2ObjectOpenHashMap<>();
 
-    public AEBigIntegerCellInventory(@NotNull AEBigIntegerCellData cellData,
-                                     @NotNull ItemStack itemStack,
-                                     @NotNull IAEBigIntegerCell cellType,
-                                     @Nullable ISaveProvider saveProvider)
+    public AEBigIntegerCellInventory(@NotNull final AEBigIntegerCellData cellData,
+                                     @NotNull final ItemStack itemStack,
+                                     @NotNull final IAEBigIntegerCell cellType,
+                                     @Nullable final ISaveProvider saveProvider)
     {
         this.cellData = cellData;
         this.storage = cellData.getOriginalStorage();
@@ -56,9 +56,9 @@ public class AEBigIntegerCellInventory implements StorageCell
 
         this.bucketSums.defaultReturnValue(BigInteger.ZERO);
         BigInteger bytesForValues = BigInteger.ZERO;
-        for (Object2ObjectMap.Entry<AEKey, BigInteger> e : storage.object2ObjectEntrySet())
+        for (final Object2ObjectMap.Entry<AEKey, BigInteger> e : storage.object2ObjectEntrySet())
         {
-            BigInteger v = nonNegative(e.getValue());
+            final BigInteger v = nonNegative(e.getValue());
             if (v.signum() <= 0) continue;
             bytesForValues = bytesForValues.add(v);
         }
@@ -91,10 +91,10 @@ public class AEBigIntegerCellInventory implements StorageCell
         isPersisted = true;
     }
     @Override
-    public long insert(AEKey what, long amount, Actionable mode, IActionSource source)
+    public long insert(final AEKey what, long amount, final Actionable mode, final IActionSource source)
     {
         if (amount <= 0) return 0;
-        if (what.getType() != cellType.getKeyType()) return 0; // REJECT MISMATCHED KEY TYPES (e.g. Fluids in Item Cells)
+        if (what.getType() != cellType.getKeyType()) return 0;
         if (cellType.isBlackListed(itemStack, what)) return 0;
         if (!matchesPartitionAndUpgrades(what)) return 0;
         if (!canNestStorageCells(what)) return 0;
@@ -102,13 +102,13 @@ public class AEBigIntegerCellInventory implements StorageCell
         final long apb = Math.max(1, what.getType().getAmountPerByte());
         final BigInteger current = nonNegative(storage.get(what));
 
-        long maxBytesCap = cellType.getMaxBytes(itemStack);
-        int maxTypesCap = cellType.getMaxTypes(itemStack);
-        int overhead = cellType.getBytesPerType(itemStack);
+        final long maxBytesCap = cellType.getMaxBytes(itemStack);
+        final int maxTypesCap = cellType.getMaxTypes(itemStack);
+        final int overhead = cellType.getBytesPerType(itemStack);
 
         if (maxBytesCap != Long.MAX_VALUE) {
-            long usedBytes = clampToLong(usedBytesCached);
-            int typesUsed = storage.size();
+            final long usedBytes = clampToLong(usedBytesCached);
+            final int typesUsed = storage.size();
             long freeBytes = maxBytesCap - usedBytes;
 
             if (current.signum() == 0) {
@@ -118,7 +118,7 @@ public class AEBigIntegerCellInventory implements StorageCell
 
             if (freeBytes <= 0) return 0;
 
-            long maxItemsFit = freeBytes * apb;
+            final long maxItemsFit = freeBytes * apb;
             if (amount > maxItemsFit) {
                 amount = maxItemsFit;
             }
@@ -135,7 +135,7 @@ public class AEBigIntegerCellInventory implements StorageCell
         return amount;
     }
     @Override
-    public long extract(AEKey what, long amount, Actionable mode, IActionSource source)
+    public long extract(final AEKey what, final long amount, final Actionable mode, final IActionSource source)
     {
         if (amount <= 0) return 0;
 
@@ -150,7 +150,7 @@ public class AEBigIntegerCellInventory implements StorageCell
         {
             usedBytesCached = usedBytesCached.subtract(BigInteger.valueOf(taken));
 
-            BigInteger next = current.subtract(BigInteger.valueOf(taken));
+            final BigInteger next = current.subtract(BigInteger.valueOf(taken));
             if (next.signum() > 0)
             {
                 storage.put(what, next);
@@ -165,14 +165,14 @@ public class AEBigIntegerCellInventory implements StorageCell
     }
 
     @Override
-    public void getAvailableStacks(KeyCounter out)
+    public void getAvailableStacks(final KeyCounter out)
     {
-        for (Object2ObjectMap.Entry<AEKey, BigInteger> entry : storage.object2ObjectEntrySet())
+        for (final Object2ObjectMap.Entry<AEKey, BigInteger> entry : storage.object2ObjectEntrySet())
         {
-            BigInteger value = nonNegative(entry.getValue());
+            final BigInteger value = nonNegative(entry.getValue());
             if (value.signum() <= 0) continue;
-            long existing = out.get(entry.getKey());
-            long headroom = (existing <= 0) ? Long.MAX_VALUE : (Long.MAX_VALUE - existing);
+            final long existing = out.get(entry.getKey());
+            final long headroom = (existing <= 0) ? Long.MAX_VALUE : (Long.MAX_VALUE - existing);
             if (headroom <= 0) continue;
 
             long add = clampToLong(value);
@@ -188,27 +188,25 @@ public class AEBigIntegerCellInventory implements StorageCell
     {
         return this.itemStack.getHoverName();
     }
-    private boolean canNestStorageCells(AEKey what)
+    private boolean canNestStorageCells(final AEKey what)
     {
-        if (what instanceof AEItemKey itemKey)
+        if (what instanceof final AEItemKey itemKey)
         {
-            ItemStack s = itemKey.toStack();
-            StorageCell nested = StorageCells.getCellInventory(s, null);
+            final ItemStack s = itemKey.toStack();
+            final StorageCell nested = StorageCells.getCellInventory(s, null);
             return nested == null || nested.canFitInsideCell();
         }
         return true;
     }
-    private boolean matchesPartitionAndUpgrades(AEKey what)
+    private boolean matchesPartitionAndUpgrades(final AEKey what)
     {
-        // 升级槽
         final IUpgradeInventory upgrades = cellType.getUpgrades(itemStack);
         final boolean hasInverter = upgrades.isInstalled(AEItems.INVERTER_CARD);
         final boolean hasFuzzy = upgrades.isInstalled(AEItems.FUZZY_CARD);
 
-        // 分区配置
         ConfigInventory config = null;
         FuzzyMode fuzzyMode = FuzzyMode.IGNORE_ALL;
-        if (cellType instanceof ICellWorkbenchItem cellWorkbenchItem)
+        if (cellType instanceof final ICellWorkbenchItem cellWorkbenchItem)
         {
             config = cellWorkbenchItem.getConfigInventory(itemStack);
             if (hasFuzzy) fuzzyMode = cellWorkbenchItem.getFuzzyMode(itemStack);
@@ -218,7 +216,7 @@ public class AEBigIntegerCellInventory implements StorageCell
             return true;
         }
 
-        IncludeExclude mode = hasInverter ? IncludeExclude.BLACKLIST : IncludeExclude.WHITELIST;
+        final IncludeExclude mode = hasInverter ? IncludeExclude.BLACKLIST : IncludeExclude.WHITELIST;
 
 
         return hasInverter;
@@ -235,46 +233,46 @@ public class AEBigIntegerCellInventory implements StorageCell
     }
     private void updateItemTooltipState()
     {
-        BigInteger used = usedBytesCached.signum() > 0 ? usedBytesCached : BigInteger.ZERO;
+        final BigInteger used = usedBytesCached.signum() > 0 ? usedBytesCached : BigInteger.ZERO;
 
         IAEBigIntegerCell.setUsedBytes(itemStack, used);
         IAEBigIntegerCell.setUsedTypes(itemStack, storage.size());
         IAEBigIntegerCell.setCellState(itemStack, getStatus());
-        List<GenericStack> show = new ArrayList<>(5);
+        final List<GenericStack> show = new ArrayList<>(5);
         int count = 0;
-        for (Object2ObjectMap.Entry<AEKey, BigInteger> e : storage.object2ObjectEntrySet())
+        for (final Object2ObjectMap.Entry<AEKey, BigInteger> e : storage.object2ObjectEntrySet())
         {
-            BigInteger v = nonNegative(e.getValue());
+            final BigInteger v = nonNegative(e.getValue());
             if (v.signum() <= 0) continue;
             show.add(new GenericStack(e.getKey(), clampToLong(v)));
             if (++count >= 5) break;
         }
         IAEBigIntegerCell.setTooltipShowStacks(itemStack, show);
     }
-    private static BigInteger ceilDiv(BigInteger a, BigInteger b)
+    private static BigInteger ceilDiv(final BigInteger a, final BigInteger b)
     {
         if (b.signum() <= 0) throw new IllegalArgumentException("div by non-positive");
         if (a.signum() <= 0) return BigInteger.ZERO;
         return a.add(b.subtract(BigInteger.ONE)).divide(b);
     }
-    private static long clampToLong(BigInteger v)
+    private static long clampToLong(final BigInteger v)
     {
         if (v.signum() <= 0) return 0L;
         if (v.bitLength() > 63) return Long.MAX_VALUE;
-        long r = v.longValue();
+        final long r = v.longValue();
         return (r < 0) ? Long.MAX_VALUE : r;
     }
-    private static BigInteger nonNegative(BigInteger v)
+    private static BigInteger nonNegative(final BigInteger v)
     {
         if (v == null || v.signum() <= 0) return BigInteger.ZERO;
         return v;
     }
-    private static BigInteger minBI(BigInteger a, BigInteger b)
+    private static BigInteger minBI(final BigInteger a, final BigInteger b)
     {
         return a.compareTo(b) <= 0 ? a : b;
     }
     @SuppressWarnings("unused")
-    private static BigInteger maxBI(BigInteger a, BigInteger b)
+    private static BigInteger maxBI(final BigInteger a, final BigInteger b)
     {
         return a.compareTo(b) >= 0 ? a : b;
     }

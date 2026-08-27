@@ -1,7 +1,7 @@
 package com.raishxn.ufo.util;
 
 import com.raishxn.ufo.UfoMod;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.ItemTags;
@@ -15,8 +15,8 @@ public class ModTags {
         public static final TagKey<Block> NEEDS_UFO_TOOL = createTag("needs_ufo_tool");
         public static final TagKey<Block> INCORRECT_FOR_UFO_TOOL = createTag("incorrect_for_ufo_tool");
 
-        private static TagKey<Block> createTag(String name) {
-            return BlockTags.create(ResourceLocation.fromNamespaceAndPath(UfoMod.MOD_ID, name));
+        private static TagKey<Block> createTag(final String name) {
+            return BlockTags.create(Identifier.fromNamespaceAndPath(UfoMod.MOD_ID, name));
         }
     }
 
@@ -40,8 +40,8 @@ public class ModTags {
         public static final TagKey<Item> MATTER_STAGE_2 = createTag("matter_stage_2");
         public static final TagKey<Item> MATTER_STAGE_FINAL = createTag("matter_stage_final");
 
-        private static TagKey<Item> createTag(String name) {
-            return ItemTags.create(ResourceLocation.fromNamespaceAndPath(UfoMod.MOD_ID, name));
+        private static TagKey<Item> createTag(final String name) {
+            return ItemTags.create(Identifier.fromNamespaceAndPath(UfoMod.MOD_ID, name));
         }
     }
     public static class Fluids {
@@ -53,7 +53,7 @@ public class ModTags {
         public static final TagKey<Fluid> COOLANT = tag("coolant");
         public static final TagKey<Fluid> COOLANT_EXTREME = tag("coolant_extreme");
         public static final TagKey<Fluid> HAZARDOUS = tag("hazardous");
-        private static TagKey<Fluid> tag(String name) {
-            return FluidTags.create(ResourceLocation.fromNamespaceAndPath(UfoMod.MOD_ID, name));
+        private static TagKey<Fluid> tag(final String name) {
+            return FluidTags.create(Identifier.fromNamespaceAndPath(UfoMod.MOD_ID, name));
         }
 }}

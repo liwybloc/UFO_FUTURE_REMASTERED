@@ -10,7 +10,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.Level;
@@ -27,7 +27,7 @@ public class QMFRecipe implements Recipe<RecipeInput> {
     private final int time;
     private final int requiredTier;
 
-    public QMFRecipe(String recipeName, List<QMFRecipeIngredient> itemInputs, List<QMFFluidIngredient> fluidInputs, List<QMFChemicalIngredient> chemicalInputs, ItemStack itemOutput, long energy, int time, int requiredTier) {
+    public QMFRecipe(final String recipeName, final List<QMFRecipeIngredient> itemInputs, final List<QMFFluidIngredient> fluidInputs, final List<QMFChemicalIngredient> chemicalInputs, final ItemStack itemOutput, final long energy, final int time, final int requiredTier) {
         this.recipeName = recipeName;
         this.itemInputs = itemInputs;
         this.fluidInputs = fluidInputs;
@@ -47,24 +47,30 @@ public class QMFRecipe implements Recipe<RecipeInput> {
     public int getRequiredTier() { return requiredTier; }
 
     @Override
-    public boolean matches(RecipeInput pInput, Level pLevel) { return false; }
+    public boolean matches(final RecipeInput pInput, final Level pLevel) { return false; }
 
     @Override
-    public ItemStack assemble(RecipeInput pInput, HolderLookup.Provider pRegistries) { return itemOutput.copy(); }
+    public ItemStack assemble(final RecipeInput pInput) { return itemOutput.copy(); }
 
     @Override
-    public boolean canCraftInDimensions(int pWidth, int pHeight) { return true; }
+    public boolean showNotification() { return false; }
 
     @Override
-    public ItemStack getResultItem(HolderLookup.Provider pRegistries) { return itemOutput; }
+    public String group() { return "ufo:qmf"; }
+
+    @Override
+    public PlacementInfo placementInfo() { return PlacementInfo.NOT_PLACEABLE; }
+
+    @Override
+    public RecipeBookCategory recipeBookCategory() { return RecipeBookCategories.CRAFTING_MISC; }
 
     public ItemStack getResultItem() { return itemOutput.copy(); }
 
     @Override
-    public RecipeSerializer<?> getSerializer() { return ModRecipes.QMF_SERIALIZER.get(); }
+    public RecipeSerializer<? extends Recipe<RecipeInput>> getSerializer() { return ModRecipes.QMF_SERIALIZER.get(); }
 
     @Override
-    public RecipeType<?> getType() { return ModRecipes.QMF_TYPE.get(); }
+    public RecipeType<? extends Recipe<RecipeInput>> getType() { return ModRecipes.QMF_TYPE.get(); }
 
     public record QMFRecipeIngredient(Ingredient ingredient, long amount) {
         public static final Codec<QMFRecipeIngredient> CODEC = RecordCodecBuilder.create(instance -> instance.group(
@@ -90,22 +96,22 @@ public class QMFRecipe implements Recipe<RecipeInput> {
         );
     }
 
-    public record QMFChemicalIngredient(ResourceLocation chemicalId, long amount) {
+    public record QMFChemicalIngredient(Identifier chemicalId, long amount) {
         public static final Codec<QMFChemicalIngredient> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-                ResourceLocation.CODEC.fieldOf("chemical").forGetter(QMFChemicalIngredient::chemicalId),
+                Identifier.CODEC.fieldOf("chemical").forGetter(QMFChemicalIngredient::chemicalId),
                 Codec.LONG.fieldOf("amount").forGetter(QMFChemicalIngredient::amount)
         ).apply(instance, QMFChemicalIngredient::new));
 
         public static final StreamCodec<RegistryFriendlyByteBuf, QMFChemicalIngredient> STREAM_CODEC = StreamCodec.of(
             (buf, ing) -> {
-                buf.writeResourceLocation(ing.chemicalId);
+                buf.writeIdentifier(ing.chemicalId);
                 buf.writeLong(ing.amount);
             },
-            buf -> new QMFChemicalIngredient(buf.readResourceLocation(), buf.readLong())
+            buf -> new QMFChemicalIngredient(buf.readIdentifier(), buf.readLong())
         );
     }
 
-    public static class Serializer implements RecipeSerializer<QMFRecipe> {
+    public static final class Serializer {
         public static final MapCodec<QMFRecipe> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
                 Codec.STRING.optionalFieldOf("recipe_name", "QMF Recipe").forGetter(QMFRecipe::getRecipeName),
                 QMFRecipeIngredient.CODEC.listOf().fieldOf("item_inputs").forGetter(QMFRecipe::getItemInputs),
@@ -140,10 +146,8 @@ public class QMFRecipe implements Recipe<RecipeInput> {
             )
         );
 
-        @Override
-        public MapCodec<QMFRecipe> codec() { return CODEC; }
+        public static final RecipeSerializer<QMFRecipe> INSTANCE = new RecipeSerializer<>(CODEC, STREAM_CODEC);
 
-        @Override
-        public StreamCodec<RegistryFriendlyByteBuf, QMFRecipe> streamCodec() { return STREAM_CODEC; }
+        private Serializer() {}
     }
 }

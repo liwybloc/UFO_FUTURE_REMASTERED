@@ -7,7 +7,6 @@ import com.raishxn.ufo.UfoMod;
 import com.raishxn.ufo.item.custom.AnimatedNameItem;
 import com.raishxn.ufo.item.custom.cell.AEBigIntegerCellItem;
 import com.raishxn.ufo.item.custom.cell.AnimatedAEBigIntegerCellItem;
-import com.raishxn.ufo.item.custom.cell.ChemicalAEBigIntegerCellItem;
 import net.minecraft.ChatFormatting;
 import net.minecraft.world.item.Item;
 import net.neoforged.bus.api.IEventBus;
@@ -17,15 +16,11 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 public final class ModCellItems {
     public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(UfoMod.MOD_ID);
 
-    // Housings
-    public static final DeferredHolder<Item, Item> WHITE_DWARF_ITEM_CELL_HOUSING = ITEMS.register("white_dwarf_item_cell_housing",
-            () -> new AnimatedNameItem(new Item.Properties(), ChatFormatting.WHITE, ChatFormatting.GRAY, ChatFormatting.DARK_GRAY));
-    public static final DeferredHolder<Item, Item> NEUTRON_FLUID_CELL_HOUSING = ITEMS.register("neutron_fluid_cell_housing",
-            () -> new AnimatedNameItem(new Item.Properties(), ChatFormatting.BLUE, ChatFormatting.AQUA, ChatFormatting.DARK_AQUA));
-    public static final DeferredHolder<Item, Item> PULSAR_CELL_HOUSING = ITEMS.register("pulsar_cell_housing",
-            () -> new AnimatedNameItem(new Item.Properties(), ChatFormatting.LIGHT_PURPLE, ChatFormatting.DARK_PURPLE));
+    public static final DeferredHolder<Item, Item> WHITE_DWARF_ITEM_CELL_HOUSING = ITEMS.registerItem("white_dwarf_item_cell_housing",
+            properties -> new AnimatedNameItem(properties, ChatFormatting.WHITE, ChatFormatting.GRAY, ChatFormatting.DARK_GRAY));
+    public static final DeferredHolder<Item, Item> NEUTRON_FLUID_CELL_HOUSING = ITEMS.registerItem("neutron_fluid_cell_housing",
+            properties -> new AnimatedNameItem(properties, ChatFormatting.BLUE, ChatFormatting.AQUA, ChatFormatting.DARK_AQUA));
 
-    // Storage Components & Tiers (sem alteração)
     public static final DeferredHolder<Item, Item> CELL_COMPONENT_40M = component("40m", 40 * 1024);
     public static final DeferredHolder<Item, Item> CELL_COMPONENT_100M = component("100m", 100 * 1024);
     public static final DeferredHolder<Item, Item> CELL_COMPONENT_250M = component("250m", 250 * 1024);
@@ -38,49 +33,34 @@ public final class ModCellItems {
     public static final StorageTier TIER_INFINITY = new StorageTier(15, "infinity", Integer.MAX_VALUE, 7.5D, CELL_COMPONENT_INFINITY);
 
     
-    // Item Cells: White Dwarf (Cores base cinza)
-    public static final DeferredHolder<Item, AEBigIntegerCellItem> ITEM_CELL_40M = ITEMS.register("white_dwarf_cell_echo",
-            () -> new AnimatedAEBigIntegerCellItem(new Item.Properties().stacksTo(1), TIER_40M.idleDrain(), AEKeyType.items(), TIER_40M, "item.ufo.white_dwarf_item_cell", "ufo.cell_tier.echo", new ChatFormatting[]{ChatFormatting.WHITE, ChatFormatting.GRAY, ChatFormatting.DARK_GRAY}, ChatFormatting.RED, ChatFormatting.GOLD, ChatFormatting.RED));
-    public static final DeferredHolder<Item, AEBigIntegerCellItem> ITEM_CELL_100M = ITEMS.register("white_dwarf_cell_beaco",
-            () -> new AnimatedAEBigIntegerCellItem(new Item.Properties().stacksTo(1), TIER_100M.idleDrain(), AEKeyType.items(), TIER_100M, "item.ufo.white_dwarf_item_cell", "ufo.cell_tier.beacon", new ChatFormatting[]{ChatFormatting.WHITE, ChatFormatting.GRAY, ChatFormatting.DARK_GRAY}, ChatFormatting.LIGHT_PURPLE, ChatFormatting.DARK_PURPLE));
-    public static final DeferredHolder<Item, AEBigIntegerCellItem> ITEM_CELL_250M = ITEMS.register("white_dwarf_cell_nexus",
-            () -> new AnimatedAEBigIntegerCellItem(new Item.Properties().stacksTo(1), TIER_250M.idleDrain(), AEKeyType.items(), TIER_250M, "item.ufo.white_dwarf_item_cell", "ufo.cell_tier.nexus", new ChatFormatting[]{ChatFormatting.WHITE, ChatFormatting.GRAY, ChatFormatting.DARK_GRAY}, ChatFormatting.AQUA, ChatFormatting.DARK_AQUA));
-    public static final DeferredHolder<Item, AEBigIntegerCellItem> ITEM_CELL_750M = ITEMS.register("white_dwarf_cell_core",
-            () -> new AnimatedAEBigIntegerCellItem(new Item.Properties().stacksTo(1), TIER_750M.idleDrain(), AEKeyType.items(), TIER_750M, "item.ufo.white_dwarf_item_cell", "ufo.cell_tier.core", new ChatFormatting[]{ChatFormatting.WHITE, ChatFormatting.GRAY, ChatFormatting.DARK_GRAY}, ChatFormatting.BLUE, ChatFormatting.DARK_PURPLE));
-    public static final DeferredHolder<Item, AEBigIntegerCellItem> ITEM_CELL_SINGULARITY = ITEMS.register("white_dwarf_cell_singularity",
-            () -> new AnimatedAEBigIntegerCellItem(new Item.Properties().stacksTo(1), 7.5D, AEKeyType.items(), TIER_INFINITY, "item.ufo.white_dwarf_item_cell", "ufo.cell_tier.singularity", new ChatFormatting[]{ChatFormatting.WHITE, ChatFormatting.GRAY, ChatFormatting.DARK_GRAY}, ChatFormatting.GREEN, ChatFormatting.DARK_GREEN));
+    public static final DeferredHolder<Item, AEBigIntegerCellItem> ITEM_CELL_40M = ITEMS.registerItem("white_dwarf_cell_echo",
+            properties -> new AnimatedAEBigIntegerCellItem(properties.stacksTo(1), TIER_40M.idleDrain(), AEKeyType.items(), TIER_40M, "item.ufo.white_dwarf_item_cell", "ufo.cell_tier.echo", new ChatFormatting[]{ChatFormatting.WHITE, ChatFormatting.GRAY, ChatFormatting.DARK_GRAY}, ChatFormatting.RED, ChatFormatting.GOLD, ChatFormatting.RED));
+    public static final DeferredHolder<Item, AEBigIntegerCellItem> ITEM_CELL_100M = ITEMS.registerItem("white_dwarf_cell_beaco",
+            properties -> new AnimatedAEBigIntegerCellItem(properties.stacksTo(1), TIER_100M.idleDrain(), AEKeyType.items(), TIER_100M, "item.ufo.white_dwarf_item_cell", "ufo.cell_tier.beacon", new ChatFormatting[]{ChatFormatting.WHITE, ChatFormatting.GRAY, ChatFormatting.DARK_GRAY}, ChatFormatting.LIGHT_PURPLE, ChatFormatting.DARK_PURPLE));
+    public static final DeferredHolder<Item, AEBigIntegerCellItem> ITEM_CELL_250M = ITEMS.registerItem("white_dwarf_cell_nexus",
+            properties -> new AnimatedAEBigIntegerCellItem(properties.stacksTo(1), TIER_250M.idleDrain(), AEKeyType.items(), TIER_250M, "item.ufo.white_dwarf_item_cell", "ufo.cell_tier.nexus", new ChatFormatting[]{ChatFormatting.WHITE, ChatFormatting.GRAY, ChatFormatting.DARK_GRAY}, ChatFormatting.AQUA, ChatFormatting.DARK_AQUA));
+    public static final DeferredHolder<Item, AEBigIntegerCellItem> ITEM_CELL_750M = ITEMS.registerItem("white_dwarf_cell_core",
+            properties -> new AnimatedAEBigIntegerCellItem(properties.stacksTo(1), TIER_750M.idleDrain(), AEKeyType.items(), TIER_750M, "item.ufo.white_dwarf_item_cell", "ufo.cell_tier.core", new ChatFormatting[]{ChatFormatting.WHITE, ChatFormatting.GRAY, ChatFormatting.DARK_GRAY}, ChatFormatting.BLUE, ChatFormatting.DARK_PURPLE));
+    public static final DeferredHolder<Item, AEBigIntegerCellItem> ITEM_CELL_SINGULARITY = ITEMS.registerItem("white_dwarf_cell_singularity",
+            properties -> new AnimatedAEBigIntegerCellItem(properties.stacksTo(1), 7.5D, AEKeyType.items(), TIER_INFINITY, "item.ufo.white_dwarf_item_cell", "ufo.cell_tier.singularity", new ChatFormatting[]{ChatFormatting.WHITE, ChatFormatting.GRAY, ChatFormatting.DARK_GRAY}, ChatFormatting.GREEN, ChatFormatting.DARK_GREEN));
 
-    // Fluid Cells: Neutron Star Reservoir (Cores base azul)
-    public static final DeferredHolder<Item, AEBigIntegerCellItem> FLUID_CELL_40M = ITEMS.register("neutron_star_reservoir_echo",
-            () -> new AnimatedAEBigIntegerCellItem(new Item.Properties().stacksTo(1), TIER_40M.idleDrain(), AEKeyType.fluids(), TIER_40M, "item.ufo.neutron_star_fluid_cell", "ufo.cell_tier.echo", new ChatFormatting[]{ChatFormatting.WHITE, ChatFormatting.BLUE, ChatFormatting.DARK_BLUE, ChatFormatting.AQUA}, ChatFormatting.RED, ChatFormatting.GOLD, ChatFormatting.RED));
-    public static final DeferredHolder<Item, AEBigIntegerCellItem> FLUID_CELL_100M = ITEMS.register("neutron_star_reservoir_beaco",
-            () -> new AnimatedAEBigIntegerCellItem(new Item.Properties().stacksTo(1), TIER_100M.idleDrain(), AEKeyType.fluids(), TIER_100M, "item.ufo.neutron_star_fluid_cell", "ufo.cell_tier.beacon", new ChatFormatting[]{ChatFormatting.WHITE, ChatFormatting.BLUE, ChatFormatting.DARK_BLUE, ChatFormatting.AQUA}, ChatFormatting.LIGHT_PURPLE, ChatFormatting.DARK_PURPLE));
-    public static final DeferredHolder<Item, AEBigIntegerCellItem> FLUID_CELL_250M = ITEMS.register("neutron_star_reservoir_nexus",
-            () -> new AnimatedAEBigIntegerCellItem(new Item.Properties().stacksTo(1), TIER_250M.idleDrain(), AEKeyType.fluids(), TIER_250M, "item.ufo.neutron_star_fluid_cell", "ufo.cell_tier.nexus", new ChatFormatting[]{ChatFormatting.WHITE, ChatFormatting.BLUE, ChatFormatting.DARK_BLUE, ChatFormatting.AQUA}, ChatFormatting.AQUA, ChatFormatting.DARK_AQUA));
-    public static final DeferredHolder<Item, AEBigIntegerCellItem> FLUID_CELL_750M = ITEMS.register("neutron_star_reservoir_core",
-            () -> new AnimatedAEBigIntegerCellItem(new Item.Properties().stacksTo(1), TIER_750M.idleDrain(), AEKeyType.fluids(), TIER_750M, "item.ufo.neutron_star_fluid_cell", "ufo.cell_tier.core", new ChatFormatting[]{ChatFormatting.WHITE, ChatFormatting.BLUE, ChatFormatting.DARK_BLUE, ChatFormatting.AQUA}, ChatFormatting.BLUE, ChatFormatting.DARK_PURPLE));
-    public static final DeferredHolder<Item, AEBigIntegerCellItem> FLUID_CELL_SINGULARITY = ITEMS.register("neutron_star_reservoir_singularity",
-            () -> new AnimatedAEBigIntegerCellItem(new Item.Properties().stacksTo(1), 7.5D, AEKeyType.fluids(), TIER_INFINITY, "item.ufo.neutron_star_fluid_cell", "ufo.cell_tier.singularity", new ChatFormatting[]{ChatFormatting.WHITE, ChatFormatting.BLUE, ChatFormatting.DARK_BLUE, ChatFormatting.AQUA}, ChatFormatting.GREEN, ChatFormatting.DARK_GREEN));
+    public static final DeferredHolder<Item, AEBigIntegerCellItem> FLUID_CELL_40M = ITEMS.registerItem("neutron_star_reservoir_echo",
+            properties -> new AnimatedAEBigIntegerCellItem(properties.stacksTo(1), TIER_40M.idleDrain(), AEKeyType.fluids(), TIER_40M, "item.ufo.neutron_star_fluid_cell", "ufo.cell_tier.echo", new ChatFormatting[]{ChatFormatting.WHITE, ChatFormatting.BLUE, ChatFormatting.DARK_BLUE, ChatFormatting.AQUA}, ChatFormatting.RED, ChatFormatting.GOLD, ChatFormatting.RED));
+    public static final DeferredHolder<Item, AEBigIntegerCellItem> FLUID_CELL_100M = ITEMS.registerItem("neutron_star_reservoir_beaco",
+            properties -> new AnimatedAEBigIntegerCellItem(properties.stacksTo(1), TIER_100M.idleDrain(), AEKeyType.fluids(), TIER_100M, "item.ufo.neutron_star_fluid_cell", "ufo.cell_tier.beacon", new ChatFormatting[]{ChatFormatting.WHITE, ChatFormatting.BLUE, ChatFormatting.DARK_BLUE, ChatFormatting.AQUA}, ChatFormatting.LIGHT_PURPLE, ChatFormatting.DARK_PURPLE));
+    public static final DeferredHolder<Item, AEBigIntegerCellItem> FLUID_CELL_250M = ITEMS.registerItem("neutron_star_reservoir_nexus",
+            properties -> new AnimatedAEBigIntegerCellItem(properties.stacksTo(1), TIER_250M.idleDrain(), AEKeyType.fluids(), TIER_250M, "item.ufo.neutron_star_fluid_cell", "ufo.cell_tier.nexus", new ChatFormatting[]{ChatFormatting.WHITE, ChatFormatting.BLUE, ChatFormatting.DARK_BLUE, ChatFormatting.AQUA}, ChatFormatting.AQUA, ChatFormatting.DARK_AQUA));
+    public static final DeferredHolder<Item, AEBigIntegerCellItem> FLUID_CELL_750M = ITEMS.registerItem("neutron_star_reservoir_core",
+            properties -> new AnimatedAEBigIntegerCellItem(properties.stacksTo(1), TIER_750M.idleDrain(), AEKeyType.fluids(), TIER_750M, "item.ufo.neutron_star_fluid_cell", "ufo.cell_tier.core", new ChatFormatting[]{ChatFormatting.WHITE, ChatFormatting.BLUE, ChatFormatting.DARK_BLUE, ChatFormatting.AQUA}, ChatFormatting.BLUE, ChatFormatting.DARK_PURPLE));
+    public static final DeferredHolder<Item, AEBigIntegerCellItem> FLUID_CELL_SINGULARITY = ITEMS.registerItem("neutron_star_reservoir_singularity",
+            properties -> new AnimatedAEBigIntegerCellItem(properties.stacksTo(1), 7.5D, AEKeyType.fluids(), TIER_INFINITY, "item.ufo.neutron_star_fluid_cell", "ufo.cell_tier.singularity", new ChatFormatting[]{ChatFormatting.WHITE, ChatFormatting.BLUE, ChatFormatting.DARK_BLUE, ChatFormatting.AQUA}, ChatFormatting.GREEN, ChatFormatting.DARK_GREEN));
 
-    // Chemical Cells: Pulsar Chamber (cores base roxo)
-    public static final DeferredHolder<Item, AEBigIntegerCellItem> CHEMICAL_CELL_40M = ITEMS.register("pulsar_chamber_echo",
-            () -> new ChemicalAEBigIntegerCellItem(new Item.Properties().stacksTo(1), TIER_40M.idleDrain(), TIER_40M, "item.ufo.pulsar_chemical_cell", "ufo.cell_tier.echo", new ChatFormatting[]{ChatFormatting.LIGHT_PURPLE, ChatFormatting.DARK_PURPLE}, ChatFormatting.RED, ChatFormatting.GOLD, ChatFormatting.RED));
-    public static final DeferredHolder<Item, AEBigIntegerCellItem> CHEMICAL_CELL_100M = ITEMS.register("pulsar_chamber_beaco",
-            () -> new ChemicalAEBigIntegerCellItem(new Item.Properties().stacksTo(1), TIER_100M.idleDrain(), TIER_100M, "item.ufo.pulsar_chemical_cell", "ufo.cell_tier.beacon", new ChatFormatting[]{ChatFormatting.LIGHT_PURPLE, ChatFormatting.DARK_PURPLE}, ChatFormatting.LIGHT_PURPLE, ChatFormatting.DARK_PURPLE));
-    public static final DeferredHolder<Item, AEBigIntegerCellItem> CHEMICAL_CELL_250M = ITEMS.register("pulsar_chamber_nexus",
-            () -> new ChemicalAEBigIntegerCellItem(new Item.Properties().stacksTo(1), TIER_250M.idleDrain(), TIER_250M, "item.ufo.pulsar_chemical_cell", "ufo.cell_tier.nexus", new ChatFormatting[]{ChatFormatting.LIGHT_PURPLE, ChatFormatting.DARK_PURPLE}, ChatFormatting.AQUA, ChatFormatting.DARK_AQUA));
-    public static final DeferredHolder<Item, AEBigIntegerCellItem> CHEMICAL_CELL_750M = ITEMS.register("pulsar_chamber_core",
-            () -> new ChemicalAEBigIntegerCellItem(new Item.Properties().stacksTo(1), TIER_750M.idleDrain(), TIER_750M, "item.ufo.pulsar_chemical_cell", "ufo.cell_tier.core", new ChatFormatting[]{ChatFormatting.LIGHT_PURPLE, ChatFormatting.DARK_PURPLE}, ChatFormatting.BLUE, ChatFormatting.DARK_PURPLE));
-    public static final DeferredHolder<Item, AEBigIntegerCellItem> CHEMICAL_CELL_SINGULARITY = ITEMS.register("pulsar_chamber_singularity",
-            () -> new ChemicalAEBigIntegerCellItem(new Item.Properties().stacksTo(1), 7.5D, TIER_INFINITY, "item.ufo.pulsar_chemical_cell", "ufo.cell_tier.singularity", new ChatFormatting[]{ChatFormatting.LIGHT_PURPLE, ChatFormatting.DARK_PURPLE}, ChatFormatting.GREEN, ChatFormatting.DARK_GREEN));
-
-
-    private static DeferredHolder<Item, Item> component(String idSuffix, int kibiBytes) {
-        String id = "storage_cell_side_" + idSuffix;
-        return ITEMS.register(id, () -> new StorageComponentItem(new Item.Properties(), kibiBytes));
+    private static DeferredHolder<Item, Item> component(final String idSuffix, final int kibiBytes) {
+        final String id = "storage_cell_side_" + idSuffix;
+        return ITEMS.registerItem(id, properties -> new StorageComponentItem(properties, kibiBytes));
     }
 
-    public static void register(IEventBus eventBus) {
+    public static void register(final IEventBus eventBus) {
         ITEMS.register(eventBus);
     }
 }

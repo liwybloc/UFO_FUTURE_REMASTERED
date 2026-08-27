@@ -54,18 +54,18 @@ public final class FieldTieredCubeValidator {
      * Finds a valid cube containing {@code clickedPos}. The canonical origin is the minimum corner
      * of the outer 7x7x7 cube.
      */
-    public static Optional<ValidationResult> findMatchingCube(Level level, BlockPos clickedPos, ShellPredicate shellPredicate) {
+    public static Optional<ValidationResult> findMatchingCube(final Level level, final BlockPos clickedPos, final ShellPredicate shellPredicate) {
         ValidationResult bestMatch = null;
 
         for (int originX = clickedPos.getX() - OUTER_RADIUS; originX <= clickedPos.getX(); originX++) {
             for (int originY = clickedPos.getY() - OUTER_RADIUS; originY <= clickedPos.getY(); originY++) {
                 for (int originZ = clickedPos.getZ() - OUTER_RADIUS; originZ <= clickedPos.getZ(); originZ++) {
-                    BlockPos origin = new BlockPos(originX, originY, originZ);
+                    final BlockPos origin = new BlockPos(originX, originY, originZ);
                     if (!contains(origin, clickedPos)) {
                         continue;
                     }
 
-                    ValidationResult result = validateAt(level, origin, clickedPos, shellPredicate);
+                    final ValidationResult result = validateAt(level, origin, clickedPos, shellPredicate);
                     if (result.valid()) {
                         if (bestMatch == null || compareOrigins(origin, bestMatch.origin()) < 0) {
                             bestMatch = result;
@@ -78,9 +78,9 @@ public final class FieldTieredCubeValidator {
         return Optional.ofNullable(bestMatch);
     }
 
-    public static ValidationResult validateAt(Level level, BlockPos origin, BlockPos clickedPos, ShellPredicate shellPredicate) {
-        List<BlockPos> shellPositions = new ArrayList<>(OUTER_SIZE * OUTER_SIZE * OUTER_SIZE - INNER_SIZE * INNER_SIZE * INNER_SIZE);
-        List<BlockPos> interiorPositions = new ArrayList<>(INNER_SIZE * INNER_SIZE * INNER_SIZE);
+    public static ValidationResult validateAt(final Level level, final BlockPos origin, final BlockPos clickedPos, final ShellPredicate shellPredicate) {
+        final List<BlockPos> shellPositions = new ArrayList<>(OUTER_SIZE * OUTER_SIZE * OUTER_SIZE - INNER_SIZE * INNER_SIZE * INNER_SIZE);
+        final List<BlockPos> interiorPositions = new ArrayList<>(INNER_SIZE * INNER_SIZE * INNER_SIZE);
         boolean hasUnloadedPositions = false;
 
         Integer detectedTier = null;
@@ -89,8 +89,8 @@ public final class FieldTieredCubeValidator {
         for (int x = 0; x < OUTER_SIZE; x++) {
             for (int y = 0; y < OUTER_SIZE; y++) {
                 for (int z = 0; z < OUTER_SIZE; z++) {
-                    BlockPos currentPos = origin.offset(x, y, z);
-                    boolean isInterior = x >= INNER_OFFSET && x < OUTER_SIZE - INNER_OFFSET
+                    final BlockPos currentPos = origin.offset(x, y, z);
+                    final boolean isInterior = x >= INNER_OFFSET && x < OUTER_SIZE - INNER_OFFSET
                             && y >= INNER_OFFSET && y < OUTER_SIZE - INNER_OFFSET
                             && z >= INNER_OFFSET && z < OUTER_SIZE - INNER_OFFSET;
 
@@ -100,10 +100,10 @@ public final class FieldTieredCubeValidator {
                         continue;
                     }
 
-                    BlockState state = level.getBlockState(currentPos);
+                    final BlockState state = level.getBlockState(currentPos);
                     if (isInterior) {
                         interiorPositions.add(currentPos);
-                        int fieldTier = resolveFieldTier(state);
+                        final int fieldTier = resolveFieldTier(state);
                         if (fieldTier == 0) {
                             valid = false;
                             continue;
@@ -141,13 +141,13 @@ public final class FieldTieredCubeValidator {
                 Collections.unmodifiableList(interiorPositions));
     }
 
-    public static boolean contains(BlockPos origin, BlockPos pos) {
+    public static boolean contains(final BlockPos origin, final BlockPos pos) {
         return pos.getX() >= origin.getX() && pos.getX() < origin.getX() + OUTER_SIZE
                 && pos.getY() >= origin.getY() && pos.getY() < origin.getY() + OUTER_SIZE
                 && pos.getZ() >= origin.getZ() && pos.getZ() < origin.getZ() + OUTER_SIZE;
     }
 
-    public static int resolveFieldTier(BlockState state) {
+    public static int resolveFieldTier(final BlockState state) {
         if (state.is(MultiblockBlocks.STELLAR_FIELD_GENERATOR_T1.get())) {
             return MultiblockMachineTier.MK1.level();
         }
@@ -160,7 +160,7 @@ public final class FieldTieredCubeValidator {
         return 0;
     }
 
-    private static int compareOrigins(BlockPos a, BlockPos b) {
+    private static int compareOrigins(final BlockPos a, final BlockPos b) {
         if (a.getY() != b.getY()) {
             return Integer.compare(a.getY(), b.getY());
         }

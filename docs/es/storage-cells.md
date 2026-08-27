@@ -34,7 +34,7 @@ UFO Future extiende el sistema de almacenamiento de AE2 con dos nuevas series �
 
 ## Celdas Infinitas
 
-Almacenamiento **ilimitado** de un solo recurso. Incluye: Agua, Lava, Piedra, Arena, Obsidiana, Vidrio, y más. También 16 colores de tinte y recursos de Mekanism.
+Almacenamiento **ilimitado** de un solo recurso. Incluye: Agua, Lava, Piedra, Arena, Obsidiana, Vidrio, y más. También incluye los 16 colores de tinte.
 
 ### Fabricación (DMA)
 - **Entradas**: Matriz Cosmic String ×1, Anomalía Cuántica ×1, Recurso ×64

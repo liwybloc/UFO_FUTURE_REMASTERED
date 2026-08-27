@@ -6,7 +6,7 @@ import com.raishxn.ufo.block.MultiblockBlocks;
 import com.raishxn.ufo.util.ModTags;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.BlockTags;
 import net.neoforged.neoforge.common.data.BlockTagsProvider;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
@@ -15,17 +15,16 @@ import org.jetbrains.annotations.Nullable;
 import java.util.concurrent.CompletableFuture;
 
 public class ModBlockTagProvider extends BlockTagsProvider {
-    public ModBlockTagProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider, @Nullable ExistingFileHelper existingFileHelper) {
+    public ModBlockTagProvider(final PackOutput output, final CompletableFuture<HolderLookup.Provider> lookupProvider, @Nullable final ExistingFileHelper existingFileHelper) {
         super(output, lookupProvider, UfoMod.MOD_ID, existingFileHelper);
     }
 
     @Override
-    protected void addTags(HolderLookup.Provider provider) {
-        // --- INÍCIO DA CORREÇÃO ---
+    protected void addTags(final HolderLookup.Provider provider) {
         tag(BlockTags.MINEABLE_WITH_PICKAXE)
-                .add(ModBlocks.QUANTUM_LATTICE_FRAME.get())         // <<-- ADICIONE .get() AQUI
-                .add(ModBlocks.GRAVITON_PLATED_CASING.get())       // <<-- E AQUI
-                .add(ModBlocks.WHITE_DWARF_FRAGMENT_BLOCK.get())  // <<-- E AQUI
+                .add(ModBlocks.QUANTUM_LATTICE_FRAME.get())
+                .add(ModBlocks.GRAVITON_PLATED_CASING.get())
+                .add(ModBlocks.WHITE_DWARF_FRAGMENT_BLOCK.get())
                 .add(MultiblockBlocks.QUANTUM_ENTROPY_CASING.get())
                 .add(MultiblockBlocks.QUANTUM_HYPER_MECHANICAL_CASING.get())
                 .add(MultiblockBlocks.QUANTUM_MATTER_FABRICATOR_CONTROLLER.get())
@@ -51,9 +50,9 @@ public class ModBlockTagProvider extends BlockTagsProvider {
 
 
         tag(BlockTags.NEEDS_DIAMOND_TOOL)
-                .add(ModBlocks.QUANTUM_LATTICE_FRAME.get())         // <<-- ADICIONE .get() AQUI
-                .add(ModBlocks.GRAVITON_PLATED_CASING.get())       // <<-- E AQUI
-                .add(ModBlocks.WHITE_DWARF_FRAGMENT_BLOCK.get())  // <<-- E AQUI
+                .add(ModBlocks.QUANTUM_LATTICE_FRAME.get())
+                .add(ModBlocks.GRAVITON_PLATED_CASING.get())
+                .add(ModBlocks.WHITE_DWARF_FRAGMENT_BLOCK.get())
                 .add(MultiblockBlocks.QUANTUM_ENTROPY_CASING.get())
                 .add(MultiblockBlocks.QUANTUM_HYPER_MECHANICAL_CASING.get())
                 .add(MultiblockBlocks.QUANTUM_MATTER_FABRICATOR_CONTROLLER.get())
@@ -76,7 +75,6 @@ public class ModBlockTagProvider extends BlockTagsProvider {
                 .add(MultiblockBlocks.ENTROPIC_CONVERGENCE_CASING.get())
                 .add(MultiblockBlocks.ENTROPIC_ASSEMBLER_MATRIX.get())
                 .add(MultiblockBlocks.ENTROPIC_CONVERGENCE_ENGINE.get());
-        // --- FIM DA CORREÇÃO ---
 
 
         tag(BlockTags.NEEDS_DIAMOND_TOOL);
@@ -85,9 +83,9 @@ public class ModBlockTagProvider extends BlockTagsProvider {
         tag(ModTags.Blocks.NEEDS_UFO_TOOL)
                 .addTag(BlockTags.NEEDS_IRON_TOOL)
                 .addTag(BlockTags.NEEDS_DIAMOND_TOOL)
-                .addOptionalTag(ResourceLocation.parse("allthemodium:needs_allthemodium_tool"))
-                .addOptionalTag(ResourceLocation.parse("allthemodium:needs_vibranium_tool"))
-                .addOptionalTag(ResourceLocation.parse("allthemodium:needs_unobtainium_tool"));
+                .addOptionalTag(Identifier.parse("allthemodium:needs_allthemodium_tool"))
+                .addOptionalTag(Identifier.parse("allthemodium:needs_vibranium_tool"))
+                .addOptionalTag(Identifier.parse("allthemodium:needs_unobtainium_tool"));
 
         tag(ModTags.Blocks.INCORRECT_FOR_UFO_TOOL)
                 .addTag(BlockTags.INCORRECT_FOR_IRON_TOOL)

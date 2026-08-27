@@ -3,6 +3,8 @@ package com.raishxn.ufo.init;
 import com.raishxn.ufo.UfoMod;
 import com.raishxn.ufo.entity.custom.ApocalypseTypeAEntity;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.neoforged.bus.api.IEventBus;
@@ -20,16 +22,16 @@ public final class ModEntities {
                     .sized(1.4F, 4.2F)
                     .eyeHeight(3.8F)
                     .clientTrackingRange(10)
-                    .build("ufo:apocalypse_type_a"));
+                    .build(ResourceKey.create(Registries.ENTITY_TYPE, UfoMod.id("apocalypse_type_a"))));
 
     private ModEntities() {
     }
 
-    public static void register(IEventBus eventBus) {
+    public static void register(final IEventBus eventBus) {
         ENTITIES.register(eventBus);
     }
 
-    public static void registerAttributes(EntityAttributeCreationEvent event) {
+    public static void registerAttributes(final EntityAttributeCreationEvent event) {
         event.put(APOCALYPSE_TYPE_A.get(), ApocalypseTypeAEntity.createAttributes().build());
     }
 }

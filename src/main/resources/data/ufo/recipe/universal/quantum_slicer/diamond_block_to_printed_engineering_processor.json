@@ -4,9 +4,7 @@
   "recipe_name": "universal/quantum_slicer/diamond_block_to_printed_engineering_processor",
   "item_inputs": [
     {
-      "ingredient": {
-        "item": "minecraft:diamond_block"
-      },
+      "ingredient": "minecraft:diamond_block",
       "amount": 8192
     }
   ],

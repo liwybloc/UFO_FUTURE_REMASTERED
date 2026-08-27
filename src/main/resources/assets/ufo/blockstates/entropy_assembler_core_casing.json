@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "ufo:block/entropy_assembler_core_casing"
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "formed=false,powered=false": {
+      "model": "ufo:block/entropic_assembler_casing"
+    },
+    "formed=false,powered=true": {
+      "model": "ufo:block/entropic_assembler_casing"
+    },
+    "formed=true,powered=false": {
+      "model": "ufo:block/entropic_assembler_casing"
+    },
+    "formed=true,powered=true": {
+      "model": "ufo:block/entropic_assembler_casing"
+    }
+  }
+}

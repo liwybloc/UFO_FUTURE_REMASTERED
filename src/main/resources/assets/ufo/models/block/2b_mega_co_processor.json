@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "ufo:block/2b_mega_co_processor"
+  }
+}

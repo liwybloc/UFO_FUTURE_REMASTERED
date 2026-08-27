@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "ufo:item/neutron_fluid_cell_housing",
+    "layer1": "ufo:item/storage_cell_side_750m",
+    "layer2": "ufo:item/storage_cell_led"
+  }
+}

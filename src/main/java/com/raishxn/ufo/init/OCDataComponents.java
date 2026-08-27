@@ -25,12 +25,11 @@ public class OCDataComponents {
             DeferredRegister.create(Registries.DATA_COMPONENT_TYPE, UfoMod.MOD_ID);
 
     private static <T> DeferredHolder<DataComponentType<?>, DataComponentType<T>> register(
-            String name, UnaryOperator<DataComponentType.Builder<T>> builder
+            final String name, final UnaryOperator<DataComponentType.Builder<T>> builder
     ) {
         return DATA_COMPONENTS.register(name, () -> builder.apply(DataComponentType.builder()).build());
     }
 
-    // 已用字节
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<Long>> CELL_BYTES_USAGE =
             register("cell_bytes_usage", b -> b
                     .persistent(Codec.LONG)
@@ -38,7 +37,6 @@ public class OCDataComponents {
                     .cacheEncoding()
             );
 
-    // 已用字节-BigInteger版
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<BigInteger>> CELL_BYTE_USAGE_BIG =
             register("cell_byte_usage_big", b -> b
                     .persistent(Codec.STRING.comapFlatMap(
@@ -63,7 +61,6 @@ public class OCDataComponents {
                     ))
             );
 
-    // 已用类型
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<Integer>> CELL_TYPES_USAGE =
             register("cell_types_usage", b -> b
                     .persistent(Codec.INT)
@@ -71,7 +68,6 @@ public class OCDataComponents {
                     .cacheEncoding()
             );
 
-    // 单元状态（字符串存枚举名）
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<String>> CELL_STATE =
             register("cell_state", b -> b
                     .persistent(Codec.STRING)
@@ -79,7 +75,6 @@ public class OCDataComponents {
                     .cacheEncoding()
             );
 
-    // Tooltip 展示栈：持久化用 AE 的容错 List<GenericStack>，网络用内置 list 编解码 + AE 的 STREAM_CODEC
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<List<GenericStack>>> CELL_SHOW_TOOLTIP_STACKS =
             register("cell_show_tooltip_stacks", b -> b
                     .persistent(GenericStack.FAULT_TOLERANT_LIST_CODEC)
@@ -92,7 +87,6 @@ public class OCDataComponents {
                     .cacheEncoding()
             );
 
-    // 组件唯一仓库 UUID
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<UUID>> CELL_UUID =
             register("cell_uuid", b -> b
                     .persistent(UUIDUtil.CODEC)
@@ -100,7 +94,7 @@ public class OCDataComponents {
                     .cacheEncoding()
             );
 
-    public static void register(IEventBus eventBus)
+    public static void register(final IEventBus eventBus)
     {
         DATA_COMPONENTS.register(eventBus);
     }

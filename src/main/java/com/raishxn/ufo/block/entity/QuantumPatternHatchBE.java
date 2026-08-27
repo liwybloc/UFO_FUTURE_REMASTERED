@@ -23,6 +23,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -32,7 +34,7 @@ public class QuantumPatternHatchBE extends PatternProviderBlockEntity implements
     @Nullable
     private BlockPos controllerPos;
 
-    public QuantumPatternHatchBE(BlockPos pos, BlockState blockState) {
+    public QuantumPatternHatchBE(final BlockPos pos, final BlockState blockState) {
         super(ModBlockEntities.QUANTUM_PATTERN_HATCH_BE.get(), pos, blockState);
     }
 
@@ -52,7 +54,7 @@ public class QuantumPatternHatchBE extends PatternProviderBlockEntity implements
     }
 
     @Override
-    public void linkToController(BlockPos controllerPos) {
+    public void linkToController(final BlockPos controllerPos) {
         if (controllerPos.equals(this.controllerPos)) {
             return;
         }
@@ -75,7 +77,7 @@ public class QuantumPatternHatchBE extends PatternProviderBlockEntity implements
     }
 
     public Direction getPushDirectionForController() {
-        var pushDirection = getBlockState().getValue(PatternProviderBlock.PUSH_DIRECTION).getDirection();
+        final var pushDirection = getBlockState().getValue(PatternProviderBlock.PUSH_DIRECTION).getDirection();
         return pushDirection != null ? pushDirection : Direction.NORTH;
     }
 
@@ -85,36 +87,32 @@ public class QuantumPatternHatchBE extends PatternProviderBlockEntity implements
     }
 
     @Override
-    public void openMenu(Player player, MenuHostLocator locator) {
+    public void openMenu(final Player player, final MenuHostLocator locator) {
         MenuOpener.open(ModMenus.QUANTUM_PATTERN_HATCH_MENU.get(), player, locator);
     }
 
     @Override
-    public void returnToMainMenu(Player player, ISubMenu subMenu) {
+    public void returnToMainMenu(final Player player, final ISubMenu subMenu) {
         MenuOpener.returnTo(ModMenus.QUANTUM_PATTERN_HATCH_MENU.get(), player, subMenu.getLocator());
     }
 
     @Nullable
     @Override
-    public AbstractContainerMenu createMenu(int containerId, Inventory playerInventory, Player player) {
+    public AbstractContainerMenu createMenu(final int containerId, final Inventory playerInventory, final Player player) {
         return new QuantumPatternHatchMenu(containerId, playerInventory, this);
     }
 
     @Override
-    public void saveAdditional(@NotNull CompoundTag tag, HolderLookup.@NotNull Provider registries) {
-        super.saveAdditional(tag, registries);
+    public void saveAdditional(@NotNull final ValueOutput output) {
+        super.saveAdditional(output);
         if (this.controllerPos != null) {
-            tag.put("controllerPos", NbtUtils.writeBlockPos(this.controllerPos));
+            output.store("controllerPos", BlockPos.CODEC, this.controllerPos);
         }
     }
 
     @Override
-    public void loadTag(@NotNull CompoundTag tag, HolderLookup.@NotNull Provider registries) {
-        super.loadTag(tag, registries);
-        if (tag.contains("controllerPos")) {
-            NbtUtils.readBlockPos(tag.getCompound("controllerPos"), "").ifPresent(pos -> this.controllerPos = pos);
-        } else {
-            this.controllerPos = null;
-        }
+    protected void loadAdditional(@NotNull final ValueInput input) {
+        super.loadAdditional(input);
+        this.controllerPos = input.read("controllerPos", BlockPos.CODEC).map(BlockPos::immutable).orElse(null);
     }
 }

@@ -10,6 +10,8 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -17,7 +19,7 @@ public class EntropicMachinePartBE extends AENetworkedBlockEntity implements IMu
     @Nullable
     private BlockPos controllerPos;
 
-    public EntropicMachinePartBE(BlockEntityType<?> type, BlockPos pos, BlockState state) {
+    public EntropicMachinePartBE(final BlockEntityType<?> type, final BlockPos pos, final BlockState state) {
         super(type, pos, state);
         this.getMainNode()
                 .setExposedOnSides(java.util.EnumSet.allOf(Direction.class))
@@ -25,7 +27,7 @@ public class EntropicMachinePartBE extends AENetworkedBlockEntity implements IMu
     }
 
     @Override
-    public void linkToController(BlockPos controllerPos) {
+    public void linkToController(final BlockPos controllerPos) {
         this.controllerPos = controllerPos.immutable();
         setChanged();
     }
@@ -42,25 +44,21 @@ public class EntropicMachinePartBE extends AENetworkedBlockEntity implements IMu
     }
 
     @Override
-    public AECableType getCableConnectionType(Direction dir) {
+    public AECableType getCableConnectionType(final Direction dir) {
         return AECableType.DENSE_SMART;
     }
 
     @Override
-    public void saveAdditional(@NotNull CompoundTag tag, HolderLookup.@NotNull Provider registries) {
-        super.saveAdditional(tag, registries);
+    public void saveAdditional(@NotNull final ValueOutput output) {
+        super.saveAdditional(output);
         if (this.controllerPos != null) {
-            tag.put("ControllerPos", NbtUtils.writeBlockPos(this.controllerPos));
+            output.store("ControllerPos", BlockPos.CODEC, this.controllerPos);
         }
     }
 
     @Override
-    public void loadTag(@NotNull CompoundTag tag, HolderLookup.@NotNull Provider registries) {
-        super.loadTag(tag, registries);
-        if (tag.contains("ControllerPos")) {
-            NbtUtils.readBlockPos(tag.getCompound("ControllerPos"), "").ifPresent(pos -> this.controllerPos = pos.immutable());
-        } else {
-            this.controllerPos = null;
-        }
+    protected void loadAdditional(@NotNull final ValueInput input) {
+        super.loadAdditional(input);
+        this.controllerPos = input.read("ControllerPos", BlockPos.CODEC).map(BlockPos::immutable).orElse(null);
     }
 }

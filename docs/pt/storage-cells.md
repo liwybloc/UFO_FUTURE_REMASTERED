@@ -58,15 +58,11 @@ Células de recurso único que armazenam quantidades **ilimitadas**. Perfeitas p
 | Vidro | `ufo:infinity_glass_cell` |
 | Fragmento de Ametista | `ufo:infinity_amethyst_shard_cell` |
 
-#### AE2 / Mekanism
+#### AE2
 
 | Célula | ID de Registro |
 |--------|---------------|
 | Pedra do Céu | `ufo:infinity_sky_stone_cell` |
-| Pelota de Antimatéria | `ufo:infinity_antimatter_pellet_cell` |
-| Pelota de Plutônio | `ufo:infinity_plutonium_pellet_cell` |
-| Pelota de Polônio | `ufo:infinity_polonium_pellet_cell` |
-| Pelota HDPE | `ufo:infinity_hdpe_pellet_cell` |
 
 #### Células de Corante (16 Cores)
 Todas seguem o padrão: `ufo:infinity_<cor>_dye_cell`

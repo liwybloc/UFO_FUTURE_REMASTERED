@@ -1,17 +1,17 @@
 package com.raishxn.ufo.block.entity;
 
+import com.raishxn.ufo.util.EntityDamageHelper;
 import java.util.*;
 import java.util.Comparator;
 
+import net.pedroksl.ae2addonlib.recipes.IngredientStack;
 import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponentMap;
-import net.minecraft.nbt.*;
 import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
@@ -20,12 +20,12 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+import com.mojang.serialization.Codec;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.neoforged.neoforge.fluids.FluidStack;
-
-import net.minecraft.world.item.crafting.RecipeHolder;
-import net.minecraft.world.item.crafting.RecipeManager;
 
 import com.raishxn.ufo.block.DimensionalMatterAssemblerBlock;
 import com.raishxn.ufo.datagen.ModDataComponents;
@@ -44,7 +44,6 @@ import appeng.api.networking.security.IActionSource;
 import appeng.api.networking.ticking.IGridTickable;
 import appeng.api.networking.ticking.TickRateModulation;
 import appeng.api.networking.ticking.TickingRequest;
-import appeng.api.orientation.BlockOrientation;
 import appeng.api.orientation.RelativeSide;
 import appeng.api.stacks.AEItemKey;
 import appeng.api.stacks.AEFluidKey;
@@ -109,7 +108,6 @@ public class DimensionalMatterAssemblerBlockEntity extends AENetworkedPoweredBlo
 
     private boolean showWarning = false;
 
-    // --- Thermal & Risk Mechanics ---
     private int temperature = 0;
     private int maxTemperature = 10000;
     private int overloadTimer = -1;
@@ -118,7 +116,7 @@ public class DimensionalMatterAssemblerBlockEntity extends AENetworkedPoweredBlo
     private int productiveThermalTicks = 0;
     private int productiveHeatRemainder = 0;
 
-    public DimensionalMatterAssemblerBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState blockState) {
+    public DimensionalMatterAssemblerBlockEntity(final BlockEntityType<?> type, final BlockPos pos, final BlockState blockState) {
         super(type, pos, blockState);
 
         this.getMainNode().setFlags().setIdlePowerUsage(0).addService(IGridTickable.class, this);
@@ -126,10 +124,8 @@ public class DimensionalMatterAssemblerBlockEntity extends AENetworkedPoweredBlo
 
         this.fluidInv.setCapacity(AEKeyType.fluids(), MAX_TANK_CAPACITY);
 
-        // Resolve the machine item from the block state — this is valid even during
         // BlockEntityType construction because the block is already registered.
         // BuiltInRegistries.ITEM.get() returns AIR during BET registration because
-        // deferred items haven't been resolved yet.
         this.upgrades = appeng.api.upgrades.UpgradeInventories.forMachine(
                 blockState.getBlock().asItem(), 4, this::saveChanges);
 
@@ -144,7 +140,7 @@ public class DimensionalMatterAssemblerBlockEntity extends AENetworkedPoweredBlo
         return this.working;
     }
 
-    public void setWorking(boolean working) {
+    public void setWorking(final boolean working) {
         if (working != this.working) {
             if (this.level != null && !this.level.isClientSide()) {
                 updateBlockState(working);
@@ -176,8 +172,6 @@ public class DimensionalMatterAssemblerBlockEntity extends AENetworkedPoweredBlo
         if (this.level == null || this.level.isClientSide())
             return;
 
-        // Auto-wake the AE2 TickManager if we have power but are asleep when we
-        // shouldn't be
         if (this.dirty) {
             getMainNode().ifPresent((grid, node) -> grid.getTickManager().wakeDevice(node));
         }
@@ -207,31 +201,25 @@ public class DimensionalMatterAssemblerBlockEntity extends AENetworkedPoweredBlo
             return;
         }
 
-        // 1. Heat Generation: only productive crafting ticks create heat.
-        // External block tick accelerators should not heat the DMA unless the AE2
-        // crafting tick also advanced recipe progress.
         if (this.productiveThermalTicks > 0) {
             this.productiveHeatRemainder += this.productiveThermalTicks;
             this.productiveThermalTicks = 0;
             while (this.productiveHeatRemainder >= 4) {
-                int generationAmount = (int) Math.max(0, Math.round(this.currentHeatMultiplier));
+                final int generationAmount = (int) Math.max(0, Math.round(this.currentHeatMultiplier));
                 this.temperature += generationAmount;
                 this.productiveHeatRemainder -= 4;
             }
         } else {
-            // 2. Passive Cooling: -1 HU every 40 ticks when idle (= -0.5 HU/s)
             if (!this.isWorking() && this.temperature > 0 && this.thermalTicker % 40 == 0) {
                 this.temperature -= 1;
             }
         }
 
-        // 3. Coolant Cooling (player-placed, independent of recipes)
         if (this.temperature > 0) {
-            GenericStack coolantStack = this.fluidInv.getStack(2); // Input Coolant tank
-            if (coolantStack != null && coolantStack.what() instanceof AEFluidKey fluidKey
+            final GenericStack coolantStack = this.fluidInv.getStack(2); // Input Coolant tank
+            if (coolantStack != null && coolantStack.what() instanceof final AEFluidKey fluidKey
                     && coolantStack.amount() > 0) {
-                // Determine coolant strength
-                String fluidId = net.minecraft.core.registries.BuiltInRegistries.FLUID.getKey(fluidKey.getFluid())
+                final String fluidId = net.minecraft.core.registries.BuiltInRegistries.FLUID.getKey(fluidKey.getFluid())
                         .toString();
                 int mBPerHeat = 0;
                 int heatPerMB = 0;
@@ -253,12 +241,12 @@ public class DimensionalMatterAssemblerBlockEntity extends AENetworkedPoweredBlo
 
                 if (mBPerHeat > 0) {
                     amountToConsume = Math.min(coolantStack.amount(), 1000); // max 1 bucket per tick
-                    long possibleHeat = amountToConsume / mBPerHeat;
+                    final long possibleHeat = amountToConsume / mBPerHeat;
                     heatCooled = Math.min(this.temperature, possibleHeat);
                     amountToConsume = heatCooled * mBPerHeat;
                 } else if (heatPerMB > 0) {
                     amountToConsume = Math.min(10, coolantStack.amount());
-                    long possibleHeat = amountToConsume * heatPerMB;
+                    final long possibleHeat = amountToConsume * heatPerMB;
                     if (this.temperature < possibleHeat) {
                         amountToConsume = Math.max(1, (this.temperature / heatPerMB));
                     }
@@ -275,50 +263,44 @@ public class DimensionalMatterAssemblerBlockEntity extends AENetworkedPoweredBlo
         if (this.temperature < 0)
             this.temperature = 0;
 
-        // --- Sound Handling (Work Loop) ---
         if (this.isWorking() && this.level.getGameTime() % 40 == 0 && this.temperature > 0) {
             this.level.playSound(null, this.worldPosition, com.raishxn.ufo.init.ModSounds.DMA_WORK.get(),
                     net.minecraft.sounds.SoundSource.BLOCKS, 0.3f, 1.0f);
         }
 
-        // 2. Hazard Area
-        double heatRatio = (double) this.temperature / Math.max(1, this.maxTemperature);
+        final double heatRatio = (double) this.temperature / Math.max(1, this.maxTemperature);
         if (heatRatio >= 0.5) { // Threshold reduced to 50%
-            // Emit rotating flame particles
-            if (this.level instanceof ServerLevel sLevel) {
-                // Creates a spinning ring effect using GameTime
-                double baseTime = sLevel.getGameTime() / 10.0;
-                double[] radii = { 6.0, 7.0, 8.0 };
-                double[] speeds = { 1.5, 1.0, 0.5 };
+            if (this.level instanceof final ServerLevel sLevel) {
+                final double baseTime = sLevel.getGameTime() / 10.0;
+                final double[] radii = { 6.0, 7.0, 8.0 };
+                final double[] speeds = { 1.5, 1.0, 0.5 };
 
                 for (int ring = 0; ring < 3; ring++) {
-                    double time = baseTime * speeds[ring];
-                    double r = radii[ring];
+                    final double time = baseTime * speeds[ring];
+                    final double r = radii[ring];
                     for (int i = 0; i < 12; i++) { // 6 particles per ring (total 18)
-                        double angle = time + (i * ((Math.PI * 2) / 6));
-                        double px = this.worldPosition.getX() + 0.5 + r * Math.cos(angle);
-                        double py = this.worldPosition.getY() + 0.5;
-                        double pz = this.worldPosition.getZ() + 0.5 + r * Math.sin(angle);
+                        final double angle = time + (i * ((Math.PI * 2) / 6));
+                        final double px = this.worldPosition.getX() + 0.5 + r * Math.cos(angle);
+                        final double py = this.worldPosition.getY() + 0.5;
+                        final double pz = this.worldPosition.getZ() + 0.5 + r * Math.sin(angle);
                         sLevel.sendParticles(net.minecraft.core.particles.ParticleTypes.FLAME, px, py, pz, 1, 0, 0, 0,
                                 0.0);
                     }
                 }
             }
 
-            // Damage players without proper armor
-            net.minecraft.world.phys.AABB hazardArea = new net.minecraft.world.phys.AABB(this.worldPosition).inflate(7);
-            List<Player> players = this.level.getEntitiesOfClass(Player.class, hazardArea);
-            for (Player player : players) {
+            final net.minecraft.world.phys.AABB hazardArea = new net.minecraft.world.phys.AABB(this.worldPosition).inflate(7);
+            final List<Player> players = this.level.getEntitiesOfClass(Player.class, hazardArea);
+            for (final Player player : players) {
                 if (this.level.getGameTime() % 20 == 0) {
                     if (!com.raishxn.ufo.event.HazardHandler.hasThermalProtection(player)) {
-                        player.hurt(this.level.damageSources().onFire(), 4.0f);
+                        EntityDamageHelper.hurt(player, this.level.damageSources().onFire(), 4.0F);
                         player.setRemainingFireTicks(60);
                     }
                 }
             }
         }
 
-        // 3. Overload & Explosion
         if (this.temperature >= this.maxTemperature) {
             if (this.overloadTimer == -1) {
                 this.overloadTimer = 100; // 5 seconds (20 ticks * 5)
@@ -328,29 +310,27 @@ public class DimensionalMatterAssemblerBlockEntity extends AENetworkedPoweredBlo
         }
 
         if (this.overloadTimer > 0) {
-            // Play Alarm sound every second during overload
             if (this.overloadTimer % 20 == 0) {
                 this.level.playSound(null, this.worldPosition, com.raishxn.ufo.init.ModSounds.DMA_ALARM.get(),
                         net.minecraft.sounds.SoundSource.BLOCKS, 0.6f, 1.0f);
 
-                int seconds = this.overloadTimer / 20;
-                net.minecraft.world.phys.AABB hazardArea = new net.minecraft.world.phys.AABB(this.worldPosition)
+                final int seconds = this.overloadTimer / 20;
+                final net.minecraft.world.phys.AABB hazardArea = new net.minecraft.world.phys.AABB(this.worldPosition)
                         .inflate(15);
-                for (Player player : this.level.getEntitiesOfClass(Player.class, hazardArea)) {
-                    player.displayClientMessage(
+                for (final Player player : this.level.getEntitiesOfClass(Player.class, hazardArea)) {
+                    player.sendOverlayMessage(
                             net.minecraft.network.chat.Component
                                     .literal("CRITICAL OVERLOAD IN " + seconds + " SECONDS!")
-                                    .withStyle(net.minecraft.ChatFormatting.RED, net.minecraft.ChatFormatting.BOLD),
-                            true // true renders over hotbar (Title/Actionbar)
+                                    .withStyle(net.minecraft.ChatFormatting.RED, net.minecraft.ChatFormatting.BOLD)
                     );
                 }
             }
             this.overloadTimer--;
 
             if (this.overloadTimer == 0) {
-                net.minecraft.server.MinecraftServer server = this.level.getServer();
+                final net.minecraft.server.MinecraftServer server = this.level.getServer();
                 if (server != null) {
-                    java.lang.String msg = "[⚠ THERMAL ALERT] Dimensional Matter Assembler exploded catastrophically at [X: "
+                    final java.lang.String msg = "[⚠ THERMAL ALERT] Dimensional Matter Assembler exploded catastrophically at [X: "
                             +
                             this.worldPosition.getX() + ", Y: " + this.worldPosition.getY() + ", Z: " +
                             this.worldPosition.getZ() + "]!";
@@ -363,7 +343,6 @@ public class DimensionalMatterAssemblerBlockEntity extends AENetworkedPoweredBlo
                 this.level.explode(null, this.worldPosition.getX(), this.worldPosition.getY(),
                         this.worldPosition.getZ(),
                         10.0f, net.minecraft.world.level.Level.ExplosionInteraction.BLOCK); // Powerful block breaking
-                                                                                             // explosion
                 removeBlockAfterCatastrophicExplosion();
                 this.overloadTimer = -1;
             }
@@ -378,7 +357,7 @@ public class DimensionalMatterAssemblerBlockEntity extends AENetworkedPoweredBlo
         this.level.removeBlock(this.worldPosition, false);
     }
 
-    private void updateBlockState(boolean working) {
+    private void updateBlockState(final boolean working) {
         if (this.level == null || this.notLoaded() || this.isRemoved()) {
             return;
         }
@@ -394,19 +373,19 @@ public class DimensionalMatterAssemblerBlockEntity extends AENetworkedPoweredBlo
     }
 
     public int getMaxProcessingTime() {
-        return this.cachedTask != null ? this.cachedTask.getTime() : 200;
+        return this.cachedTask != null ? this.cachedTask.time() : 200;
     }
 
     public int getProcessingTime() {
         return this.processingTime;
     }
 
-    private void setProcessingTime(int processingTime) {
+    private void setProcessingTime(final int processingTime) {
         this.processingTime = processingTime;
     }
 
     @Override
-    protected void saveVisualState(CompoundTag data) {
+    protected void saveVisualState(final ValueOutput data) {
         super.saveVisualState(data);
         data.putBoolean("working", isWorking());
         data.putInt("temperature", this.temperature);
@@ -415,15 +394,12 @@ public class DimensionalMatterAssemblerBlockEntity extends AENetworkedPoweredBlo
     }
 
     @Override
-    protected void loadVisualState(CompoundTag data) {
+    protected void loadVisualState(final ValueInput data) {
         super.loadVisualState(data);
-        this.working = data.getBoolean("working");
-        if (data.contains("temperature"))
-            this.temperature = data.getInt("temperature");
-        if (data.contains("maxTemperature"))
-            this.maxTemperature = data.getInt("maxTemperature");
-        if (data.contains("overloadTimer"))
-            this.overloadTimer = data.getInt("overloadTimer");
+        this.working = data.getBooleanOr("working", false);
+        this.temperature = data.getIntOr("temperature", this.temperature);
+        this.maxTemperature = data.getIntOr("maxTemperature", this.maxTemperature);
+        this.overloadTimer = data.getIntOr("overloadTimer", this.overloadTimer);
     }
 
     public void saveChanges() {
@@ -435,7 +411,6 @@ public class DimensionalMatterAssemblerBlockEntity extends AENetworkedPoweredBlo
         this.setChanged();
     }
 
-    // New thermal and synergy stat fields
     private double currentHeatMultiplier = 1.0;
     private double currentSpeedMultiplier = 1.0;
     private double currentPowerMultiplier = 1.0;
@@ -456,16 +431,13 @@ public class DimensionalMatterAssemblerBlockEntity extends AENetworkedPoweredBlo
         boolean foundCreative = false;
 
         for (int i = 0; i < this.upgrades.size(); i++) {
-            ItemStack upgradeStack = this.upgrades.getStackInSlot(i);
+            final ItemStack upgradeStack = this.upgrades.getStackInSlot(i);
             if (!upgradeStack.isEmpty()) {
                 if (upgradeStack.getItem() instanceof com.raishxn.ufo.item.custom.DimensionalCatalystItem) {
                     foundCreative = true;
-                } else if (upgradeStack.getItem() instanceof com.raishxn.ufo.item.custom.BaseCatalystItem catalyst) {
+                } else if (upgradeStack.getItem() instanceof final com.raishxn.ufo.item.custom.BaseCatalystItem catalyst) {
                     newMaxPower *= catalyst.getBufferMultiplier();
 
-                    // Thermal now multiplies heat generation (e.g. +400 static heat = 4x
-                    // multiplier)
-                    // We map getStaticHeat -> Multiplier: (e.g. 100 heat = 1.0 extra multiplier)
                     heatMult += Math.max(0, catalyst.getStaticHeat() / 100.0);
                     speedMult *= catalyst.getSpeedMultiplier();
                     powerMult *= catalyst.getPowerMultiplier();
@@ -487,8 +459,7 @@ public class DimensionalMatterAssemblerBlockEntity extends AENetworkedPoweredBlo
             }
         }
 
-        // Apply 4-stack synergy combo!
-        if (synergyPossible && identicalCount == 4 && firstCatalyst != null) {
+        if (synergyPossible && identicalCount == 4) {
             heatMult *= 1.5; // 50% more heat generation as debuff
             if ("chrono".equals(firstCatalyst.getFamily())) {
                 speedMult *= 2.0; // Huge speed synergy
@@ -518,11 +489,6 @@ public class DimensionalMatterAssemblerBlockEntity extends AENetworkedPoweredBlo
     }
 
     @Override
-    public Set<Direction> getGridConnectableSides(BlockOrientation orientation) {
-        return EnumSet.allOf(Direction.class);
-    }
-
-    @Override
     public InternalInventory getInternalInventory() {
         return this.inv;
     }
@@ -539,7 +505,7 @@ public class DimensionalMatterAssemblerBlockEntity extends AENetworkedPoweredBlo
         return this.fluidInv;
     }
 
-    public void setShowWarning(boolean show) {
+    public void setShowWarning(final boolean show) {
         this.showWarning = show;
     }
 
@@ -554,7 +520,7 @@ public class DimensionalMatterAssemblerBlockEntity extends AENetworkedPoweredBlo
 
     @Nullable
     @Override
-    public InternalInventory getSubInventory(ResourceLocation id) {
+    public InternalInventory getSubInventory(final Identifier id) {
         if (id.equals(ISegmentedInventory.STORAGE)) {
             return this.getInternalInventory();
         } else if (id.equals(ISegmentedInventory.UPGRADES)) {
@@ -564,7 +530,7 @@ public class DimensionalMatterAssemblerBlockEntity extends AENetworkedPoweredBlo
     }
 
     @Override
-    protected InternalInventory getExposedInventoryForSide(Direction facing) {
+    protected InternalInventory getExposedInventoryForSide(final Direction facing) {
         return this.invExposed;
     }
 
@@ -578,7 +544,7 @@ public class DimensionalMatterAssemblerBlockEntity extends AENetworkedPoweredBlo
         getMainNode().ifPresent((grid, node) -> grid.getTickManager().wakeDevice(node));
     }
 
-    public void onChangeInventory(AppEngInternalInventory inv, int slot) {
+    public void onChangeInventory(final AppEngInternalInventory inv, final int slot) {
         onChangeInventory();
     }
 
@@ -598,15 +564,14 @@ public class DimensionalMatterAssemblerBlockEntity extends AENetworkedPoweredBlo
     }
 
     private boolean hasCraftWork() {
-        var task = this.getTask();
+        final var task = this.getTask();
         if (task != null) {
-            // Check outputs fit
             boolean outputsFit = true;
-            for (int i = 0; i < task.getItemOutputs().size(); i++) {
-                var outStack = task.getItemOutputs().get(i);
-                if (outStack.what() instanceof AEItemKey itemKey) {
-                    int outputAmount = getOutputAmountWithMaxBonus(outStack.amount());
-                    var stack = itemKey.toStack(outputAmount);
+            for (int i = 0; i < task.itemOutputs().size(); i++) {
+                final var outStack = task.itemOutputs().get(i);
+                if (outStack.what() instanceof final AEItemKey itemKey) {
+                    final int outputAmount = getOutputAmountWithMaxBonus(outStack.amount());
+                    final var stack = itemKey.toStack(outputAmount);
                     if (!this.outputInv.insertItem(i, stack, true).isEmpty()) {
                         outputsFit = false;
                         break;
@@ -616,11 +581,11 @@ public class DimensionalMatterAssemblerBlockEntity extends AENetworkedPoweredBlo
             if (!outputsFit)
                 return false;
 
-            for (int i = 0; i < task.getFluidOutputs().size(); i++) {
-                var outStack = task.getFluidOutputs().get(i);
-                if (outStack.what() instanceof AEFluidKey fluidKey) {
-                    int outputAmount = getOutputAmountWithMaxBonus(outStack.amount());
-                    if (!this.fluidInv.canAdd(i, fluidKey, outputAmount)) {
+            for (int i = 0; i < task.fluidOutputs().size(); i++) {
+                final var outStack = task.fluidOutputs().get(i);
+                if (outStack.what() instanceof final AEFluidKey fluidKey) {
+                    final int outputAmount = getOutputAmountWithMaxBonus(outStack.amount());
+                    if (this.fluidInv.cantAdd(i, fluidKey, outputAmount)) {
                         return false;
                     }
                 }
@@ -640,37 +605,40 @@ public class DimensionalMatterAssemblerBlockEntity extends AENetworkedPoweredBlo
         return this.cachedTask;
     }
 
-    private int getOutputAmountWithMaxBonus(long baseAmount) {
-        long multiplier = 1L + (long) Math.ceil(Math.max(0.0, this.currentBonusDropChance));
+    private int getOutputAmountWithMaxBonus(final long baseAmount) {
+        final long multiplier = 1L + (long) Math.ceil(Math.max(0.0, this.currentBonusDropChance));
         return (int) Math.min(Integer.MAX_VALUE, Math.max(0L, baseAmount) * multiplier);
     }
 
-    private int getOutputAmountWithRolledBonus(long baseAmount) {
-        long safeBaseAmount = Math.max(0L, baseAmount);
-        double bonusChance = Math.max(0.0, this.currentBonusDropChance);
-        long guaranteedBonusRolls = (long) bonusChance;
-        double fractionalBonusRoll = bonusChance - guaranteedBonusRolls;
+    private int getOutputAmountWithRolledBonus(final long baseAmount) {
+        final long safeBaseAmount = Math.max(0L, baseAmount);
+        final double bonusChance = Math.max(0.0, this.currentBonusDropChance);
+        final long guaranteedBonusRolls = (long) bonusChance;
+        final double fractionalBonusRoll = bonusChance - guaranteedBonusRolls;
         long bonusRolls = guaranteedBonusRolls;
 
-        if (fractionalBonusRoll > 0.0 && this.level != null && this.level.random.nextDouble() < fractionalBonusRoll) {
+        if (fractionalBonusRoll > 0.0 && this.level != null && this.level.getRandom().nextDouble() < fractionalBonusRoll) {
             bonusRolls++;
         }
 
         return (int) Math.min(Integer.MAX_VALUE, safeBaseAmount * (1L + bonusRolls));
     }
 
-    private static List<RecipeHolder<DimensionalMatterAssemblerRecipe>> getSortedRecipes(Level level) {
-        RecipeManager manager = level.getRecipeManager();
+    private static List<RecipeHolder<DimensionalMatterAssemblerRecipe>> getSortedRecipes(final Level level) {
+        if (!(level instanceof final ServerLevel serverLevel)) {
+            return List.of();
+        }
+        final RecipeManager manager = serverLevel.recipeAccess();
         if (manager != cachedRecipeManagerRef || sortedRecipeCache == null) {
-            sortedRecipeCache = manager.getAllRecipesFor(ModRecipes.DMA_RECIPE_TYPE.get()).stream()
+            sortedRecipeCache = manager.recipeMap().byType(ModRecipes.DMA_RECIPE_TYPE.get()).stream()
                     .sorted(Comparator
                             .comparingInt((RecipeHolder<DimensionalMatterAssemblerRecipe> holder) ->
-                                    (int) holder.value().getItemInputs().stream()
+                                    (int) holder.value().itemInputs().stream()
                                             .filter(r -> r != null && !r.isEmpty()).count())
                             .thenComparingLong((RecipeHolder<DimensionalMatterAssemblerRecipe> holder) ->
-                                    holder.value().getFluidInputs().stream()
+                                    holder.value().fluidInputs().stream()
                                             .filter(f -> f != null && !f.isEmpty())
-                                            .mapToLong(f -> f.getAmount()).sum())
+                                            .mapToLong(IngredientStack::getAmount).sum())
                             .reversed())
                     .toList();
             cachedRecipeManagerRef = manager;
@@ -678,27 +646,26 @@ public class DimensionalMatterAssemblerBlockEntity extends AENetworkedPoweredBlo
         return sortedRecipeCache;
     }
 
-    private DimensionalMatterAssemblerRecipe findRecipe(Level level) {
-        var possibleRecipes = getSortedRecipes(level);
-        for (var recipeHolder : possibleRecipes) {
-            var recipe = recipeHolder.value();
+    private DimensionalMatterAssemblerRecipe findRecipe(final Level level) {
+        final var possibleRecipes = getSortedRecipes(level);
+        for (final var recipeHolder : possibleRecipes) {
+            final var recipe = recipeHolder.value();
             boolean matches = true;
 
-            // Shapeless Logic to check input grids
-            List<ItemStack> availableInputs = new java.util.ArrayList<>();
+            final List<ItemStack> availableInputs = new java.util.ArrayList<>();
             for (int i = 0; i < this.inputInv.size(); i++) {
-                var stack = this.inputInv.getStackInSlot(i);
+                final var stack = this.inputInv.getStackInSlot(i);
                 if (!stack.isEmpty())
                     availableInputs.add(stack.copy());
             }
 
-            for (var req : recipe.getItemInputs()) {
+            for (final var req : recipe.itemInputs()) {
                 if (req == null || req.isEmpty())
                     continue;
-                int amountNeeded = (int) req.getAmount();
-                for (var stack : availableInputs) {
+                int amountNeeded = req.getAmount();
+                for (final var stack : availableInputs) {
                     if (req.getIngredient().test(stack)) {
-                        int toTake = Math.min(stack.getCount(), amountNeeded);
+                        final int toTake = Math.min(stack.getCount(), amountNeeded);
                         stack.shrink(toTake);
                         amountNeeded -= toTake;
                     }
@@ -714,21 +681,19 @@ public class DimensionalMatterAssemblerBlockEntity extends AENetworkedPoweredBlo
             if (!matches)
                 continue;
 
-            // Match recipe fluid inputs against slot 3 (base fluid input).
-            // Slot 2 (coolant) is player-managed and NOT part of recipes.
-            for (int i = 0; i < recipe.getFluidInputs().size(); i++) {
-                var fluidInSlot = this.fluidInv.getStack(3); // Always use slot 3 (base fluid input)
-                if (recipe.getFluidInputs().get(i) != null && !recipe.getFluidInputs().get(i).isEmpty()) {
-                    if (fluidInSlot == null || fluidInSlot.amount() < recipe.getFluidInputs().get(i).getAmount()) {
+            for (int i = 0; i < recipe.fluidInputs().size(); i++) {
+                final var fluidInSlot = this.fluidInv.getStack(3); // Always use slot 3 (base fluid input)
+                if (recipe.fluidInputs().get(i) != null && !recipe.fluidInputs().get(i).isEmpty()) {
+                    if (fluidInSlot == null || fluidInSlot.amount() < recipe.fluidInputs().get(i).getAmount()) {
                         matches = false;
                         break;
                     }
-                    if (!(fluidInSlot.what() instanceof AEFluidKey fluidKey)) {
+                    if (!(fluidInSlot.what() instanceof final AEFluidKey fluidKey)) {
                         matches = false;
                         break;
                     }
-                    FluidStack fluidStack = fluidKey.toStack((int) fluidInSlot.amount());
-                    if (!recipe.getFluidInputs().get(i).getIngredient().test(fluidStack)) {
+                    final FluidStack fluidStack = fluidKey.toStack((int) fluidInSlot.amount());
+                    if (!recipe.fluidInputs().get(i).getIngredient().test(fluidStack)) {
                         matches = false;
                         break;
                     }
@@ -742,16 +707,15 @@ public class DimensionalMatterAssemblerBlockEntity extends AENetworkedPoweredBlo
     }
 
     @Override
-    public TickingRequest getTickingRequest(IGridNode iGridNode) {
+    public TickingRequest getTickingRequest(final IGridNode iGridNode) {
         return new TickingRequest(1, 20, !hasAutoExportWork() && !this.hasCraftWork());
     }
 
     @Override
-    public TickRateModulation tickingRequest(IGridNode iGridNode, int ticksSinceLastCall) {
+    public TickRateModulation tickingRequest(final IGridNode iGridNode, final int ticksSinceLastCall) {
         if (this.dirty) {
-            // Check if running recipe is still valid
             if (level != null) {
-                var recipe = findRecipe(level);
+                final var recipe = findRecipe(level);
                 if (recipe == null) {
                     this.setProcessingTime(0);
                     this.setWorking(false);
@@ -766,20 +730,20 @@ public class DimensionalMatterAssemblerBlockEntity extends AENetworkedPoweredBlo
         }
 
         if (this.hasCraftWork()) {
-            boolean[] didWork = { false };
+            final boolean[] didWork = { false };
             getMainNode().ifPresent(grid -> {
-                IEnergyService eg = grid.getEnergyService();
+                final IEnergyService eg = grid.getEnergyService();
                 IEnergySource src = this;
 
-                int baseSpeedFactor = switch (this.upgrades.getInstalledUpgrades(AEItems.SPEED_CARD)) {
-                    default -> 2; // 100 ticks
+                final int baseSpeedFactor = switch (this.upgrades.getInstalledUpgrades(AEItems.SPEED_CARD)) {
                     case 1 -> 3; // 66 ticks
                     case 2 -> 5; // 40 ticks
                     case 3 -> 10; // 20 ticks
                     case 4 -> 50; // 4 ticks
+                    default -> 2; // 100 ticks
                 };
 
-                int recipeTime = this.cachedTask != null ? this.cachedTask.getTime() : 200;
+                final int recipeTime = this.cachedTask != null ? this.cachedTask.time() : 200;
 
                 final int speedFactor = this.hasCreativeCatalyst
                         ? Math.max(1, recipeTime)
@@ -788,7 +752,7 @@ public class DimensionalMatterAssemblerBlockEntity extends AENetworkedPoweredBlo
                 final float powerRatio = progressReq < speedFactor ? (float) progressReq / speedFactor : 1;
                 final int requiredTicks = Mth.ceil((float) recipeTime / speedFactor);
 
-                int basePowerConsumption = Mth.floor(((float) getTask().getEnergy() / requiredTicks) * powerRatio);
+                final int basePowerConsumption = Mth.floor(((float) Objects.requireNonNull(getTask()).energy() / requiredTicks) * powerRatio);
                 final int powerConsumption = this.hasCreativeCatalyst
                         ? 0
                         : Math.max(1, (int) (basePowerConsumption * this.currentPowerMultiplier));
@@ -801,24 +765,11 @@ public class DimensionalMatterAssemblerBlockEntity extends AENetworkedPoweredBlo
                     return;
                 }
 
-                // Try to recharge from AppFlux FE cells in the AE2 network
-                try {
-                    if (net.neoforged.fml.ModList.get().isLoaded("appflux")) {
-                        com.raishxn.ufo.compat.appflux.AppliedFluxPlugin.rechargeEnergyStorage(
-                                grid,
-                                Integer.MAX_VALUE,
-                                IActionSource.ofMachine(this),
-                                this.getEnergyStorage(Direction.UP));
-                    }
-                } catch (Throwable ignored) {
-                    // NO-OP if AppFlux is not available
-                }
-
                 double powerReq = this.extractAEPower(powerConsumption, Actionable.SIMULATE, PowerMultiplier.CONFIG);
 
                 if (powerReq <= powerThreshold) {
                     src = eg;
-                    var oldPowerReq = powerReq;
+                    final var oldPowerReq = powerReq;
                     powerReq = eg.extractAEPower(powerConsumption, Actionable.SIMULATE, PowerMultiplier.CONFIG);
                     if (oldPowerReq > powerReq) {
                         src = this;
@@ -832,17 +783,17 @@ public class DimensionalMatterAssemblerBlockEntity extends AENetworkedPoweredBlo
                     setShowWarning(false);
                     didWork[0] = true;
                 } else if (powerReq != 0) {
-                    var progressRatio = src == this
+                    final var progressRatio = src == this
                             ? powerReq / powerConsumption
                             : (powerReq - 10 * eg.getIdlePowerUsage()) / powerConsumption;
-                    var factor = Mth.floor(progressRatio * speedFactor);
+                    final var factor = Mth.floor(progressRatio * speedFactor);
 
                     if (factor >= 1) {
-                        var extracted = src.extractAEPower(
+                        final var extracted = src.extractAEPower(
                                 (double) (powerConsumption * factor) / speedFactor,
                                 Actionable.MODULATE,
                                 PowerMultiplier.CONFIG);
-                        var actualFactor = (int) Math.floor(extracted / powerConsumption * speedFactor);
+                        final var actualFactor = (int) Math.floor(extracted / powerConsumption * speedFactor);
                         this.setProcessingTime(this.getProcessingTime() + actualFactor);
                         didWork[0] = true;
                     }
@@ -858,35 +809,31 @@ public class DimensionalMatterAssemblerBlockEntity extends AENetworkedPoweredBlo
                 this.setProcessingTime(0);
                 final DimensionalMatterAssemblerRecipe out = this.getTask();
                 if (out != null) {
-                    // [DEBUG] Craft Done => decrease fluid & consume items
 
-                    // Insert out items
-                    for (int i = 0; i < out.getItemOutputs().size(); i++) {
-                        if (out.getItemOutputs().get(i) != null
-                                && out.getItemOutputs().get(i).what() instanceof AEItemKey itemKey) {
-                            int outAmount = getOutputAmountWithRolledBonus(out.getItemOutputs().get(i).amount());
-                            var toIns = itemKey.toStack(outAmount);
+                    for (int i = 0; i < out.itemOutputs().size(); i++) {
+                        if (out.itemOutputs().get(i) != null
+                                && out.itemOutputs().get(i).what() instanceof final AEItemKey itemKey) {
+                            final int outAmount = getOutputAmountWithRolledBonus(out.itemOutputs().get(i).amount());
+                            final var toIns = itemKey.toStack(outAmount);
                             this.outputInv.insertItem(i, toIns, false);
                         }
                     }
 
-                    // Insert fluids out
-                    for (int i = 0; i < out.getFluidOutputs().size(); i++) {
-                        if (out.getFluidOutputs().get(i) != null
-                                && out.getFluidOutputs().get(i).what() instanceof AEFluidKey fluidKey) {
-                            int outAmount = getOutputAmountWithRolledBonus(out.getFluidOutputs().get(i).amount());
+                    for (int i = 0; i < out.fluidOutputs().size(); i++) {
+                        if (out.fluidOutputs().get(i) != null
+                                && out.fluidOutputs().get(i).what() instanceof final AEFluidKey fluidKey) {
+                            final int outAmount = getOutputAmountWithRolledBonus(out.fluidOutputs().get(i).amount());
                             this.fluidInv.add(i, fluidKey, outAmount);
                         }
                     }
 
-                    // Consume inputs shapelessly
-                    for (var req : out.getItemInputs()) {
+                    for (final var req : out.itemInputs()) {
                         if (req != null && !req.isEmpty()) {
-                            int amountNeeded = (int) req.getAmount();
+                            int amountNeeded = req.getAmount();
                             for (int i = 0; i < this.inputInv.size() && amountNeeded > 0; i++) {
-                                var currentStack = this.inputInv.getStackInSlot(i);
+                                final var currentStack = this.inputInv.getStackInSlot(i);
                                 if (req.getIngredient().test(currentStack)) {
-                                    int toTake = Math.min(currentStack.getCount(), amountNeeded);
+                                    final int toTake = Math.min(currentStack.getCount(), amountNeeded);
                                     currentStack.shrink(toTake);
                                     this.inputInv.setItemDirect(i, currentStack);
                                     amountNeeded -= toTake;
@@ -895,13 +842,12 @@ public class DimensionalMatterAssemblerBlockEntity extends AENetworkedPoweredBlo
                         }
                     }
 
-                    // Consume fluids (always from slot 3 = base fluid input)
-                    for (int i = 0; i < out.getFluidInputs().size(); i++) {
-                        if (out.getFluidInputs().get(i) != null && !out.getFluidInputs().get(i).isEmpty()) {
-                            var currentStack = this.fluidInv.getStack(3); // Always slot 3 (base fluid)
+                    for (int i = 0; i < out.fluidInputs().size(); i++) {
+                        if (out.fluidInputs().get(i) != null && !out.fluidInputs().get(i).isEmpty()) {
+                            final var currentStack = this.fluidInv.getStack(3); // Always slot 3 (base fluid)
                             if (currentStack != null) {
-                                var key = currentStack.what();
-                                long remaining = currentStack.amount() - out.getFluidInputs().get(i).getAmount();
+                                final var key = currentStack.what();
+                                final long remaining = currentStack.amount() - out.fluidInputs().get(i).getAmount();
                                 if (remaining > 0) {
                                     this.fluidInv.setStack(3, new GenericStack(key, remaining));
                                 } else {
@@ -933,22 +879,21 @@ public class DimensionalMatterAssemblerBlockEntity extends AENetworkedPoweredBlo
             return false;
         }
 
-        var orientation = this.getOrientation();
+        final var orientation = this.getOrientation();
 
-        for (var side : allowedOutputs) {
-            var dir = orientation.getSide(side);
-            var target = getTarget(dir);
+        for (final var side : allowedOutputs) {
+            final var dir = orientation.getSide(side);
+            final var target = getTarget(dir);
 
             if (target != null) {
-                var source = IActionSource.ofMachine(this);
+                final var source = IActionSource.ofMachine(this);
                 var movedStacks = false;
 
-                // Push Items out
                 for (int i = 0; i < this.outputInv.size(); i++) {
-                    var genStack = GenericStack.fromItemStack(this.outputInv.getStackInSlot(i));
+                    final var genStack = GenericStack.fromItemStack(this.outputInv.getStackInSlot(i));
                     if (genStack != null && genStack.what() != null) {
-                        var extractedStack = this.outputInv.extractItem(i, 64, false);
-                        var inserted = target.insert(genStack.what(), extractedStack.getCount(), Actionable.MODULATE,
+                        final var extractedStack = this.outputInv.extractItem(i, 64, false);
+                        final var inserted = target.insert(genStack.what(), extractedStack.getCount(), Actionable.MODULATE,
                                 source);
                         extractedStack.setCount(extractedStack.getCount() - (int) inserted);
                         this.outputInv.insertItem(i, extractedStack, false);
@@ -956,13 +901,12 @@ public class DimensionalMatterAssemblerBlockEntity extends AENetworkedPoweredBlo
                     }
                 }
 
-                // Push fluids out
                 for (int i = 0; i < 2; i++) {
-                    var outFluid = this.fluidInv.getStack(i);
+                    final var outFluid = this.fluidInv.getStack(i);
                     if (outFluid != null && outFluid.what() != null) {
-                        var extracted = this.fluidInv.extract(i, outFluid.what(), outFluid.amount(),
+                        final var extracted = this.fluidInv.extract(i, outFluid.what(), outFluid.amount(),
                                 Actionable.MODULATE);
-                        var inserted = target.insert(outFluid.what(), extracted, Actionable.MODULATE, source);
+                        final var inserted = target.insert(outFluid.what(), extracted, Actionable.MODULATE, source);
                         this.fluidInv.add(i, ((AEFluidKey) outFluid.what()), (int) (extracted - inserted));
 
                         if (this.fluidInv.getAmount(i) == 0)
@@ -980,18 +924,18 @@ public class DimensionalMatterAssemblerBlockEntity extends AENetworkedPoweredBlo
         return false;
     }
 
-    private CompositeStorage getTarget(Direction dir) {
+    private CompositeStorage getTarget(final Direction dir) {
         if (this.exportStrategies.get(dir) == null) {
-            var be = this.getBlockEntity();
+            final var be = this.getBlockEntity();
             this.exportStrategies.put(
                     dir,
                     StackWorldBehaviors.createExternalStorageStrategies(
                             (ServerLevel) be.getLevel(), be.getBlockPos().relative(dir), dir.getOpposite()));
         }
 
-        var externalStorages = new IdentityHashMap<AEKeyType, MEStorage>(2);
-        for (var entry : exportStrategies.get(dir).entrySet()) {
-            var wrapper = entry.getValue().createWrapper(false, () -> {
+        final var externalStorages = new IdentityHashMap<AEKeyType, MEStorage>(2);
+        for (final var entry : exportStrategies.get(dir).entrySet()) {
+            final var wrapper = entry.getValue().createWrapper(false, () -> {
             });
             if (wrapper != null) {
                 externalStorages.put(entry.getKey(), wrapper);
@@ -1010,65 +954,58 @@ public class DimensionalMatterAssemblerBlockEntity extends AENetworkedPoweredBlo
     }
 
     @Override
-    public AECableType getCableConnectionType(Direction dir) {
+    public AECableType getCableConnectionType(final Direction dir) {
         return AECableType.COVERED;
     }
 
     @Override
-    public void saveAdditional(CompoundTag data, HolderLookup.Provider registries) {
-        super.saveAdditional(data, registries);
-        this.fluidInv.writeToChildTag(data, "tank", registries);
+    public void saveAdditional(final ValueOutput data) {
+        super.saveAdditional(data);
+        this.fluidInv.writeToChildTag(data, "tank");
 
-        ListTag outputTags = new ListTag();
-        for (var side : this.allowedOutputs) {
-            outputTags.add(StringTag.valueOf(side.name()));
+        final var outputTags = data.list("outputs", Codec.STRING);
+        for (final var side : this.allowedOutputs) {
+            outputTags.add(side.name());
         }
-        data.put("outputs", outputTags);
 
-        this.upgrades.writeToNBT(data, "upgrades", registries);
-        this.configManager.writeToNBT(data, registries);
+        this.upgrades.writeToNBT(data, "upgrades");
+        this.configManager.writeToNBT(data);
 
-        // Persist thermal state
         data.putInt("temperature", this.temperature);
         data.putInt("overloadTimer", this.overloadTimer);
         data.putInt("productiveHeatRemainder", this.productiveHeatRemainder);
     }
 
     @Override
-    public void loadTag(CompoundTag data, HolderLookup.Provider registries) {
-        super.loadTag(data, registries);
-        this.fluidInv.readFromChildTag(data, "tank", registries);
+    public void loadTag(final ValueInput data) {
+        super.loadTag(data);
+        this.fluidInv.readFromChildTag(data, "tank");
 
         this.allowedOutputs.clear();
-        ListTag outputTags = data.getList("outputs", Tag.TAG_STRING);
+        final var outputTags = data.listOrEmpty("outputs", Codec.STRING);
         if (!outputTags.isEmpty()) {
-            for (var x = 0; x < outputTags.size(); x++) {
-                RelativeSide side = Enum.valueOf(RelativeSide.class, outputTags.getString(x));
+            for (final String outputTag : outputTags) {
+                final RelativeSide side = Enum.valueOf(RelativeSide.class, outputTag);
                 this.allowedOutputs.add(side);
             }
         }
 
-        this.upgrades.readFromNBT(data, "upgrades", registries);
-        this.configManager.readFromNBT(data, registries);
+        this.upgrades.readFromNBT(data, "upgrades");
+        this.configManager.readFromNBT(data);
 
-        // Restore thermal state
-        if (data.contains("temperature"))
-            this.temperature = data.getInt("temperature");
-        if (data.contains("overloadTimer"))
-            this.overloadTimer = data.getInt("overloadTimer");
-        if (data.contains("productiveHeatRemainder"))
-            this.productiveHeatRemainder = data.getInt("productiveHeatRemainder");
+        this.temperature = data.getIntOr("temperature", this.temperature);
+        this.overloadTimer = data.getIntOr("overloadTimer", this.overloadTimer);
+        this.productiveHeatRemainder = data.getIntOr("productiveHeatRemainder", this.productiveHeatRemainder);
 
-        // Recalculate upgrade bonuses (maxTemperature, maxPower) from loaded upgrades
         recalculateUpgrades();
     }
 
     @Override
-    protected boolean readFromStream(RegistryFriendlyByteBuf data) {
-        var c = super.readFromStream(data);
+    protected boolean readFromStream(final RegistryFriendlyByteBuf data) {
+        final var c = super.readFromStream(data);
 
-        var oldWorking = isWorking();
-        var newWorking = data.readBoolean();
+        final var oldWorking = isWorking();
+        final var newWorking = data.readBoolean();
 
         if (oldWorking != newWorking) {
             this.working = newWorking;
@@ -1084,7 +1021,6 @@ public class DimensionalMatterAssemblerBlockEntity extends AENetworkedPoweredBlo
         this.fluidInv.setStack(3, GenericStack.readBuffer(data));
         this.cachedTask = null;
 
-        // Read thermal state from server
         this.temperature = data.readInt();
         this.maxTemperature = data.readInt();
         this.overloadTimer = data.readInt();
@@ -1093,7 +1029,7 @@ public class DimensionalMatterAssemblerBlockEntity extends AENetworkedPoweredBlo
     }
 
     @Override
-    protected void writeToStream(RegistryFriendlyByteBuf data) {
+    protected void writeToStream(final RegistryFriendlyByteBuf data) {
         super.writeToStream(data);
 
         data.writeBoolean(isWorking());
@@ -1106,22 +1042,21 @@ public class DimensionalMatterAssemblerBlockEntity extends AENetworkedPoweredBlo
         GenericStack.writeBuffer(this.fluidInv.getStack(2), data);
         GenericStack.writeBuffer(this.fluidInv.getStack(3), data);
 
-        // Sync thermal state to client
         data.writeInt(this.temperature);
         data.writeInt(this.maxTemperature);
         data.writeInt(this.overloadTimer);
     }
 
     @Override
-    public void exportSettings(SettingsFrom mode, DataComponentMap.Builder builder, @Nullable Player player) {
+    public void exportSettings(final SettingsFrom mode, final DataComponentMap.Builder builder, @Nullable final Player player) {
         super.exportSettings(mode, builder, player);
         builder.set(ModDataComponents.DMA_ALLOWED_OUTPUTS.get(), encodeAllowedOutputs());
     }
 
     @Override
-    public void importSettings(SettingsFrom mode, DataComponentMap input, @Nullable Player player) {
+    public void importSettings(final SettingsFrom mode, final DataComponentMap input, @Nullable final Player player) {
         super.importSettings(mode, input, player);
-        Integer exportedOutputs = input.get(ModDataComponents.DMA_ALLOWED_OUTPUTS.get());
+        final Integer exportedOutputs = input.get(ModDataComponents.DMA_ALLOWED_OUTPUTS.get());
         if (exportedOutputs != null) {
             updateOutputSides(decodeAllowedOutputs(exportedOutputs));
         }
@@ -1129,15 +1064,15 @@ public class DimensionalMatterAssemblerBlockEntity extends AENetworkedPoweredBlo
 
     private int encodeAllowedOutputs() {
         int mask = 0;
-        for (RelativeSide side : this.allowedOutputs) {
+        for (final RelativeSide side : this.allowedOutputs) {
             mask |= 1 << side.ordinal();
         }
         return mask;
     }
 
-    private static EnumSet<RelativeSide> decodeAllowedOutputs(int mask) {
-        EnumSet<RelativeSide> outputs = EnumSet.noneOf(RelativeSide.class);
-        for (RelativeSide side : RelativeSide.values()) {
+    private static EnumSet<RelativeSide> decodeAllowedOutputs(final int mask) {
+        final EnumSet<RelativeSide> outputs = EnumSet.noneOf(RelativeSide.class);
+        for (final RelativeSide side : RelativeSide.values()) {
             if ((mask & (1 << side.ordinal())) != 0) {
                 outputs.add(side);
             }
@@ -1145,7 +1080,7 @@ public class DimensionalMatterAssemblerBlockEntity extends AENetworkedPoweredBlo
         return outputs;
     }
 
-    private void onConfigChanged(IConfigManager manager, Setting<?> setting) {
+    private void onConfigChanged(final IConfigManager manager, final Setting<?> setting) {
         if (setting == Settings.AUTO_EXPORT) {
             getMainNode().ifPresent((grid, node) -> grid.getTickManager().wakeDevice(node));
         }
@@ -1153,15 +1088,15 @@ public class DimensionalMatterAssemblerBlockEntity extends AENetworkedPoweredBlo
     }
 
     @Override
-    public void addAdditionalDrops(Level level, BlockPos pos, List<ItemStack> drops) {
+    public void addAdditionalDrops(final Level level, final BlockPos pos, final List<ItemStack> drops) {
         super.addAdditionalDrops(level, pos, drops);
 
-        for (var upgrade : upgrades) {
+        for (final var upgrade : upgrades) {
             drops.add(upgrade);
         }
 
         for (var i = 0; i < this.fluidInv.size(); i++) {
-            var fluid = this.fluidInv.getStack(i);
+            final var fluid = this.fluidInv.getStack(i);
             if (fluid != null) {
                 fluid.what().addDrops(fluid.amount(), drops, level, pos);
             }
@@ -1178,7 +1113,7 @@ public class DimensionalMatterAssemblerBlockEntity extends AENetworkedPoweredBlo
     /**
      * Clears a specific tank slot. Used by GUI clear buttons.
      */
-    public void clearTank(int slot) {
+    public void clearTank(final int slot) {
         if (slot >= 0 && slot < this.fluidInv.size()) {
             this.fluidInv.setStack(slot, null);
             this.onChangeTank();
@@ -1187,13 +1122,13 @@ public class DimensionalMatterAssemblerBlockEntity extends AENetworkedPoweredBlo
     }
 
     @Override
-    public void updateOutputSides(EnumSet<RelativeSide> allowedOutputs) {
+    public void updateOutputSides(final EnumSet<RelativeSide> allowedOutputs) {
         this.allowedOutputs = allowedOutputs;
         saveChanges();
     }
 
     @Override
-    public void returnToMainMenu(Player player, ISubMenu iSubMenu) {
+    public void returnToMainMenu(final Player player, final ISubMenu iSubMenu) {
         appeng.menu.MenuOpener.returnTo(com.raishxn.ufo.menu.UFOMenus.DIMENSIONAL_MATTER_ASSEMBLER.get(), player,
                 iSubMenu.getLocator());
     }
@@ -1204,28 +1139,25 @@ public class DimensionalMatterAssemblerBlockEntity extends AENetworkedPoweredBlo
     }
 
     public static class CustomGenericInv extends GenericStackInv {
-        public CustomGenericInv(Set<AEKeyType> supportedKeyTypes, @Nullable Runnable listener, Mode mode, int size) {
+        public CustomGenericInv(final Set<AEKeyType> supportedKeyTypes, @Nullable final Runnable listener, final Mode mode, final int size) {
             super(supportedKeyTypes, listener, mode, size);
         }
 
         @SuppressWarnings("deprecation")
         @Override
-        public boolean isAllowedIn(int slot, AEKey what) {
-            // Slots 0, 1 are output-only (no external insertion allowed)
+        public boolean isAllowedIn(final int slot, final AEKey what) {
             if (slot == 0 || slot == 1)
                 return false;
 
-            if (what instanceof AEFluidKey fluidKey) {
-                boolean isCoolant = fluidKey.getFluid().builtInRegistryHolder()
+            if (what instanceof final AEFluidKey fluidKey) {
+                final boolean isCoolant = fluidKey.getFluid().builtInRegistryHolder()
                         .is(com.raishxn.ufo.util.ModTags.Fluids.COOLANT)
                         || fluidKey.getFluid().builtInRegistryHolder().is(com.raishxn.ufo.util.ModTags.Fluids.COOLANTS);
 
-                // Slot 2 is exclusive for Coolants
                 if (slot == 2 && !isCoolant) {
                     return false;
                 }
 
-                // Slot 3 is exclusive for basic recipe fluids (NO coolants allowed)
                 if (slot == 3 && isCoolant) {
                     return false;
                 }
@@ -1242,46 +1174,41 @@ public class DimensionalMatterAssemblerBlockEntity extends AENetworkedPoweredBlo
          * properly tracking merging / remainder math when a slot is partially full.
          */
         @Override
-        public long insert(AEKey what, long amount, Actionable mode, IActionSource source) {
+        public long insert(final AEKey what, final long amount, final Actionable mode, final IActionSource source) {
             if (!(what instanceof AEFluidKey)) {
                 return super.insert(what, amount, mode, source);
             }
 
             long remaining = amount;
 
-            // Try input slots 2 and 3 in order
             for (int slot = 2; slot <= 3 && remaining > 0; slot++) {
                 if (!isAllowedIn(slot, what))
                     continue;
 
-                var stack = this.getStack(slot);
+                final var stack = this.getStack(slot);
                 if (stack == null) {
-                    // Empty slot — fill it as much as possible
-                    long toInsert = Math.min(remaining, this.getMaxAmount(what));
+                    final long toInsert = Math.min(remaining, this.getMaxAmount(what));
                     if (mode == Actionable.MODULATE) {
                         this.setStack(slot, new GenericStack(what, toInsert));
                     }
                     remaining -= toInsert;
                 } else if (stack.what().equals(what)) {
-                    // Partially full matching slot — merge into it
-                    long space = this.getMaxAmount(what) - stack.amount();
+                    final long space = this.getMaxAmount(what) - stack.amount();
                     if (space > 0) {
-                        long toInsert = Math.min(remaining, space);
+                        final long toInsert = Math.min(remaining, space);
                         if (mode == Actionable.MODULATE) {
                             this.setStack(slot, new GenericStack(what, stack.amount() + toInsert));
                         }
                         remaining -= toInsert;
                     }
                 }
-                // If it's a completely different fluid, we simply bypass and check the next slot (if any).
             }
 
             return amount - remaining;
         }
 
         @Override
-        public long extract(int slot, AEKey what, long amount, Actionable mode) {
-            // Slots 2, 3 are input-only (no external extraction allowed)
+        public long extract(final int slot, final AEKey what, final long amount, final Actionable mode) {
             if (slot == 2 || slot == 3)
                 return 0L;
             return super.extract(slot, what, amount, mode);
@@ -1291,24 +1218,24 @@ public class DimensionalMatterAssemblerBlockEntity extends AENetworkedPoweredBlo
          * Internal extraction that bypasses the external-only protection.
          * Used by the machine's own thermal logic to consume coolant.
          */
-        public long extractInternal(int slot, AEKey what, long amount, Actionable mode) {
-            return super.extract(slot, what, amount, mode);
+        public void extractInternal(final int slot, final AEKey what, final long amount, final Actionable mode) {
+            super.extract(slot, what, amount, mode);
         }
 
-        public boolean canAdd(int slot, AEFluidKey key, int amount) {
-            var stack = this.getStack(slot);
+        public boolean cantAdd(final int slot, final AEFluidKey key, final int amount) {
+            final var stack = this.getStack(slot);
             if (stack == null)
-                return true;
-            if (!stack.what().equals(key))
                 return false;
-            return stack.amount() + amount <= this.getMaxAmount(key);
+            if (!stack.what().equals(key))
+                return true;
+            return stack.amount() + amount > this.getMaxAmount(key);
         }
 
-        public int add(int slot, AEFluidKey key, int amount) {
-            if (!canAdd(slot, key, amount))
+        public int add(final int slot, final AEFluidKey key, final int amount) {
+            if (cantAdd(slot, key, amount))
                 return 0;
 
-            var stack = this.getStack(slot);
+            final var stack = this.getStack(slot);
             var newAmount = amount;
             if (stack != null)
                 newAmount += (int) stack.amount();
@@ -1316,8 +1243,8 @@ public class DimensionalMatterAssemblerBlockEntity extends AENetworkedPoweredBlo
             return amount;
         }
 
-        public void clear(int slot) {
-            boolean changed = this.getStack(slot) != null;
+        public void clear(final int slot) {
+            final boolean changed = this.getStack(slot) != null;
             this.setStack(slot, null);
             if (changed) {
                 onChange();

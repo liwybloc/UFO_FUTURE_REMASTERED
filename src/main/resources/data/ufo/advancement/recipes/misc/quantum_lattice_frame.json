@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_processor": {
+      "conditions": {
+        "items": [
+          {
+            "items": "ufo:dimensional_processor"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "ufo:quantum_lattice_frame"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_processor"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "ufo:quantum_lattice_frame"
+    ]
+  }
+}

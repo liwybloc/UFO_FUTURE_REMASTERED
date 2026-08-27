@@ -5,7 +5,7 @@ import com.raishxn.ufo.util.ModTags;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -23,96 +23,35 @@ import java.util.List;
 public class AetherContainmentCapsuleItem extends Item {
     public static final int CAPACITY = 4000;
 
-    public AetherContainmentCapsuleItem(Properties properties) {
+    public AetherContainmentCapsuleItem(final Properties properties) {
         super(properties.stacksTo(1));
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
-        ItemStack accStack = player.getItemInHand(hand); // Renomeei a variável local para consistência
-        if (level.isClientSide) return InteractionResultHolder.success(accStack);
-
-        InteractionHand otherHand = (hand == InteractionHand.MAIN_HAND) ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND;
-        ItemStack otherStack = player.getItemInHand(otherHand);
-
-        if (otherStack.isEmpty()) return InteractionResultHolder.pass(accStack);
-
-        IFluidHandlerItem accHandler = accStack.getCapability(Capabilities.FluidHandler.ITEM, null);
-        IFluidHandlerItem otherHandler = otherStack.getCapability(Capabilities.FluidHandler.ITEM, null);
-
-        if (accHandler != null && otherHandler != null) {
-            if (player.isShiftKeyDown()) {
-                // --- MODO ESVAZIAR (ACC -> Outro) ---
-                FluidStack drained = accHandler.drain(1000, IFluidHandler.FluidAction.SIMULATE);
-                if (!drained.isEmpty()) {
-                    int filled = otherHandler.fill(drained, IFluidHandler.FluidAction.EXECUTE);
-                    if (filled > 0) {
-                        accHandler.drain(filled, IFluidHandler.FluidAction.EXECUTE);
-                        player.setItemInHand(otherHand, otherHandler.getContainer());
-                        player.setItemInHand(hand, accHandler.getContainer());
-
-                        // MUDANÇA: CCA -> ACC
-                        player.displayClientMessage(Component.literal("ACC emptied.").withStyle(ChatFormatting.YELLOW), true);
-                        return InteractionResultHolder.consume(accHandler.getContainer());
-                    }
-                }
-            } else {
-                // --- MODO ENCHER (Outro -> ACC) ---
-                FluidStack toDrain = otherHandler.drain(CAPACITY, IFluidHandler.FluidAction.SIMULATE);
-
-                if (!toDrain.isEmpty()) {
-                    if (toDrain.is(ModTags.Fluids.HAZARDOUS)) {
-                        int filled = accHandler.fill(toDrain, IFluidHandler.FluidAction.EXECUTE);
-                        if (filled > 0) {
-                            otherHandler.drain(filled, IFluidHandler.FluidAction.EXECUTE);
-                            player.setItemInHand(otherHand, otherHandler.getContainer());
-                            ItemStack newAcc = accHandler.getContainer();
-                            player.setItemInHand(hand, newAcc);
-
-                            // MUDANÇA: CCA -> ACC
-                            player.displayClientMessage(Component.literal("ACC safely filled.")
-                                    .append(" (" + filled + "mB)")
-                                    .withStyle(ChatFormatting.GREEN), true);
-                            return InteractionResultHolder.consume(newAcc);
-                        } else {
-                            // MUDANÇA: CCA -> ACC
-                            player.displayClientMessage(Component.literal("ERROR: ACC is full.").withStyle(ChatFormatting.RED), true);
-                        }
-                    } else {
-                        // MUDANÇA: CCA -> ACC
-                        player.displayClientMessage(Component.literal("ERROR: ACC only accepts HAZARDOUS fluids.").withStyle(ChatFormatting.RED), true);
-                    }
-                }
-            }
-        }
-
-        return InteractionResultHolder.fail(accStack);
+    public InteractionResult use(final Level level, final Player player, final InteractionHand hand) {
+        return InteractionResult.PASS;
     }
 
-    @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        // MUDANÇA: Chave de tradução atualizada para .acc
+    public void appendHoverText(final ItemStack stack, final TooltipContext context, final List<Component> tooltipComponents, final TooltipFlag tooltipFlag) {
         tooltipComponents.add(Component.translatable("tooltip.ufo.acc").withStyle(ChatFormatting.GRAY));
-        FluidHandlerItemStack handler = new HazardousFluidHandler(stack, CAPACITY);
-        FluidStack fluid = handler.getFluid();
+        final FluidHandlerItemStack handler = new HazardousFluidHandler(stack, CAPACITY);
+        final FluidStack fluid = handler.getFluid();
         if (!fluid.isEmpty()) {
-            // Já estava em inglês "Contains:", mantido.
             tooltipComponents.add(Component.literal("Contains: ")
                     .append(fluid.getHoverName())
                     .append(" (" + fluid.getAmount() + "mB)")
                     .withStyle(ChatFormatting.AQUA));
         } else {
-            // Já estava em inglês "Empty", mantido.
             tooltipComponents.add(Component.literal("Empty").withStyle(ChatFormatting.DARK_GRAY));
         }
     }
 
     public static class HazardousFluidHandler extends FluidHandlerItemStack {
-        public HazardousFluidHandler(@NotNull ItemStack container, int capacity) {
+        public HazardousFluidHandler(@NotNull final ItemStack container, final int capacity) {
             super(ModDataComponents.FLUID_CONTENT, container, capacity);
         }
         @Override
-        public boolean isFluidValid(int tank, @NotNull FluidStack stack) {
+        public boolean isFluidValid(final int tank, @NotNull final FluidStack stack) {
             return stack.is(ModTags.Fluids.HAZARDOUS);
         }
     }

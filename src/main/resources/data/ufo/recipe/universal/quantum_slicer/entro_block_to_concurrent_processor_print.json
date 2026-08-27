@@ -10,9 +10,7 @@
   "recipe_name": "universal/quantum_slicer/entro_block_to_concurrent_processor_print",
   "item_inputs": [
     {
-      "ingredient": {
-        "item": "extendedae:entro_block"
-      },
+      "ingredient": "extendedae:entro_block",
       "amount": 8192
     }
   ],

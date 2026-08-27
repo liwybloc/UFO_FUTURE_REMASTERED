@@ -8,24 +8,22 @@ import appeng.blockentity.crafting.CraftingBlockEntity;
 import com.raishxn.ufo.api.multiblock.FieldTieredCubeValidator;
 import com.raishxn.ufo.api.multiblock.IEntropicMachineController;
 import com.raishxn.ufo.api.multiblock.MultiblockMachineTier;
-import com.raishxn.ufo.block.MultiblockBlocks;
 import com.raishxn.ufo.init.ModBlockEntities;
+import com.raishxn.ufo.screen.EntropicConvergenceEngineMenu;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.NbtUtils;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -58,18 +56,18 @@ public class EntropicConvergenceEngineBE extends CraftingBlockEntity
     @Nullable
     private BlockPos anchorPos;
 
-    public EntropicConvergenceEngineBE(BlockPos pos, BlockState state) {
+    public EntropicConvergenceEngineBE(final BlockPos pos, final BlockState state) {
         this(ModBlockEntities.ENTROPIC_CONVERGENCE_ENGINE_BE.get(), pos, state);
     }
 
-    public EntropicConvergenceEngineBE(BlockEntityType<? extends EntropicConvergenceEngineBE> type, BlockPos pos, BlockState state) {
+    public EntropicConvergenceEngineBE(final BlockEntityType<? extends EntropicConvergenceEngineBE> type, final BlockPos pos, final BlockState state) {
         super(type, pos, state);
         this.upgrades = UpgradeInventories.forMachine(state.getBlock().asItem(), 4, this::saveChanges);
     }
 
     @Override
-    public void scanStructure(Level level) {
-        if (level instanceof net.minecraft.server.level.ServerLevel serverLevel) {
+    public void scanStructure(final Level level) {
+        if (level instanceof final ServerLevel serverLevel) {
             this.calc.calculateMultiblock(serverLevel, this.worldPosition);
         }
     }
@@ -78,30 +76,30 @@ public class EntropicConvergenceEngineBE extends CraftingBlockEntity
     public void onReady() {
         this.getMainNode().create(getLevel(), getBlockEntity().getBlockPos());
 
-        BlockState currentState = getBlockState();
-        if (currentState.getBlock() instanceof AEBaseEntityBlock<?> block) {
-            BlockState newState = block.getBlockEntityBlockState(currentState, this);
+        final BlockState currentState = getBlockState();
+        if (currentState.getBlock() instanceof final AEBaseEntityBlock<?> block) {
+            final BlockState newState = block.getBlockEntityBlockState(currentState, this);
             if (currentState != newState) {
                 this.markForUpdate();
             }
         }
 
         this.getMainNode().setVisualRepresentation(this.getItemFromBlockEntity());
-        if (this.level instanceof net.minecraft.server.level.ServerLevel serverLevel) {
+        if (this.level instanceof final ServerLevel serverLevel) {
             this.calc.calculateMultiblock(serverLevel, this.worldPosition);
         }
     }
 
     @Override
-    public void updateMultiBlock(BlockPos changedPos) {
-        if (this.level instanceof net.minecraft.server.level.ServerLevel serverLevel) {
+    public void updateMultiBlock(final BlockPos changedPos) {
+        if (this.level instanceof final net.minecraft.server.level.ServerLevel serverLevel) {
             this.calc.updateMultiblockAfterNeighborUpdate(serverLevel, this.worldPosition, changedPos);
         }
     }
 
     @Override
     public long getStorageBytes() {
-        if (!this.structureAssembled || !isAnchor()) {
+        if (!this.structureAssembled || !this.isAnchor()) {
             return 0L;
         }
         return STORAGE_BY_TIER[Math.max(1, Math.min(3, this.machineTier))];
@@ -109,7 +107,7 @@ public class EntropicConvergenceEngineBE extends CraftingBlockEntity
 
     @Override
     public int getAcceleratorThreads() {
-        if (!this.structureAssembled || !isAnchor()) {
+        if (!this.structureAssembled || !this.isAnchor()) {
             return 0;
         }
         return COPROCESSORS_BY_TIER[Math.max(1, Math.min(3, this.machineTier))];
@@ -121,35 +119,36 @@ public class EntropicConvergenceEngineBE extends CraftingBlockEntity
     }
 
     @Override
-    public boolean canProxyInteract(BlockPos pos) {
+    public boolean canProxyInteract(final BlockPos pos) {
         return pos.equals(this.worldPosition) || this.partSet.contains(pos);
     }
 
     @Override
     public boolean isNetworkConnected() {
-        return getActionableNode() != null && getActionableNode().getGrid() != null && getActionableNode().isActive();
+        final var node = this.getActionableNode();
+        return node != null && node.getGrid() != null && node.isActive();
     }
 
     @Override
     public void markStructureDirty() {
-        if (this.level instanceof net.minecraft.server.level.ServerLevel serverLevel) {
+        if (this.level instanceof final ServerLevel serverLevel) {
             this.calc.calculateMultiblock(serverLevel, this.worldPosition);
         }
     }
 
     @Override
-    public void addPart(BlockPos partPos) {
-        BlockPos immutable = partPos.immutable();
+    public void addPart(final BlockPos partPos) {
+        final BlockPos immutable = partPos.immutable();
         if (this.partSet.add(immutable)) {
             this.parts.add(immutable);
         }
     }
 
     @Override
-    public void removePart(BlockPos partPos) {
+    public void removePart(final BlockPos partPos) {
         this.partSet.remove(partPos);
         this.parts.remove(partPos);
-        markStructureDirty();
+        this.markStructureDirty();
     }
 
     @Override
@@ -163,14 +162,13 @@ public class EntropicConvergenceEngineBE extends CraftingBlockEntity
     }
 
     @Override
-    public Component getDisplayName() {
+    public @NotNull Component getDisplayName() {
         return Component.translatable("block.ufo.entropic_convergence_engine");
     }
 
-    @Nullable
     @Override
-    public AbstractContainerMenu createMenu(int id, Inventory playerInventory, Player player) {
-        return new com.raishxn.ufo.screen.EntropicConvergenceEngineMenu(id, playerInventory, this);
+    public @NotNull AbstractContainerMenu createMenu(final int id, @NotNull final Inventory playerInventory, @NotNull final Player player) {
+        return new EntropicConvergenceEngineMenu(id, playerInventory, this);
     }
 
     @Override
@@ -257,45 +255,35 @@ public class EntropicConvergenceEngineBE extends CraftingBlockEntity
     }
 
     @Override
-    public void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
-        tag.putBoolean("StructureAssembled", this.structureAssembled);
-        tag.putInt("MachineTier", this.machineTier);
+    public void saveAdditional(final ValueOutput output) {
+        super.saveAdditional(output);
+        output.putBoolean("StructureAssembled", this.structureAssembled);
+        output.putInt("MachineTier", this.machineTier);
         if (this.anchorPos != null) {
-            tag.put("AnchorPos", NbtUtils.writeBlockPos(this.anchorPos));
+            output.store("AnchorPos", BlockPos.CODEC, this.anchorPos);
         }
-
-        ListTag partsTag = new ListTag();
-        for (BlockPos partPos : this.parts) {
-            partsTag.add(NbtUtils.writeBlockPos(partPos));
-        }
-        tag.put("EntropicParts", partsTag);
+        final var parts = output.list("EntropicParts", BlockPos.CODEC);
+        this.parts.forEach(parts::add);
     }
 
     @Override
-    public void loadTag(CompoundTag tag, HolderLookup.Provider registries) {
-        super.loadTag(tag, registries);
-        this.structureAssembled = tag.getBoolean("StructureAssembled");
-        this.machineTier = Math.max(MultiblockMachineTier.MK1.level(), tag.getInt("MachineTier"));
-        this.anchorPos = null;
-        if (tag.contains("AnchorPos")) {
-            NbtUtils.readBlockPos(tag.getCompound("AnchorPos"), "").ifPresent(pos -> this.anchorPos = pos.immutable());
-        }
+    protected void loadAdditional(final ValueInput input) {
+        super.loadAdditional(input);
+        this.structureAssembled = input.getBooleanOr("StructureAssembled", false);
+        this.machineTier = Math.max(MultiblockMachineTier.MK1.level(), input.getIntOr("MachineTier", MultiblockMachineTier.MK1.level()));
+        this.anchorPos = input.read("AnchorPos", BlockPos.CODEC).map(BlockPos::immutable).orElse(null);
 
         this.parts.clear();
         this.partSet.clear();
-        ListTag partsTag = tag.getList("EntropicParts", Tag.TAG_COMPOUND);
-        for (Tag partTag : partsTag) {
-            NbtUtils.readBlockPos((CompoundTag) partTag, "").ifPresent(pos -> {
-                BlockPos immutable = pos.immutable();
-                this.parts.add(immutable);
-                this.partSet.add(immutable);
-            });
+        for (final BlockPos pos : input.listOrEmpty("EntropicParts", BlockPos.CODEC)) {
+            final BlockPos immutable = pos.immutable();
+            this.parts.add(immutable);
+            this.partSet.add(immutable);
         }
     }
 
     @Override
-    public void disconnect(boolean update) {
+    public void disconnect(final boolean update) {
         super.disconnect(update);
         clearCalculatedStructure();
     }
@@ -308,17 +296,17 @@ public class EntropicConvergenceEngineBE extends CraftingBlockEntity
         this.partSet.clear();
     }
 
-    public void applyCalculatedStructure(appeng.me.cluster.implementations.CraftingCPUCluster cluster,
-            FieldTieredCubeValidator.ValidationResult result) {
+    public void applyCalculatedStructure(final appeng.me.cluster.implementations.CraftingCPUCluster cluster,
+                                         final FieldTieredCubeValidator.ValidationResult result) {
         this.structureAssembled = true;
         this.machineTier = result.machineTier();
         this.anchorPos = result.origin().immutable();
         this.parts.clear();
         this.partSet.clear();
 
-        for (BlockPos shellPos : result.shellPositions()) {
+        for (final BlockPos shellPos : result.shellPositions()) {
             if (!shellPos.equals(this.worldPosition)) {
-                BlockPos immutable = shellPos.immutable();
+                final BlockPos immutable = shellPos.immutable();
                 this.parts.add(immutable);
                 this.partSet.add(immutable);
             }
@@ -329,6 +317,6 @@ public class EntropicConvergenceEngineBE extends CraftingBlockEntity
     }
 
     private boolean isAnchor() {
-        return this.anchorPos != null && this.worldPosition.equals(this.anchorPos);
+        return this.worldPosition.equals(this.anchorPos);
     }
 }

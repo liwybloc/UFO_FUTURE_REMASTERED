@@ -7,7 +7,7 @@ public enum MultiblockMachineTier {
 
     private final int level;
 
-    MultiblockMachineTier(int level) {
+    MultiblockMachineTier(final int level) {
         this.level = level;
     }
 
@@ -15,7 +15,7 @@ public enum MultiblockMachineTier {
         return this.level;
     }
 
-    public static MultiblockMachineTier fromLevel(int level) {
+    public static MultiblockMachineTier fromLevel(final int level) {
         return switch (Math.max(1, Math.min(3, level))) {
             case 2 -> MK2;
             case 3 -> MK3;

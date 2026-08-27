@@ -105,16 +105,6 @@ Exemplos:
 
 Estes itens estão registrados, mas não possuem receitas correspondentes auditadas:
 
-- `ufo:infinity_antimatter_pellet_cell`
-- `ufo:infinity_hdpe_pellet_cell`
-- `ufo:infinity_plutonium_pellet_cell`
-- `ufo:infinity_polonium_pellet_cell`
-
-Recomendação:
-
-- gerar receitas condicionais quando Mekanism estiver disponível
-- ou registrar esses itens de forma condicional em vez de sempre
-
 ## Auditoria por Família
 
 ## 1. Receitas de Crafting Padrão
@@ -438,8 +428,6 @@ Separar as Infinity Cells em faixas de custo:
   - cobblestone, sand, water, gravel, logs
 - materiais avançados de utilidade
   - obsidian, amethyst, end stone, lava, sky stone
-- materiais exóticos ou modded
-  - pellets do Mekanism e alvos equivalentes
 
 Regra sugerida:
 

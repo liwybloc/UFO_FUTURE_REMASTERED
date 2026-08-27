@@ -1,5 +1,6 @@
 {
-  "parent": "neoforge:item/bucket",
-  "fluid": "ufo:source_stable_coolant",
-  "loader": "neoforge:fluid_container"
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "minecraft:item/bucket"
+  }
 }

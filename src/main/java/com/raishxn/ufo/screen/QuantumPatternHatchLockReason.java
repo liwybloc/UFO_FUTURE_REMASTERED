@@ -11,7 +11,7 @@ import appeng.core.localization.GuiText;
 import appeng.core.localization.InGameTooltip;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
@@ -22,18 +22,18 @@ public class QuantumPatternHatchLockReason implements ICompositeWidget {
     private int x;
     private int y;
 
-    public QuantumPatternHatchLockReason(QuantumPatternHatchScreen screen) {
+    public QuantumPatternHatchLockReason(final QuantumPatternHatchScreen screen) {
         this.screen = screen;
     }
 
     @Override
-    public void setPosition(Point position) {
+    public void setPosition(final Point position) {
         x = position.getX();
         y = position.getY();
     }
 
     @Override
-    public void setSize(int width, int height) {
+    public void setSize(final int width, final int height) {
     }
 
     @Override
@@ -46,16 +46,16 @@ public class QuantumPatternHatchLockReason implements ICompositeWidget {
         return visible;
     }
 
-    public void setVisible(boolean visible) {
+    public void setVisible(final boolean visible) {
         this.visible = visible;
     }
 
     @Override
-    public void drawForegroundLayer(GuiGraphics guiGraphics, Rect2i bounds, Point mouse) {
-        var menu = screen.getMenu();
+    public void drawForegroundLayer(final GuiGraphicsExtractor guiGraphics, final Rect2i bounds, final Point mouse) {
+        final var menu = screen.getMenu();
 
-        Icon icon;
-        Component lockStatusText;
+        final Icon icon;
+        final Component lockStatusText;
         if (menu.getCraftingLockedReason() == LockCraftingMode.NONE) {
             icon = Icon.UNLOCKED;
             lockStatusText = GuiText.CraftingLockIsUnlocked.text().withStyle(ChatFormatting.DARK_GREEN);
@@ -70,17 +70,17 @@ public class QuantumPatternHatchLockReason implements ICompositeWidget {
 
     @Nullable
     @Override
-    public Tooltip getTooltip(int mouseX, int mouseY) {
-        var menu = screen.getMenu();
-        var tooltip = switch (menu.getCraftingLockedReason()) {
+    public Tooltip getTooltip(final int mouseX, final int mouseY) {
+        final var menu = screen.getMenu();
+        final var tooltip = switch (menu.getCraftingLockedReason()) {
             case NONE -> null;
             case LOCK_UNTIL_PULSE -> InGameTooltip.CraftingLockedUntilPulse.text();
             case LOCK_WHILE_HIGH -> InGameTooltip.CraftingLockedByRedstoneSignal.text();
             case LOCK_WHILE_LOW -> InGameTooltip.CraftingLockedByLackOfRedstoneSignal.text();
             case LOCK_UNTIL_RESULT -> {
-                var stack = menu.getUnlockStack();
-                Component stackName;
-                Component stackAmount;
+                final var stack = menu.getUnlockStack();
+                final Component stackName;
+                final Component stackAmount;
                 if (stack != null) {
                     stackName = AEKeyRendering.getDisplayName(stack.what());
                     stackAmount = Component.literal(stack.what().formatAmount(stack.amount(), AmountFormat.FULL));

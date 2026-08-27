@@ -24,11 +24,11 @@ public abstract class TemporalFluid extends BaseFlowingFluid {
             super();
         }
 
-        public int getAmount(net.minecraft.world.level.material.FluidState state) {
+        public int getAmount(final net.minecraft.world.level.material.FluidState state) {
             return 8;
         }
 
-        public boolean isSource(net.minecraft.world.level.material.FluidState state) {
+        public boolean isSource(final net.minecraft.world.level.material.FluidState state) {
             return true;
         }
     }
@@ -39,16 +39,16 @@ public abstract class TemporalFluid extends BaseFlowingFluid {
             registerDefaultState(getStateDefinition().any().setValue(LEVEL, 7));
         }
 
-        protected void createFluidStateDefinition(net.minecraft.world.level.block.state.StateDefinition.Builder<Fluid, net.minecraft.world.level.material.FluidState> builder) {
+        protected void createFluidStateDefinition(final net.minecraft.world.level.block.state.StateDefinition.Builder<Fluid, net.minecraft.world.level.material.FluidState> builder) {
             super.createFluidStateDefinition(builder);
             builder.add(LEVEL);
         }
 
-        public int getAmount(net.minecraft.world.level.material.FluidState state) {
+        public int getAmount(final net.minecraft.world.level.material.FluidState state) {
             return state.getValue(LEVEL);
         }
 
-        public boolean isSource(net.minecraft.world.level.material.FluidState state) {
+        public boolean isSource(final net.minecraft.world.level.material.FluidState state) {
             return false;
         }
     }

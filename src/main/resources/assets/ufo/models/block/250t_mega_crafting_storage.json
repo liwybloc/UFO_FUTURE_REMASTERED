@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "ufo:block/250t_mega_crafting_storage"
+  }
+}

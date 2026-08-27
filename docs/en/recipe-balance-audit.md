@@ -103,18 +103,6 @@ Examples:
 
 ### Conditional Integration Gap
 
-These are registered but do not currently have matching audited recipes:
-
-- `ufo:infinity_antimatter_pellet_cell`
-- `ufo:infinity_hdpe_pellet_cell`
-- `ufo:infinity_plutonium_pellet_cell`
-- `ufo:infinity_polonium_pellet_cell`
-
-Recommendation:
-
-- either generate conditional recipes when Mekanism is available
-- or register these items conditionally instead of always
-
 ## Family Audit
 
 ## 1. Standard Crafting Recipes
@@ -438,8 +426,6 @@ Split infinity cells into cost bands:
   - cobblestone, sand, water, gravel, logs
 - Advanced utility materials
   - obsidian, amethyst, end stone, lava, sky stone
-- Exotic or modded materials
-  - Mekanism pellets and similarly expensive targets
 
 Suggested rule:
 

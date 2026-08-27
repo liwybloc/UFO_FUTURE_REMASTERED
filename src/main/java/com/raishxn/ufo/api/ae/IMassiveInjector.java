@@ -4,16 +4,11 @@ import appeng.api.stacks.AEKey;
 import net.minecraft.world.level.Level;
 
 /**
- * Contract for a block entity capable of injecting massive quantities of items
- * or fluids directly into an AE2 ME network, bypassing the default ItemStack
- * size limits.
+ * Defines a block entity capable of injecting massive quantities of keyed resources
+ * directly into an AE2 ME network.
  * <p>
- * Implementations are expected to hold a reference to an {@link appeng.api.networking.IGridNode}
- * and use the ME network's storage services to push amounts expressed as {@code long}.
- * <p>
- * <b>Design note:</b> We use {@code long} (max ~9.2 quintillion) instead of
- * {@code BigInteger} because AE2 1.21.1 natively uses {@code long} for all
- * quantity operations, and our target range (2M–10M) fits comfortably.
+ * Implementations use the ME network storage service and express transferred amounts
+ * as {@code long} values.
  */
 public interface IMassiveInjector {
 
@@ -26,11 +21,12 @@ public interface IMassiveInjector {
      * @param level  the server level
      * @return the amount that was actually accepted by the network
      */
-    long injectIntoNetwork(AEKey what, long amount, Level level);
+    long injectIntoNetwork(final AEKey what, final long amount, final Level level);
 
     /**
-     * @return {@code true} if this injector is currently connected to a powered
-     *         and online ME network.
+     * Determines whether this injector can currently access a powered ME network.
+     *
+     * @return {@code true} when the connected ME network is powered and online
      */
     boolean isNetworkReady();
 }

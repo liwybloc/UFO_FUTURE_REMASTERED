@@ -23,7 +23,7 @@ public class UFOComponents extends ComponentRegistry {
                     .networkSynchronized(ByteBufCodecs.INT.apply(ByteBufCodecs.list())));
 
 
-    protected static <T> DataComponentType<T> register(String name, Consumer<DataComponentType.Builder<T>> customizer) {
+    protected static <T> DataComponentType<T> register(final String name, final Consumer<DataComponentType.Builder<T>> customizer) {
         return register(UfoMod.MOD_ID, name, customizer);
     }
 }

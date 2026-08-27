@@ -8,51 +8,64 @@ import com.raishxn.ufo.util.AdjacentEnergyExporter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.energy.IEnergyStorage;
+import net.neoforged.neoforge.transfer.TransferPreconditions;
+import net.neoforged.neoforge.transfer.energy.EnergyHandler;
+import net.neoforged.neoforge.transfer.transaction.SnapshotJournal;
+import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 
 public class UfoEnergyCellBlockEntity extends EnergyCellBlockEntity {
-    private final IEnergyStorage exposedEnergy = new IEnergyStorage() {
+    private final SnapshotJournal<Double> energyJournal = new SnapshotJournal<>() {
         @Override
-        public int receiveEnergy(int maxReceive, boolean simulate) {
+        protected Double createSnapshot() {
+            return UfoEnergyCellBlockEntity.this.getAECurrentPower();
+        }
+
+        @Override
+        protected void revertToSnapshot(final Double snapshot) {
+            final double current = UfoEnergyCellBlockEntity.this.getAECurrentPower();
+            if (current < snapshot) {
+                UfoEnergyCellBlockEntity.this.injectAEPower(snapshot - current, Actionable.MODULATE);
+            } else if (current > snapshot) {
+                UfoEnergyCellBlockEntity.this.extractAEPower(
+                        current - snapshot, Actionable.MODULATE, PowerMultiplier.ONE);
+            }
+        }
+    };
+
+    private final EnergyHandler exposedEnergy = new EnergyHandler() {
+        @Override
+        public long getAmountAsLong() {
+            return Math.min(Integer.MAX_VALUE,
+                    (long) Math.floor(PowerMultiplier.CONFIG.divide(UfoEnergyCellBlockEntity.this.getAECurrentPower())));
+        }
+
+        @Override
+        public long getCapacityAsLong() {
+            return Math.min(Integer.MAX_VALUE,
+                    (long) Math.floor(PowerMultiplier.CONFIG.divide(UfoEnergyCellBlockEntity.this.getAEMaxPower())));
+        }
+
+        @Override
+        public int insert(final int amount, final TransactionContext transaction) {
+            TransferPreconditions.checkNonNegative(amount);
             return 0;
         }
 
         @Override
-        public int extractEnergy(int maxExtract, boolean simulate) {
-            if (maxExtract <= 0) {
+        public int extract(final int amount, final TransactionContext transaction) {
+            TransferPreconditions.checkNonNegative(amount);
+            if (amount == 0) {
                 return 0;
             }
 
-            return (int) Math.min(Integer.MAX_VALUE,
-                    UfoEnergyCellBlockEntity.this.extractAEPower(maxExtract,
-                            simulate ? Actionable.SIMULATE : Actionable.MODULATE,
-                            PowerMultiplier.CONFIG));
-        }
-
-        @Override
-        public int getEnergyStored() {
-            return (int) Math.min(Integer.MAX_VALUE,
-                    Math.floor(PowerMultiplier.CONFIG.divide(UfoEnergyCellBlockEntity.this.getAECurrentPower())));
-        }
-
-        @Override
-        public int getMaxEnergyStored() {
-            return (int) Math.min(Integer.MAX_VALUE,
-                    Math.floor(PowerMultiplier.CONFIG.divide(UfoEnergyCellBlockEntity.this.getAEMaxPower())));
-        }
-
-        @Override
-        public boolean canExtract() {
-            return true;
-        }
-
-        @Override
-        public boolean canReceive() {
-            return false;
+            energyJournal.updateSnapshots(transaction);
+            return (int) Math.min(amount,
+                    UfoEnergyCellBlockEntity.this.extractAEPower(
+                            amount, Actionable.MODULATE, PowerMultiplier.CONFIG));
         }
     };
 
-    public UfoEnergyCellBlockEntity(BlockEntityType<?> blockEntityType, BlockPos pos, BlockState blockState) {
+    public UfoEnergyCellBlockEntity(final BlockEntityType<?> blockEntityType, final BlockPos pos, final BlockState blockState) {
         super(blockEntityType, pos, blockState);
     }
 
@@ -61,16 +74,16 @@ public class UfoEnergyCellBlockEntity extends EnergyCellBlockEntity {
             return;
         }
 
-        int totalBudget = getForgeExportRate();
+        final int totalBudget = getForgeExportRate();
         AdjacentEnergyExporter.pushEnergy(this.level, this.worldPosition, this.exposedEnergy, totalBudget, totalBudget);
     }
 
-    public IEnergyStorage getExposedEnergy() {
+    public EnergyHandler getExposedEnergy() {
         return this.exposedEnergy;
     }
 
     private int getForgeExportRate() {
-        if (!(this.getBlockState().getBlock() instanceof EnergyCellBlock energyCellBlock)) {
+        if (!(this.getBlockState().getBlock() instanceof final EnergyCellBlock energyCellBlock)) {
             return 0;
         }
 

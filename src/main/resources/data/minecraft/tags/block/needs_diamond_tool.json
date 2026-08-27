@@ -1,0 +1,29 @@
+{
+  "values": [
+    "ufo:quantum_lattice_frame",
+    "ufo:graviton_plated_casing",
+    "ufo:white_dwarf_fragment_block",
+    "ufo:quantum_entropy_casing",
+    "ufo:quantum_hyper_mechanical_casing",
+    "ufo:quantum_matter_fabricator_controller",
+    "ufo:quantum_slicer_controller",
+    "ufo:quantum_processor_assembler_controller",
+    "ufo:quantum_cryoforge_controller",
+    "ufo:quantum_pattern_hatch",
+    "ufo:stellar_nexus_controller",
+    "ufo:stellar_field_generator_t1",
+    "ufo:stellar_field_generator_t2",
+    "ufo:stellar_field_generator_t3",
+    "ufo:me_massive_input_hatch",
+    "ufo:me_massive_output_hatch",
+    "ufo:me_massive_fluid_hatch",
+    "ufo:ae_energy_input_hatch",
+    "ufo:entropy_assembler_core_casing",
+    "ufo:entropy_singularity_casing",
+    "ufo:entropy_computer_condensation_matrix",
+    "ufo:entropic_assembler_casing",
+    "ufo:entropic_convergence_casing",
+    "ufo:entropic_assembler_matrix",
+    "ufo:entropic_convergence_engine"
+  ]
+}

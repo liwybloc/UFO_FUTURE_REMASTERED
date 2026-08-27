@@ -13,13 +13,12 @@ import java.util.stream.Stream;
 
 public class ModBlockLootTableProvider extends BlockLootSubProvider {
 
-    protected ModBlockLootTableProvider(HolderLookup.Provider provider) {
+    protected ModBlockLootTableProvider(final HolderLookup.Provider provider) {
         super(Set.of(), FeatureFlags.REGISTRY.allFlags(), provider);
     }
 
     @Override
     protected void generate() {
-        // --- Blocos normais estáticos ---
         this.dropSelf(ModBlocks.WHITE_DWARF_FRAGMENT_BLOCK.get());
         this.dropSelf(ModBlocks.NEUTRON_STAR_FRAGMENT_BLOCK.get());
         this.dropSelf(ModBlocks.PULSAR_FRAGMENT_BLOCK.get());

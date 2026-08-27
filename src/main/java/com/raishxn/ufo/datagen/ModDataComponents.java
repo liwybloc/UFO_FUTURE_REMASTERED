@@ -25,13 +25,11 @@ public class ModDataComponents {
     private static final DeferredRegister<DataComponentType<?>> DATA_COMPONENTS =
             DeferredRegister.create(Registries.DATA_COMPONENT_TYPE, UfoMod.MOD_ID);
 
-    // --- NOVOS COMPONENTES PARA AS CÉLULAS BIGINTEGER ---
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<BigInteger>> CELL_BYTE_USAGE_BIG = register("cell_byte_usage_big", builder -> builder.persistent(BigIntegerCodec.INSTANCE).networkSynchronized(BigIntegerCodec.STREAM_CODEC));
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<Long>> CELL_TYPES_USAGE =
             register("cell_types_usage", builder -> builder.persistent(Codec.LONG).networkSynchronized(ByteBufCodecs.VAR_LONG));
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<String>> CELL_STATE = register("cell_state", builder -> builder.persistent(Codec.STRING).networkSynchronized(ByteBufCodecs.STRING_UTF8));
 
-    // LINHA CORRIGIDA ABAIXO
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<List<GenericStack>>> CELL_SHOW_TOOLTIP_STACKS = register("cell_show_tooltip_stacks", builder -> builder.persistent(GenericStack.CODEC.listOf()).networkSynchronized(GenericStack.STREAM_CODEC.apply(ByteBufCodecs.list())));
 
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<List<GenericStack>>> INFINITY_GENESIS_CELL_KEYS =
@@ -40,13 +38,11 @@ public class ModDataComponents {
                     .networkSynchronized(GenericStack.STREAM_CODEC.apply(ByteBufCodecs.list())));
 
 
-    // Para a Picareta
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<Boolean>> AUTO_SMELT =
             register("auto_smelt", builder -> builder.persistent(Codec.BOOL).networkSynchronized(ByteBufCodecs.BOOL));
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<Integer>> PROGRESSIVE_FORTUNE =
             register("progressive_fortune", builder -> builder.persistent(Codec.INT).networkSynchronized(ByteBufCodecs.VAR_INT));
 
-    // Para a Espada
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<Integer>> KILL_COUNT =
             register("kill_count", builder -> builder.persistent(Codec.INT).networkSynchronized(ByteBufCodecs.VAR_INT));
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<Integer>> COMBO_COUNT =
@@ -54,7 +50,6 @@ public class ModDataComponents {
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<Long>> LAST_HIT_TIME =
             register("last_hit_time", builder -> builder.persistent(Codec.LONG).networkSynchronized(ByteBufCodecs.VAR_LONG));
 
-    // --- Seus Componentes Existentes (sem alterações) ---
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<Integer>> ENERGY =
             DATA_COMPONENTS.register("energy", () -> DataComponentType.<Integer>builder()
                     .persistent(Codec.INT)
@@ -86,16 +81,14 @@ public class ModDataComponents {
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<SimpleFluidContent>> FLUID_CONTENT = register("fluid_content",
             builder -> builder.persistent(SimpleFluidContent.CODEC).networkSynchronized(SimpleFluidContent.STREAM_CODEC));
 
-    // Correção para SAVED_INVENTORY (caso tenhas adicionado o do CCM anteriormente com o nome errado)
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<ItemContainerContents>> SAVED_INVENTORY = register("saved_inventory",
             builder -> builder.persistent(ItemContainerContents.CODEC).networkSynchronized(ItemContainerContents.STREAM_CODEC));
 
-    // --- Novo método helper para simplificar o registro ---
-    private static <T> DeferredHolder<DataComponentType<?>, DataComponentType<T>> register(String name, UnaryOperator<DataComponentType.Builder<T>> operator) {
+    private static <T> DeferredHolder<DataComponentType<?>, DataComponentType<T>> register(final String name, final UnaryOperator<DataComponentType.Builder<T>> operator) {
         return DATA_COMPONENTS.register(name, () -> operator.apply(DataComponentType.builder()).build());
     }
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<UUID>> CELL_UUID = register("cell_uuid", builder -> builder.persistent(UUIDUtil.CODEC).networkSynchronized(UUIDUtil.STREAM_CODEC));
-    public static void register(IEventBus eventBus) {
+    public static void register(final IEventBus eventBus) {
         DATA_COMPONENTS.register(eventBus);
     }
 }

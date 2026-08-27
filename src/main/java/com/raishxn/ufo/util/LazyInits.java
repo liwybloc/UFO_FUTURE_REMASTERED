@@ -8,11 +8,11 @@ public class LazyInits {
     private static final List<Runnable> INIT_F = new ArrayList<>();
     private static final List<Runnable> INIT_C = new ArrayList<>();
 
-    public static void addFinal(Runnable task) {
+    public static void addFinal(final Runnable task) {
         INIT_F.add(task);
     }
 
-    public static void addCommon(Runnable task) {
+    public static void addCommon(final Runnable task) {
         INIT_C.add(task);
     }
 

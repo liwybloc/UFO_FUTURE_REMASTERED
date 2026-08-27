@@ -1,5 +1,6 @@
 package com.raishxn.ufo.entity.custom;
 
+import com.raishxn.ufo.util.EntityDamageHelper;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerBossEvent;
@@ -7,7 +8,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.BossEvent;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -24,13 +24,13 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import software.bernie.geckolib.animatable.GeoEntity;
-import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
-import software.bernie.geckolib.animation.AnimatableManager;
-import software.bernie.geckolib.animation.AnimationController;
-import software.bernie.geckolib.animation.PlayState;
-import software.bernie.geckolib.animation.RawAnimation;
-import software.bernie.geckolib.util.GeckoLibUtil;
+import com.geckolib.animatable.GeoEntity;
+import com.geckolib.animatable.instance.AnimatableInstanceCache;
+import com.geckolib.animatable.manager.AnimatableManager;
+import com.geckolib.animation.AnimationController;
+import com.geckolib.animation.object.PlayState;
+import com.geckolib.animation.RawAnimation;
+import com.geckolib.util.GeckoLibUtil;
 
 import java.util.EnumSet;
 
@@ -59,11 +59,7 @@ public class ApocalypseTypeAEntity extends Monster implements GeoEntity {
     private static final double BEAM_RANGE = AGGRO_RANGE;
 
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
-    private final ServerBossEvent bossEvent = new ServerBossEvent(
-            Component.literal("APOCALYPSE TYPE-A"),
-            BossEvent.BossBarColor.RED,
-            BossEvent.BossBarOverlay.NOTCHED_10
-    );
+    private final ServerBossEvent bossEvent;
 
     private AttackState attackState = AttackState.NONE;
     private int attackTicks;
@@ -74,8 +70,10 @@ public class ApocalypseTypeAEntity extends Monster implements GeoEntity {
     private boolean attackConnected;
     private int comboHitIndex;
 
-    public ApocalypseTypeAEntity(EntityType<? extends Monster> entityType, Level level) {
+    public ApocalypseTypeAEntity(final EntityType<? extends Monster> entityType, final Level level) {
         super(entityType, level);
+        this.bossEvent = new ServerBossEvent(this.getUUID(), Component.literal("APOCALYPSE TYPE-A"),
+                BossEvent.BossBarColor.RED, BossEvent.BossBarOverlay.NOTCHED_10);
         this.xpReward = 250;
         this.bossEvent.setDarkenScreen(true);
     }
@@ -103,11 +101,11 @@ public class ApocalypseTypeAEntity extends Monster implements GeoEntity {
     }
 
     @Override
-    public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController<>(this, "movement", 0, state ->
+    public void registerControllers(final AnimatableManager.ControllerRegistrar controllers) {
+        controllers.add(new AnimationController<>("movement", 0, state ->
                 state.setAndContinue(state.isMoving() ? WALK : IDLE)));
 
-        controllers.add(new AnimationController<>(this, "actions", 0, state -> {
+        controllers.add(new AnimationController<>("actions", 0, state -> {
             if (this.isDeadOrDying()) {
                 return state.setAndContinue(DEATH);
             }
@@ -126,18 +124,8 @@ public class ApocalypseTypeAEntity extends Monster implements GeoEntity {
     }
 
     @Override
-    public double getTick(Object object) {
-        return this.tickCount;
-    }
-
-    @Override
-    public boolean hurt(DamageSource source, float amount) {
-        return super.hurt(source, amount);
-    }
-
-    @Override
-    protected void customServerAiStep() {
-        super.customServerAiStep();
+    protected void customServerAiStep(final ServerLevel level) {
+        super.customServerAiStep(level);
         this.updateTargeting();
         this.tickCooldowns();
         this.tickActiveAttack();
@@ -146,19 +134,19 @@ public class ApocalypseTypeAEntity extends Monster implements GeoEntity {
     }
 
     @Override
-    public void startSeenByPlayer(ServerPlayer serverPlayer) {
+    public void startSeenByPlayer(final ServerPlayer serverPlayer) {
         super.startSeenByPlayer(serverPlayer);
         this.bossEvent.addPlayer(serverPlayer);
     }
 
     @Override
-    public void stopSeenByPlayer(ServerPlayer serverPlayer) {
+    public void stopSeenByPlayer(final ServerPlayer serverPlayer) {
         super.stopSeenByPlayer(serverPlayer);
         this.bossEvent.removePlayer(serverPlayer);
     }
 
     @Override
-    public void setCustomName(Component name) {
+    public void setCustomName(final Component name) {
         super.setCustomName(name);
         this.bossEvent.setName(this.getDisplayName());
     }
@@ -168,13 +156,12 @@ public class ApocalypseTypeAEntity extends Monster implements GeoEntity {
         return Component.translatable("entity.ufo.apocalypse_type_a");
     }
 
-    @Override
     protected boolean shouldDespawnInPeaceful() {
         return false;
     }
 
     @Override
-    public boolean removeWhenFarAway(double distanceToClosestPlayer) {
+    public boolean removeWhenFarAway(final double distanceToClosestPlayer) {
         return false;
     }
 
@@ -205,7 +192,7 @@ public class ApocalypseTypeAEntity extends Monster implements GeoEntity {
             return;
         }
 
-        LivingEntity target = this.getTarget();
+        final LivingEntity target = this.getTarget();
         this.attackTicks++;
         this.getNavigation().stop();
 
@@ -224,7 +211,7 @@ public class ApocalypseTypeAEntity extends Monster implements GeoEntity {
         }
     }
 
-    private void tickBasicAttack(LivingEntity target) {
+    private void tickBasicAttack(final LivingEntity target) {
         if (!this.attackConnected && this.attackTicks >= BASIC_ATTACK_HIT_TICK) {
             this.attackConnected = true;
             this.tryAnimationHit(target, 4.8D);
@@ -235,7 +222,7 @@ public class ApocalypseTypeAEntity extends Monster implements GeoEntity {
         }
     }
 
-    private void tickBasicAttack2(LivingEntity target) {
+    private void tickBasicAttack2(final LivingEntity target) {
         if (!this.attackConnected && this.attackTicks >= BASIC_ATTACK_2_HIT_TICK) {
             this.attackConnected = true;
             this.tryAnimationHit(target, 5.4D);
@@ -246,7 +233,7 @@ public class ApocalypseTypeAEntity extends Monster implements GeoEntity {
         }
     }
 
-    private void tickTeleport(LivingEntity target) {
+    private void tickTeleport(final LivingEntity target) {
         if (target != null && this.attackTicks == TELEPORT_STEP_TICK) {
             this.teleportNearTarget(target);
         }
@@ -257,7 +244,7 @@ public class ApocalypseTypeAEntity extends Monster implements GeoEntity {
         }
     }
 
-    private void tickCombo(LivingEntity target) {
+    private void tickCombo(final LivingEntity target) {
         if (target == null) {
             this.finishAttack(0);
             return;
@@ -274,13 +261,13 @@ public class ApocalypseTypeAEntity extends Monster implements GeoEntity {
         }
     }
 
-    private void tickBeam(LivingEntity target) {
+    private void tickBeam(final LivingEntity target) {
         if (target == null) {
             this.finishAttack(0);
             return;
         }
 
-        if (this.attackTicks == BEAM_WINDUP_TICK && this.level() instanceof ServerLevel serverLevel) {
+        if (this.attackTicks == BEAM_WINDUP_TICK && this.level() instanceof final ServerLevel serverLevel) {
             serverLevel.playSound(null, this.blockPosition(), SoundEvents.BEACON_ACTIVATE, SoundSource.HOSTILE, 1.0F, 0.7F);
         }
 
@@ -294,13 +281,13 @@ public class ApocalypseTypeAEntity extends Monster implements GeoEntity {
         }
     }
 
-    private void tryAnimationHit(LivingEntity target, double reach) {
+    private void tryAnimationHit(final LivingEntity target, final double reach) {
         if (target == null || !target.isAlive()) {
             return;
         }
 
-        boolean inRange = this.distanceToSqr(target) <= reach * reach;
-        boolean inAttackArc = this.isTargetInsideAttackArc(target, reach, 1.5D, 1.0D);
+        final boolean inRange = this.distanceToSqr(target) <= reach * reach;
+        final boolean inAttackArc = this.isTargetInsideAttackArc(target, reach, 1.5D, 1.0D);
         if (!inRange && !inAttackArc) {
             return;
         }
@@ -308,38 +295,38 @@ public class ApocalypseTypeAEntity extends Monster implements GeoEntity {
         this.applyDirectHit(target, 1.0F, false);
     }
 
-    private void tryComboHit(LivingEntity target) {
-        boolean inRange = this.distanceToSqr(target) <= 36.0D;
-        boolean inAttackArc = this.isTargetInsideAttackArc(target, 6.0D, 2.0D, 1.2D);
+    private void tryComboHit(final LivingEntity target) {
+        final boolean inRange = this.distanceToSqr(target) <= 36.0D;
+        final boolean inAttackArc = this.isTargetInsideAttackArc(target, 6.0D, 2.0D, 1.2D);
         if (!inRange && !inAttackArc) {
             return;
         }
 
         if (this.applyDirectHit(target, 0.85F, true)) {
-            Vec3 knockback = target.position().subtract(this.position()).normalize().scale(0.65D);
+            final Vec3 knockback = target.position().subtract(this.position()).normalize().scale(0.65D);
             target.push(knockback.x, 0.22D, knockback.z);
         }
     }
 
-    private void fireBeamAt(LivingEntity target) {
+    private void fireBeamAt(final LivingEntity target) {
         if (!target.isAlive() || !this.hasLineOfSight(target)) {
             return;
         }
 
-        double distance = this.distanceToSqr(target);
+        final double distance = this.distanceToSqr(target);
         if (distance > BEAM_RANGE * BEAM_RANGE) {
             return;
         }
 
-        float damage = (float) this.getAttributeValue(Attributes.ATTACK_DAMAGE) * 0.75F;
+        final float damage = (float) this.getAttributeValue(Attributes.ATTACK_DAMAGE) * 0.75F;
         target.invulnerableTime = 0;
-        target.hurt(this.damageSources().mobAttack(this), damage);
+        EntityDamageHelper.hurt(target, this.damageSources().mobAttack(this), damage);
 
-        Vec3 push = target.position().subtract(this.position()).normalize().scale(0.35D);
+        final Vec3 push = target.position().subtract(this.position()).normalize().scale(0.35D);
         target.push(push.x, 0.08D, push.z);
     }
 
-    private boolean applyDirectHit(LivingEntity target, float damageMultiplier, boolean bypassIFrames) {
+    private boolean applyDirectHit(final LivingEntity target, final float damageMultiplier, final boolean bypassIFrames) {
         if (!target.isAlive()) {
             return false;
         }
@@ -348,46 +335,42 @@ public class ApocalypseTypeAEntity extends Monster implements GeoEntity {
             target.invulnerableTime = 0;
         }
 
-        float damage = (float) this.getAttributeValue(Attributes.ATTACK_DAMAGE) * damageMultiplier;
-        boolean damaged = target.hurt(this.damageSources().mobAttack(this), damage);
-
-        if (damaged) {
-            target.setLastHurtByMob(this);
-        }
-
-        return damaged;
+        final float damage = (float) this.getAttributeValue(Attributes.ATTACK_DAMAGE) * damageMultiplier;
+        EntityDamageHelper.hurt(target, this.damageSources().mobAttack(this), damage);
+        target.setLastHurtByMob(this);
+        return true;
     }
 
-    private boolean isTargetInsideAttackArc(LivingEntity target, double forwardReach, double sidePadding, double verticalPadding) {
+    private boolean isTargetInsideAttackArc(final LivingEntity target, final double forwardReach, final double sidePadding, final double verticalPadding) {
         if (target == null || !target.isAlive()) {
             return false;
         }
 
-        AABB attackBox = this.getBoundingBox()
+        final AABB attackBox = this.getBoundingBox()
                 .inflate(sidePadding, verticalPadding, sidePadding)
                 .expandTowards(this.getLookAngle().normalize().scale(forwardReach));
 
         return attackBox.intersects(target.getBoundingBox());
     }
 
-    private void teleportNearTarget(LivingEntity target) {
-        if (!(this.level() instanceof ServerLevel serverLevel)) {
+    private void teleportNearTarget(final LivingEntity target) {
+        if (!(this.level() instanceof final ServerLevel serverLevel)) {
             return;
         }
 
-        double angle = target.getYRot() * (Math.PI / 180.0D);
-        double offsetX = -Math.sin(angle) * 2.5D;
-        double offsetZ = Math.cos(angle) * 2.5D;
-        double x = target.getX() - offsetX;
-        double y = target.getY();
-        double z = target.getZ() - offsetZ;
+        final double angle = target.getYRot() * (Math.PI / 180.0D);
+        final double offsetX = -Math.sin(angle) * 2.5D;
+        final double offsetZ = Math.cos(angle) * 2.5D;
+        final double x = target.getX() - offsetX;
+        final double y = target.getY();
+        final double z = target.getZ() - offsetZ;
 
         if (this.randomTeleport(x, y, z, true)) {
             serverLevel.broadcastEntityEvent(this, (byte) 46);
         }
     }
 
-    private void startAttack(AttackState state, String animation) {
+    private void startAttack(final AttackState state, final String animation) {
         this.attackState = state;
         this.attackTicks = 0;
         this.attackConnected = false;
@@ -396,7 +379,7 @@ public class ApocalypseTypeAEntity extends Monster implements GeoEntity {
         this.triggerAnim("actions", animation);
     }
 
-    private void finishAttack(int cooldown) {
+    private void finishAttack(final int cooldown) {
         this.attackState = AttackState.NONE;
         this.attackTicks = 0;
         this.attackConnected = false;
@@ -404,17 +387,17 @@ public class ApocalypseTypeAEntity extends Monster implements GeoEntity {
     }
 
     private void updateTargeting() {
-        LivingEntity currentTarget = this.getTarget();
-        if (currentTarget instanceof Player player && isValidTarget(player)) {
+        final LivingEntity currentTarget = this.getTarget();
+        if (currentTarget instanceof final Player player && isValidTarget(player)) {
             return;
         }
 
-        Player nearestPlayer = this.level().getNearestPlayer(
+        final Player nearestPlayer = this.level().getNearestPlayer(
                 this.getX(),
                 this.getY(),
                 this.getZ(),
                 AGGRO_RANGE,
-                entity -> entity instanceof Player player && isValidTarget(player)
+                entity -> entity instanceof final Player player && isValidTarget(player)
         );
 
         if (nearestPlayer != null) {
@@ -424,7 +407,7 @@ public class ApocalypseTypeAEntity extends Monster implements GeoEntity {
         }
     }
 
-    private static boolean isValidTarget(Player player) {
+    private static boolean isValidTarget(final Player player) {
         return player != null && player.isAlive() && !player.isCreative() && !player.isSpectator();
     }
 
@@ -444,7 +427,7 @@ public class ApocalypseTypeAEntity extends Monster implements GeoEntity {
 
         @Override
         public boolean canUse() {
-            LivingEntity target = ApocalypseTypeAEntity.this.getTarget();
+            final LivingEntity target = ApocalypseTypeAEntity.this.getTarget();
             return target != null && target.isAlive();
         }
 
@@ -460,7 +443,7 @@ public class ApocalypseTypeAEntity extends Monster implements GeoEntity {
 
         @Override
         public void tick() {
-            LivingEntity target = ApocalypseTypeAEntity.this.getTarget();
+            final LivingEntity target = ApocalypseTypeAEntity.this.getTarget();
             if (target == null) {
                 return;
             }
@@ -471,7 +454,7 @@ public class ApocalypseTypeAEntity extends Monster implements GeoEntity {
                 return;
             }
 
-            double distanceSqr = ApocalypseTypeAEntity.this.distanceToSqr(target);
+            final double distanceSqr = ApocalypseTypeAEntity.this.distanceToSqr(target);
             if (distanceSqr > AGGRO_RANGE * AGGRO_RANGE) {
                 ApocalypseTypeAEntity.this.setTarget(null);
                 ApocalypseTypeAEntity.this.getNavigation().stop();

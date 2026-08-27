@@ -4,17 +4,13 @@
   "compatibilityLevel": "JAVA_21",
   "priority": 3000,
   "mixins": [
-    "AccessorBuiltInModelHooks",
     "InvokerCraftingCPUCluster",
     "MixinCPUSelectionList",
     "MixinCraftingCPUCluster",
-    "MixinAppEngBase",
-    "MixinKeyTypeSelection"
+    "MixinAppEngBase"
   ],
   "client": [
-    "AccessorAbstractContainerScreen",
-    "MixinMEStorageScreen",
-    "MixinModelBakery"
+    "AccessorAbstractContainerScreen"
   ],
   "injectors": {
     "defaultRequire": 1

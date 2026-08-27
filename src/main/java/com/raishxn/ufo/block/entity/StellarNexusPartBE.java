@@ -8,6 +8,8 @@ import net.minecraft.nbt.NbtUtils;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -22,14 +24,13 @@ public class StellarNexusPartBE extends BlockEntity implements IMultiblockPart {
     @Nullable
     private BlockPos controllerPos = null;
 
-    public StellarNexusPartBE(BlockEntityType<?> type, BlockPos pos, BlockState state) {
+    public StellarNexusPartBE(final BlockEntityType<?> type, final BlockPos pos, final BlockState state) {
         super(type, pos, state);
     }
 
-    // ──────────────────── IMultiblockPart ────────────────────
 
     @Override
-    public void linkToController(BlockPos controllerPos) {
+    public void linkToController(final BlockPos controllerPos) {
         this.controllerPos = controllerPos;
         this.setChanged();
     }
@@ -46,23 +47,18 @@ public class StellarNexusPartBE extends BlockEntity implements IMultiblockPart {
         return this.controllerPos;
     }
 
-    // ──────────────────── NBT Persistence ────────────────────
 
     @Override
-    protected void saveAdditional(@NotNull CompoundTag tag, HolderLookup.@NotNull Provider registries) {
-        super.saveAdditional(tag, registries);
+    protected void saveAdditional(@NotNull final ValueOutput output) {
+        super.saveAdditional(output);
         if (this.controllerPos != null) {
-            tag.put("controllerPos", NbtUtils.writeBlockPos(this.controllerPos));
+            output.store("controllerPos", BlockPos.CODEC, this.controllerPos);
         }
     }
 
     @Override
-    protected void loadAdditional(@NotNull CompoundTag tag, HolderLookup.@NotNull Provider registries) {
-        super.loadAdditional(tag, registries);
-        if (tag.contains("controllerPos")) {
-            NbtUtils.readBlockPos(tag.getCompound("controllerPos"), "").ifPresent(pos -> this.controllerPos = pos);
-        } else {
-            this.controllerPos = null;
-        }
+    protected void loadAdditional(@NotNull final ValueInput input) {
+        super.loadAdditional(input);
+        this.controllerPos = input.read("controllerPos", BlockPos.CODEC).map(BlockPos::immutable).orElse(null);
     }
 }

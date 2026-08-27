@@ -10,9 +10,7 @@
   "recipe_name": "universal/quantum_slicer/sky_steel_block_to_printed_accumulation_processor",
   "item_inputs": [
     {
-      "ingredient": {
-        "item": "megacells:sky_steel_block"
-      },
+      "ingredient": "megacells:sky_steel_block",
       "amount": 8192
     }
   ],

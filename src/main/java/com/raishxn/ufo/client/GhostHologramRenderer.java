@@ -6,14 +6,14 @@ import com.raishxn.ufo.api.multiblock.MultiblockControllerDefinitions;
 import com.raishxn.ufo.api.multiblock.MultiblockPattern;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +30,7 @@ public class GhostHologramRenderer {
     private record HologramBlock(BlockPos pos, BlockState state) {
     }
 
-    public static void toggleHologram(BlockPos pos, net.minecraft.core.Direction facing) {
+    public static void toggleHologram(final BlockPos pos, final net.minecraft.core.Direction facing) {
         if (activeControllerPos != null && activeControllerPos.equals(pos)) {
             activeControllerPos = null;
             activeFacing = null;
@@ -43,18 +43,18 @@ public class GhostHologramRenderer {
         rebuildCache();
     }
 
-    private static net.minecraft.core.Direction getPatternFacing(BlockPos pos, net.minecraft.core.Direction fallbackFacing) {
-        Minecraft mc = Minecraft.getInstance();
+    private static net.minecraft.core.Direction getPatternFacing(final BlockPos pos, final net.minecraft.core.Direction fallbackFacing) {
+        final Minecraft mc = Minecraft.getInstance();
         if (mc.level == null) {
             return fallbackFacing;
         }
 
-        BlockEntity be = mc.level.getBlockEntity(pos);
-        BlockState state = mc.level.getBlockState(pos);
+        final BlockEntity be = mc.level.getBlockEntity(pos);
+        final BlockState state = mc.level.getBlockState(pos);
         return MultiblockControllerDefinitions.getPatternFacing(be, state);
     }
 
-    public static boolean isActive(BlockPos pos) {
+    public static boolean isActive(final BlockPos pos) {
         return activeControllerPos != null && activeControllerPos.equals(pos);
     }
 
@@ -64,111 +64,65 @@ public class GhostHologramRenderer {
             return;
         }
 
-        Minecraft mc = Minecraft.getInstance();
+        final Minecraft mc = Minecraft.getInstance();
         if (mc.level == null) {
             return;
         }
 
-        Optional<MultiblockControllerDefinition> definitionOpt = getDefinition(mc.level.getBlockEntity(activeControllerPos));
+        final Optional<MultiblockControllerDefinition> definitionOpt = getDefinition(mc.level.getBlockEntity(activeControllerPos));
         if (definitionOpt.isEmpty()) {
             return;
         }
 
-        MultiblockControllerDefinition definition = definitionOpt.get();
-        MultiblockPattern pattern = definition.pattern();
-        Map<Character, BlockState> defaults = definition.defaultCreativeStates();
+        final MultiblockControllerDefinition definition = definitionOpt.get();
+        final MultiblockPattern pattern = definition.pattern();
+        final Map<Character, BlockState> defaults = definition.defaultCreativeStates();
 
-        char[][][] charPattern = pattern.getPattern();
-        int controllerCol = pattern.getControllerCol();
-        int controllerRow = pattern.getControllerRow();
-        int controllerLayer = pattern.getControllerLayer();
+        final char[][][] charPattern = pattern.getPattern();
+        final int controllerCol = pattern.getControllerCol();
+        final int controllerRow = pattern.getControllerRow();
+        final int controllerLayer = pattern.getControllerLayer();
 
         for (int y = 0; y < charPattern.length; y++) {
             for (int z = 0; z < charPattern[y].length; z++) {
                 for (int x = 0; x < charPattern[y][z].length; x++) {
-                    char c = charPattern[y][z][x];
+                    final char c = charPattern[y][z][x];
                     if (c == ' ' || c == 'A' || c == pattern.getControllerChar()) {
                         continue;
                     }
 
-                    BlockState targetState = defaults.get(c);
+                    final BlockState targetState = defaults.get(c);
                     if (targetState == null) {
                         continue;
                     }
 
-                    int offsetX = x - controllerCol;
-                    int offsetY = y - controllerLayer;
-                    int offsetZ = z - controllerRow;
+                    final int offsetX = x - controllerCol;
+                    final int offsetY = y - controllerLayer;
+                    final int offsetZ = z - controllerRow;
 
-                    BlockPos worldPos = getRotatedPos(activeControllerPos, offsetX, offsetY, offsetZ, activeFacing);
+                    final BlockPos worldPos = getRotatedPos(activeControllerPos, offsetX, offsetY, offsetZ, activeFacing);
                     cachedBlocks.add(new HologramBlock(worldPos, targetState));
                 }
             }
         }
     }
 
-    private static Optional<MultiblockControllerDefinition> getDefinition(BlockEntity be) {
+    private static Optional<MultiblockControllerDefinition> getDefinition(final BlockEntity be) {
         return be == null ? Optional.empty() : MultiblockControllerDefinitions.getDefinition(be);
     }
 
     @SubscribeEvent
-    public static void onRenderLevelStage(RenderLevelStageEvent event) {
-        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS) {
-            return;
-        }
-        if (activeControllerPos == null || activeFacing == null) {
-            return;
-        }
-
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.level == null || mc.player == null) {
-            return;
-        }
-
-        if (!MultiblockControllerDefinitions.isSupportedController(mc.level.getBlockState(activeControllerPos))) {
+    public static void onClientTick(final ClientTickEvent.Post event) {
+        final Minecraft mc = Minecraft.getInstance();
+        if (activeControllerPos != null && (mc.level == null
+                || !MultiblockControllerDefinitions.isSupportedController(mc.level.getBlockState(activeControllerPos)))) {
             activeControllerPos = null;
             activeFacing = null;
             cachedBlocks.clear();
-            return;
         }
-
-        if (mc.player.distanceToSqr(net.minecraft.world.phys.Vec3.atCenterOf(activeControllerPos)) > 64 * 64) {
-            return;
-        }
-
-        PoseStack poseStack = event.getPoseStack();
-        net.minecraft.world.phys.Vec3 cameraPos = event.getCamera().getPosition();
-        MultiBufferSource.BufferSource bufferSource = mc.renderBuffers().bufferSource();
-
-        poseStack.pushPose();
-        poseStack.translate(-cameraPos.x, -cameraPos.y, -cameraPos.z);
-
-        var vertexConsumer = bufferSource.getBuffer(RenderType.translucent());
-
-        for (HologramBlock hb : cachedBlocks) {
-            BlockState existingState = mc.level.getBlockState(hb.pos());
-            if (!existingState.isAir() && existingState.getFluidState().isEmpty()) {
-                continue;
-            }
-
-            poseStack.pushPose();
-            poseStack.translate(hb.pos().getX(), hb.pos().getY(), hb.pos().getZ());
-            mc.getBlockRenderer().renderBatched(
-                    hb.state(),
-                    hb.pos(),
-                    mc.level,
-                    poseStack,
-                    vertexConsumer,
-                    true,
-                    mc.level.getRandom());
-            poseStack.popPose();
-        }
-
-        bufferSource.endBatch();
-        poseStack.popPose();
     }
 
-    private static BlockPos getRotatedPos(BlockPos center, int localX, int localY, int localZ, net.minecraft.core.Direction facing) {
+    private static BlockPos getRotatedPos(final BlockPos center, final int localX, final int localY, final int localZ, final net.minecraft.core.Direction facing) {
         return switch (facing) {
             case SOUTH -> center.offset(-localX, localY, -localZ);
             case WEST -> center.offset(localZ, localY, -localX);

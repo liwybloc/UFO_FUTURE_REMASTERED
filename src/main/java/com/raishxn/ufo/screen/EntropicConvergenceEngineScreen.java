@@ -5,7 +5,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 
 public class EntropicConvergenceEngineScreen extends AbstractUniversalMultiblockControllerScreen<EntropicConvergenceEngineMenu> {
-    public EntropicConvergenceEngineScreen(EntropicConvergenceEngineMenu menu, Inventory playerInventory, Component title, ScreenStyle style) {
+    public EntropicConvergenceEngineScreen(final EntropicConvergenceEngineMenu menu, final Inventory playerInventory, final Component title, final ScreenStyle style) {
         super(menu, playerInventory, title, style);
     }
 }

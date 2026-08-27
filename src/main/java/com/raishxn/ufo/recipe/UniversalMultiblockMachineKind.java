@@ -13,7 +13,7 @@ public enum UniversalMultiblockMachineKind {
 
     private final String serializedName;
 
-    UniversalMultiblockMachineKind(String serializedName) {
+    UniversalMultiblockMachineKind(final String serializedName) {
         this.serializedName = serializedName;
     }
 
@@ -21,8 +21,8 @@ public enum UniversalMultiblockMachineKind {
         return this.serializedName;
     }
 
-    public static UniversalMultiblockMachineKind fromSerializedName(String name) {
-        for (var value : values()) {
+    public static UniversalMultiblockMachineKind fromSerializedName(final String name) {
+        for (final var value : values()) {
             if (value.serializedName.equalsIgnoreCase(name)) {
                 return value;
             }

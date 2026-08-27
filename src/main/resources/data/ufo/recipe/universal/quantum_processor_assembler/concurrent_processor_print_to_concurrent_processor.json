@@ -10,21 +10,15 @@
   "recipe_name": "universal/quantum_processor_assembler/concurrent_processor_print_to_concurrent_processor",
   "item_inputs": [
     {
-      "ingredient": {
-        "item": "extendedae:concurrent_processor_print"
-      },
+      "ingredient": "extendedae:concurrent_processor_print",
       "amount": 32768
     },
     {
-      "ingredient": {
-        "item": "ae2:printed_silicon"
-      },
+      "ingredient": "ae2:printed_silicon",
       "amount": 32768
     },
     {
-      "ingredient": {
-        "item": "minecraft:redstone"
-      },
+      "ingredient": "minecraft:redstone",
       "amount": 32768
     }
   ],

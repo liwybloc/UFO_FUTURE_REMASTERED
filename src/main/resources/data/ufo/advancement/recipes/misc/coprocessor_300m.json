@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_prev": {
+      "conditions": {
+        "items": [
+          {
+            "items": "ufo:150m_mega_co_processor"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "ufo:coprocessor_300m"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_prev"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "ufo:coprocessor_300m"
+    ]
+  }
+}

@@ -2,8 +2,6 @@ package com.raishxn.ufo.block.entity;
 
 import com.raishxn.ufo.api.ae.IMassiveInjector;
 import com.raishxn.ufo.api.multiblock.IMultiblockPart;
-import com.raishxn.ufo.block.MultiblockBlocks;
-import com.raishxn.ufo.compat.mekanism.MekanismChemicalStorage;
 
 import appeng.api.config.Actionable;
 import appeng.api.networking.IGridNode;
@@ -24,6 +22,8 @@ import net.minecraft.nbt.NbtUtils;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -50,8 +50,7 @@ import java.util.Set;
  * </ol>
  */
 public class MassiveOutputHatchBE extends AENetworkedBlockEntity
-        implements IMassiveInjector, IMultiblockPart, IGridTickable, MekanismChemicalStorage {
-    private static final long CHEMICAL_CAPACITY = 16_000_000L;
+        implements IMassiveInjector, IMultiblockPart, IGridTickable {
 
     /** Controller position for multiblock link (null if standalone). */
     @Nullable
@@ -62,13 +61,9 @@ public class MassiveOutputHatchBE extends AENetworkedBlockEntity
 
     /** Statistics: last injection amount (for GUI/tooltip display). */
     private long lastInjectionAmount = 0;
-    @Nullable
-    private net.minecraft.resources.ResourceLocation storedChemicalId = null;
-    private long storedChemicalAmount = 0L;
 
-    public MassiveOutputHatchBE(BlockEntityType<?> type, BlockPos pos, BlockState state) {
+    public MassiveOutputHatchBE(final BlockEntityType<?> type, final BlockPos pos, final BlockState state) {
         super(type, pos, state);
-        // Configure AE2 grid node: no idle power draw, connectable on all sides
         this.getMainNode()
                 .setExposedOnSides(java.util.EnumSet.allOf(Direction.class))
                 .setFlags()                          // No special flags
@@ -76,33 +71,26 @@ public class MassiveOutputHatchBE extends AENetworkedBlockEntity
                 .addService(IGridTickable.class, this); // Register for tick callbacks
     }
 
-    // ═══════════════════════════════════════════════════════════
-    //  IMassiveInjector — Bulk AE2 Network Injection
-    // ═══════════════════════════════════════════════════════════
 
     @Override
-    public long injectIntoNetwork(AEKey what, long amount, Level level) {
+    public long injectIntoNetwork(final AEKey what, final long amount, final Level level) {
         if (!isNetworkReady() || what == null || amount <= 0) {
             return 0;
         }
 
-        // Access the ME grid's unified storage
-        var gridNode = this.getMainNode().getNode();
+        final var gridNode = this.getMainNode().getNode();
         if (gridNode == null || gridNode.getGrid() == null) {
             return 0;
         }
 
-        var grid = gridNode.getGrid();
-        var storageService = grid.getStorageService();
-        var inventory = storageService.getInventory();
+        final var grid = gridNode.getGrid();
+        final var storageService = grid.getStorageService();
+        final var inventory = storageService.getInventory();
 
-        // Use IActionSource.ofMachine to identify ourselves as the source
-        var source = IActionSource.ofMachine(this);
+        final var source = IActionSource.ofMachine(this);
 
-        // Inject directly — AE2's insert() natively handles long quantities
-        long inserted = inventory.insert(what, amount, Actionable.MODULATE, source);
+        final long inserted = inventory.insert(what, amount, Actionable.MODULATE, source);
 
-        // Track statistics
         if (inserted > 0) {
             this.totalInjected += inserted;
             this.lastInjectionAmount = inserted;
@@ -114,16 +102,13 @@ public class MassiveOutputHatchBE extends AENetworkedBlockEntity
 
     @Override
     public boolean isNetworkReady() {
-        var node = this.getMainNode().getNode();
+        final var node = this.getMainNode().getNode();
         return node != null && node.isActive() && node.isPowered();
     }
 
-    // ═══════════════════════════════════════════════════════════
-    //  IMultiblockPart — Structure Participation
-    // ═══════════════════════════════════════════════════════════
 
     @Override
-    public void linkToController(BlockPos controllerPos) {
+    public void linkToController(final BlockPos controllerPos) {
         this.controllerPos = controllerPos;
         refreshGridConnection();
         this.setChanged();
@@ -149,35 +134,25 @@ public class MassiveOutputHatchBE extends AENetworkedBlockEntity
         return this.controllerPos != null;
     }
 
-    // ═══════════════════════════════════════════════════════════
-    //  IGridTickable — AE2 Tick Callbacks
-    // ═══════════════════════════════════════════════════════════
 
     @Override
-    public TickingRequest getTickingRequest(IGridNode node) {
-        // We don't actively do work — injection is called by the controller.
-        // Sleep until woken.
+    public TickingRequest getTickingRequest(final IGridNode node) {
         return new TickingRequest(20, 20, true);
     }
 
     @Override
-    public TickRateModulation tickingRequest(IGridNode node, int ticksSinceLastCall) {
-        // Nothing to do autonomously; the controller drives injection.
+    public TickRateModulation tickingRequest(final IGridNode node, final int ticksSinceLastCall) {
         return TickRateModulation.SLEEP;
     }
 
-    // ═══════════════════════════════════════════════════════════
-    //  AE2 Configuration
-    // ═══════════════════════════════════════════════════════════
 
     @Override
-    public AECableType getCableConnectionType(Direction dir) {
+    public AECableType getCableConnectionType(final Direction dir) {
         return AECableType.DENSE_SMART;
     }
 
     @Override
-    public Set<Direction> getGridConnectableSides(BlockOrientation orientation) {
-        // Allow AE2 cable connections from all 6 sides
+    public Set<Direction> getGridConnectableSides(final BlockOrientation orientation) {
         return EnumSet.allOf(Direction.class);
     }
 
@@ -190,9 +165,6 @@ public class MassiveOutputHatchBE extends AENetworkedBlockEntity
         this.onGridConnectableSidesChanged();
     }
 
-    // ═══════════════════════════════════════════════════════════
-    //  Statistics API (for future GUI / tooltips)
-    // ═══════════════════════════════════════════════════════════
 
     public long getTotalInjected() {
         return this.totalInjected;
@@ -208,66 +180,22 @@ public class MassiveOutputHatchBE extends AENetworkedBlockEntity
         this.setChanged();
     }
 
-    @Override
-    public boolean supportsChemicalIO() {
-        return this.getBlockState().is(MultiblockBlocks.ME_MASSIVE_FLUID_HATCH.get());
-    }
 
     @Override
-    public long getChemicalCapacity() {
-        return CHEMICAL_CAPACITY;
-    }
-
-    @Override
-    public @Nullable net.minecraft.resources.ResourceLocation getStoredChemicalId() {
-        return this.storedChemicalId;
-    }
-
-    @Override
-    public long getStoredChemicalAmount() {
-        return this.storedChemicalAmount;
-    }
-
-    @Override
-    public void setStoredChemical(@Nullable net.minecraft.resources.ResourceLocation chemicalId, long amount) {
-        long clamped = Math.max(0L, Math.min(CHEMICAL_CAPACITY, amount));
-        this.storedChemicalId = clamped > 0L ? chemicalId : null;
-        this.storedChemicalAmount = clamped;
-        this.setChanged();
-        if (this.level != null) {
-            this.level.sendBlockUpdated(this.worldPosition, this.getBlockState(), this.getBlockState(), 3);
-        }
-    }
-
-    // ═══════════════════════════════════════════════════════════
-    //  NBT Persistence (AE2 pattern: saveAdditional + loadTag)
-    // ═══════════════════════════════════════════════════════════
-
-    @Override
-    public void saveAdditional(@NotNull CompoundTag tag, HolderLookup.@NotNull Provider registries) {
-        super.saveAdditional(tag, registries);
+    public void saveAdditional(@NotNull final ValueOutput output) {
+        super.saveAdditional(output);
         if (this.controllerPos != null) {
-            tag.put("controllerPos", NbtUtils.writeBlockPos(this.controllerPos));
+            output.store("controllerPos", BlockPos.CODEC, this.controllerPos);
         }
-        tag.putLong("totalInjected", this.totalInjected);
-        tag.putLong("lastInjection", this.lastInjectionAmount);
-        if (this.storedChemicalId != null && this.storedChemicalAmount > 0L) {
-            tag.putString("storedChemicalId", this.storedChemicalId.toString());
-            tag.putLong("storedChemicalAmount", this.storedChemicalAmount);
-        }
+        output.putLong("totalInjected", this.totalInjected);
+        output.putLong("lastInjection", this.lastInjectionAmount);
     }
 
     @Override
-    public void loadTag(@NotNull CompoundTag tag, HolderLookup.@NotNull Provider registries) {
-        super.loadTag(tag, registries);
-        if (tag.contains("controllerPos")) {
-            NbtUtils.readBlockPos(tag.getCompound("controllerPos"), "").ifPresent(pos -> this.controllerPos = pos);
-        } else {
-            this.controllerPos = null;
-        }
-        this.totalInjected = tag.getLong("totalInjected");
-        this.lastInjectionAmount = tag.getLong("lastInjection");
-        this.storedChemicalId = tag.contains("storedChemicalId") ? net.minecraft.resources.ResourceLocation.parse(tag.getString("storedChemicalId")) : null;
-        this.storedChemicalAmount = this.storedChemicalId == null ? 0L : tag.getLong("storedChemicalAmount");
+    protected void loadAdditional(@NotNull final ValueInput input) {
+        super.loadAdditional(input);
+        this.controllerPos = input.read("controllerPos", BlockPos.CODEC).map(BlockPos::immutable).orElse(null);
+        this.totalInjected = input.getLongOr("totalInjected", 0L);
+        this.lastInjectionAmount = input.getLongOr("lastInjection", 0L);
     }
 }

@@ -10,9 +10,7 @@
   "recipe_name": "universal/quantum_slicer/silicon_block_to_printed_silicon",
   "item_inputs": [
     {
-      "ingredient": {
-        "item": "extendedae:silicon_block"
-      },
+      "ingredient": "extendedae:silicon_block",
       "amount": 8192
     }
   ],

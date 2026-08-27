@@ -8,6 +8,7 @@ import com.raishxn.ufo.init.ModRecipes;
 import com.raishxn.ufo.recipe.UniversalMultiblockMachineKind;
 import com.raishxn.ufo.screen.QuantumCryoforgeControllerMenu;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -21,7 +22,7 @@ public class QuantumCryoforgeControllerBE extends AbstractParallelMultiblockCont
 
     private static MultiblockPattern PATTERN;
 
-    public QuantumCryoforgeControllerBE(BlockPos pos, BlockState state) {
+    public QuantumCryoforgeControllerBE(final BlockPos pos, final BlockState state) {
         super(ModBlockEntities.QUANTUM_CRYOFORGE_CONTROLLER_BE.get(), pos, state);
     }
 
@@ -45,21 +46,21 @@ public class QuantumCryoforgeControllerBE extends AbstractParallelMultiblockCont
 
     @Nullable
     @Override
-    public AbstractContainerMenu createMenu(int id, Inventory playerInventory, Player player) {
+    public AbstractContainerMenu createMenu(final int id, final Inventory playerInventory, final Player player) {
         return new QuantumCryoforgeControllerMenu(id, playerInventory, this);
     }
 
     @Override
     protected List<MultiblockProcessingRecipe> getAvailableRecipes() {
-        if (this.level == null) {
+        if (!(this.level instanceof final ServerLevel serverLevel)) {
             return List.of();
         }
 
-        List<MultiblockProcessingRecipe> recipes = new ArrayList<>();
-        for (var holder : this.level.getRecipeManager().getAllRecipesFor(ModRecipes.UNIVERSAL_MULTIBLOCK_TYPE.get())) {
-            var recipe = holder.value();
-            if (recipe.getMachine() == UniversalMultiblockMachineKind.QUANTUM_CRYOFORGE) {
-                recipes.add(MultiblockProcessingRecipe.fromUniversal(holder.id(), recipe));
+        final List<MultiblockProcessingRecipe> recipes = new ArrayList<>();
+        for (final var holder : serverLevel.recipeAccess().recipeMap().byType(ModRecipes.UNIVERSAL_MULTIBLOCK_TYPE.get())) {
+            final var recipe = holder.value();
+            if (recipe.machine() == UniversalMultiblockMachineKind.QUANTUM_CRYOFORGE) {
+                recipes.add(MultiblockProcessingRecipe.fromUniversal(holder.id().identifier(), recipe));
             }
         }
         return recipes;

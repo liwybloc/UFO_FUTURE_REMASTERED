@@ -6,6 +6,8 @@ import com.raishxn.ufo.UfoMod;
 import com.raishxn.ufo.item.custom.cell.AEBigIntegerCellHandler;
 import com.raishxn.ufo.item.custom.cell.InfinityGenesisCellInventory;
 import com.raishxn.ufo.item.custom.cell.InfinityCellInventory;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.fml.loading.FMLEnvironment;
 
 public class UFORegistryHandler {
 
@@ -21,15 +23,14 @@ public class UFORegistryHandler {
     }
 
     private void registerUpgrades() {
-        // Use the block's asItem() to ensure the same Item instance as UpgradeInventories.forMachine() in the BE constructor
-        java.util.List<net.minecraft.world.item.Item> machineItems = java.util.List.of(
+        final java.util.List<net.minecraft.world.item.Item> machineItems = java.util.List.of(
                 com.raishxn.ufo.block.ModBlocks.DIMENSIONAL_MATTER_ASSEMBLER_BLOCK.get().asItem(),
                 com.raishxn.ufo.block.MultiblockBlocks.QUANTUM_MATTER_FABRICATOR_CONTROLLER.get().asItem(),
                 com.raishxn.ufo.block.MultiblockBlocks.QUANTUM_SLICER_CONTROLLER.get().asItem(),
                 com.raishxn.ufo.block.MultiblockBlocks.QUANTUM_PROCESSOR_ASSEMBLER_CONTROLLER.get().asItem(),
                 com.raishxn.ufo.block.MultiblockBlocks.QUANTUM_CRYOFORGE_CONTROLLER.get().asItem());
 
-        for (var machineItem : machineItems) {
+        for (final var machineItem : machineItems) {
             appeng.api.upgrades.Upgrades.add(ModItems.MATTERFLOW_CATALYST_T1.get(), machineItem, 4);
             appeng.api.upgrades.Upgrades.add(ModItems.MATTERFLOW_CATALYST_T2.get(), machineItem, 4);
             appeng.api.upgrades.Upgrades.add(ModItems.MATTERFLOW_CATALYST_T3.get(), machineItem, 4);
@@ -50,7 +51,12 @@ public class UFORegistryHandler {
         StorageCells.addCellHandler(InfinityCellInventory.HANDLER);
         StorageCells.addCellHandler(InfinityGenesisCellInventory.HANDLER);
         StorageCells.addCellHandler(AEBigIntegerCellHandler.INSTANCE);
-        // --- Infinity Cells → 3D drive model (purple/cosmic) ---
+        if (FMLEnvironment.getDist() == Dist.CLIENT) {
+            registerStorageModels();
+        }
+    }
+
+    private void registerStorageModels() {
         StorageCellModels.registerModel(ModCells.INFINITY_WATER_CELL.get(), UfoMod.id("drive/cells/infinity_cell"));
         StorageCellModels.registerModel(ModCells.INFINITY_COBBLESTONE_CELL.get(), UfoMod.id("drive/cells/infinity_cell"));
         StorageCellModels.registerModel(ModCells.INFINITY_COBBLED_DEEPSLATE_CELL.get(), UfoMod.id("drive/cells/infinity_cell"));
@@ -59,21 +65,12 @@ public class UFORegistryHandler {
         StorageCellModels.registerModel(ModCells.INFINITY_LAVA_CELL.get(), UfoMod.id("drive/cells/infinity_cell"));
         StorageCellModels.registerModel(ModCells.INFINITY_SAND_CELL.get(), UfoMod.id("drive/cells/infinity_cell"));
         StorageCellModels.registerModel(ModCells.INFINITY_SKY_STONE_CELL.get(), UfoMod.id("drive/cells/infinity_cell"));
-        StorageCellModels.registerModel(ModCells.INFINITY_ANTIMATTER_PELLET_CELL.get(), UfoMod.id("drive/cells/infinity_cell"));
-
-        // Additional infinity cells (Mekanism)
-        StorageCellModels.registerModel(ModCells.INFINITY_PLUTONIUM_PELLET_CELL.get(), UfoMod.id("drive/cells/infinity_cell"));
-        StorageCellModels.registerModel(ModCells.INFINITY_POLONIUM_PELLET_CELL.get(), UfoMod.id("drive/cells/infinity_cell"));
-        StorageCellModels.registerModel(ModCells.INFINITY_HDPE_PELLET_CELL.get(), UfoMod.id("drive/cells/infinity_cell"));
-
-        // Additional infinity cells (Vanilla)
         StorageCellModels.registerModel(ModCells.INFINITY_OBSIDIAN_CELL.get(), UfoMod.id("drive/cells/infinity_cell"));
         StorageCellModels.registerModel(ModCells.INFINITY_GRAVEL_CELL.get(), UfoMod.id("drive/cells/infinity_cell"));
         StorageCellModels.registerModel(ModCells.INFINITY_OAK_LOG_CELL.get(), UfoMod.id("drive/cells/infinity_cell"));
         StorageCellModels.registerModel(ModCells.INFINITY_GLASS_CELL.get(), UfoMod.id("drive/cells/infinity_cell"));
         StorageCellModels.registerModel(ModCells.INFINITY_AMETHYST_SHARD_CELL.get(), UfoMod.id("drive/cells/infinity_cell"));
 
-        // Dye cells
         StorageCellModels.registerModel(ModCells.INFINITY_WHITE_DYE_CELL.get(), UfoMod.id("drive/cells/infinity_cell"));
         StorageCellModels.registerModel(ModCells.INFINITY_ORANGE_DYE_CELL.get(), UfoMod.id("drive/cells/infinity_cell"));
         StorageCellModels.registerModel(ModCells.INFINITY_MAGENTA_DYE_CELL.get(), UfoMod.id("drive/cells/infinity_cell"));
@@ -92,25 +89,16 @@ public class UFORegistryHandler {
         StorageCellModels.registerModel(ModCells.INFINITY_BLACK_DYE_CELL.get(), UfoMod.id("drive/cells/infinity_cell"));
         StorageCellModels.registerModel(ModCells.INFINITY_GENESIS_CELL.get(), UfoMod.id("drive/cells/infinity_cell"));
 
-        // --- White Dwarf Item Cells → 3D drive model (gray/silver) ---
         StorageCellModels.registerModel(ModCellItems.ITEM_CELL_40M.get(), UfoMod.id("drive/cells/white_dwarf_cell"));
         StorageCellModels.registerModel(ModCellItems.ITEM_CELL_100M.get(), UfoMod.id("drive/cells/white_dwarf_cell"));
         StorageCellModels.registerModel(ModCellItems.ITEM_CELL_250M.get(), UfoMod.id("drive/cells/white_dwarf_cell"));
         StorageCellModels.registerModel(ModCellItems.ITEM_CELL_750M.get(), UfoMod.id("drive/cells/white_dwarf_cell"));
         StorageCellModels.registerModel(ModCellItems.ITEM_CELL_SINGULARITY.get(), UfoMod.id("drive/cells/white_dwarf_cell"));
 
-        // --- Neutron Star Fluid Cells → 3D drive model (deep blue) ---
         StorageCellModels.registerModel(ModCellItems.FLUID_CELL_40M.get(), UfoMod.id("drive/cells/neutron_star_cell"));
         StorageCellModels.registerModel(ModCellItems.FLUID_CELL_100M.get(), UfoMod.id("drive/cells/neutron_star_cell"));
         StorageCellModels.registerModel(ModCellItems.FLUID_CELL_250M.get(), UfoMod.id("drive/cells/neutron_star_cell"));
         StorageCellModels.registerModel(ModCellItems.FLUID_CELL_750M.get(), UfoMod.id("drive/cells/neutron_star_cell"));
         StorageCellModels.registerModel(ModCellItems.FLUID_CELL_SINGULARITY.get(), UfoMod.id("drive/cells/neutron_star_cell"));
-
-        // --- Pulsar Chemical Cells → 3D drive model (violet) ---
-        StorageCellModels.registerModel(ModCellItems.CHEMICAL_CELL_40M.get(), UfoMod.id("drive/cells/pulsar_cell"));
-        StorageCellModels.registerModel(ModCellItems.CHEMICAL_CELL_100M.get(), UfoMod.id("drive/cells/pulsar_cell"));
-        StorageCellModels.registerModel(ModCellItems.CHEMICAL_CELL_250M.get(), UfoMod.id("drive/cells/pulsar_cell"));
-        StorageCellModels.registerModel(ModCellItems.CHEMICAL_CELL_750M.get(), UfoMod.id("drive/cells/pulsar_cell"));
-        StorageCellModels.registerModel(ModCellItems.CHEMICAL_CELL_SINGULARITY.get(), UfoMod.id("drive/cells/pulsar_cell"));
     }
 }

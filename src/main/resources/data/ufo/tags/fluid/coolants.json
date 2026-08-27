@@ -1,0 +1,10 @@
+{
+  "values": [
+    "ufo:source_gelid_cryotheum",
+    "ufo:flowing_gelid_cryotheum",
+    "ufo:source_stable_coolant",
+    "ufo:flowing_stable_coolant",
+    "ufo:source_temporal_fluid",
+    "ufo:flowing_temporal_fluid"
+  ]
+}

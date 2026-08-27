@@ -15,7 +15,7 @@ public class AnimatedAEBigIntegerCellItem extends AEBigIntegerCellItem {
     private final ChatFormatting[] baseNameColors; // <-- ADICIONADO
     private final ChatFormatting[] tierColors;
 
-    public AnimatedAEBigIntegerCellItem(Item.Properties props, double idleDrain, AEKeyType keyType, StorageTier tier, String baseNameKey, String tierNameKey, ChatFormatting[] baseNameColors, ChatFormatting... tierColors) {
+    public AnimatedAEBigIntegerCellItem(final Item.Properties props, final double idleDrain, final AEKeyType keyType, final StorageTier tier, final String baseNameKey, final String tierNameKey, final ChatFormatting[] baseNameColors, final ChatFormatting... tierColors) {
         super(props, idleDrain, keyType, tier);
         this.baseNameKey = baseNameKey;
         this.tierNameKey = tierNameKey;
@@ -24,9 +24,9 @@ public class AnimatedAEBigIntegerCellItem extends AEBigIntegerCellItem {
     }
 
     @Override
-    public Component getName(ItemStack stack) {
-        Component baseName = ColorHelper.getAnimatedColoredText(Component.translatable(this.baseNameKey).getString(), this.baseNameColors); // <-- CORRIGIDO
-        Component tierName = ColorHelper.getAnimatedColoredText(Component.translatable(this.tierNameKey).getString(), this.tierColors);
+    public Component getName(final ItemStack stack) {
+        final Component baseName = ColorHelper.getAnimatedColoredText(Component.translatable(this.baseNameKey).getString(), this.baseNameColors); // <-- CORRIGIDO
+        final Component tierName = ColorHelper.getAnimatedColoredText(Component.translatable(this.tierNameKey).getString(), this.tierColors);
 
         return baseName.copy().append(" - ").append(tierName);
     }

@@ -12,19 +12,19 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
 public class EntropicAssemblerMatrixControllerBlock extends EntropicMachineShellBlock implements net.minecraft.world.level.block.EntityBlock {
-    public EntropicAssemblerMatrixControllerBlock(BlockBehaviour.Properties properties) {
+    public EntropicAssemblerMatrixControllerBlock(final BlockBehaviour.Properties properties) {
         super(properties);
     }
 
     @Nullable
     @Override
-    public EntropicAssemblerMatrixBE newBlockEntity(BlockPos pos, BlockState state) {
+    public EntropicAssemblerMatrixBE newBlockEntity(final BlockPos pos, final BlockState state) {
         return new EntropicAssemblerMatrixBE(pos, state);
     }
 
     @Nullable
     @Override
-    public <T extends net.minecraft.world.level.block.entity.BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
+    public <T extends net.minecraft.world.level.block.entity.BlockEntity> BlockEntityTicker<T> getTicker(final Level level, final BlockState state, final BlockEntityType<T> type) {
         if (level.isClientSide()) {
             return null;
         }

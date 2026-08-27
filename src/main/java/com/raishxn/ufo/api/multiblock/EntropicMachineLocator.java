@@ -18,15 +18,15 @@ public final class EntropicMachineLocator {
     }
 
     @Nullable
-    public static IEntropicMachineController findController(Level level, BlockPos origin) {
+    public static IEntropicMachineController findController(final Level level, final BlockPos origin) {
         IEntropicMachineController best = null;
         BlockPos bestPos = null;
 
-        for (BlockPos pos : BlockPos.betweenClosed(
+        for (final BlockPos pos : BlockPos.betweenClosed(
                 origin.offset(-SEARCH_RADIUS, -SEARCH_RADIUS, -SEARCH_RADIUS),
                 origin.offset(SEARCH_RADIUS, SEARCH_RADIUS, SEARCH_RADIUS))) {
-            BlockEntity be = level.getBlockEntity(pos);
-            if (!(be instanceof IEntropicMachineController controller) || !controller.canProxyInteract(origin)) {
+            final BlockEntity be = level.getBlockEntity(pos);
+            if (!(be instanceof final IEntropicMachineController controller) || !controller.canProxyInteract(origin)) {
                 continue;
             }
 
@@ -39,17 +39,17 @@ public final class EntropicMachineLocator {
         return best;
     }
 
-    public static void markNearbyDirty(Level level, BlockPos origin) {
+    public static void markNearbyDirty(final Level level, final BlockPos origin) {
         if (level.isClientSide()) {
             return;
         }
 
-        List<AbstractEntropicMachineBE> nearbyMachines = new ArrayList<>();
-        for (BlockPos pos : BlockPos.betweenClosed(
+        final List<AbstractEntropicMachineBE> nearbyMachines = new ArrayList<>();
+        for (final BlockPos pos : BlockPos.betweenClosed(
                 origin.offset(-SEARCH_RADIUS, -SEARCH_RADIUS, -SEARCH_RADIUS),
                 origin.offset(SEARCH_RADIUS, SEARCH_RADIUS, SEARCH_RADIUS))) {
-            BlockEntity be = level.getBlockEntity(pos);
-            if (be instanceof AbstractEntropicMachineBE machine) {
+            final BlockEntity be = level.getBlockEntity(pos);
+            if (be instanceof final AbstractEntropicMachineBE machine) {
                 nearbyMachines.add(machine);
             }
         }
@@ -58,25 +58,25 @@ public final class EntropicMachineLocator {
             return;
         }
 
-        for (AbstractEntropicMachineBE machine : nearbyMachines) {
+        for (final AbstractEntropicMachineBE machine : nearbyMachines) {
             machine.clearStructureState();
         }
 
-        Map<StructureKey, FieldTieredCubeValidator.ValidationResult> matches = new LinkedHashMap<>();
-        for (AbstractEntropicMachineBE machine : nearbyMachines) {
-            var result = machine.findStructure(level);
+        final Map<StructureKey, FieldTieredCubeValidator.ValidationResult> matches = new LinkedHashMap<>();
+        for (final AbstractEntropicMachineBE machine : nearbyMachines) {
+            final var result = machine.findStructure(level);
             if (result != null && result.valid()) {
                 matches.putIfAbsent(new StructureKey(machine.getClass(), result.origin()), result);
             }
         }
 
-        for (var entry : matches.entrySet()) {
-            StructureKey key = entry.getKey();
-            var result = entry.getValue();
+        for (final var entry : matches.entrySet()) {
+            final StructureKey key = entry.getKey();
+            final var result = entry.getValue();
 
-            for (BlockPos shellPos : result.shellPositions()) {
-                BlockEntity be = level.getBlockEntity(shellPos);
-                if (be instanceof AbstractEntropicMachineBE machine
+            for (final BlockPos shellPos : result.shellPositions()) {
+                final BlockEntity be = level.getBlockEntity(shellPos);
+                if (be instanceof final AbstractEntropicMachineBE machine
                         && machine.getClass() == key.machineClass()) {
                     machine.applyStructure(result);
                 }
@@ -87,7 +87,7 @@ public final class EntropicMachineLocator {
     private record StructureKey(Class<?> machineClass, BlockPos origin) {
     }
 
-    private static int compare(@Nullable BlockPos a, @Nullable BlockPos b) {
+    private static int compare(@Nullable final BlockPos a, @Nullable final BlockPos b) {
         if (a == null) {
             return 1;
         }

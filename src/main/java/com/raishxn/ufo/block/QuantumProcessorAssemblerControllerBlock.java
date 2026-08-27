@@ -12,7 +12,7 @@ public class QuantumProcessorAssemblerControllerBlock extends AbstractSimpleMult
 
     public static final MapCodec<QuantumProcessorAssemblerControllerBlock> CODEC = simpleCodec(QuantumProcessorAssemblerControllerBlock::new);
 
-    public QuantumProcessorAssemblerControllerBlock(BlockBehaviour.Properties properties) {
+    public QuantumProcessorAssemblerControllerBlock(final BlockBehaviour.Properties properties) {
         super(properties);
     }
 
@@ -27,7 +27,7 @@ public class QuantumProcessorAssemblerControllerBlock extends AbstractSimpleMult
     }
 
     @Override
-    protected QuantumProcessorAssemblerControllerBE createBlockEntity(BlockPos pos, BlockState state) {
+    protected QuantumProcessorAssemblerControllerBE createBlockEntity(final BlockPos pos, final BlockState state) {
         return new QuantumProcessorAssemblerControllerBE(pos, state);
     }
 }

@@ -29,12 +29,12 @@ public class MultiblockInfoWrapper {
     private final int height;
     private final int layers;
 
-    public MultiblockInfoWrapper(MultiblockControllerDefinitions.PreviewEntry entry) {
+    public MultiblockInfoWrapper(final MultiblockControllerDefinitions.PreviewEntry entry) {
         this.entry = entry;
 
-        MultiblockControllerDefinition definition = entry.definition();
-        MultiblockPattern pattern = definition.pattern();
-        char[][][] chars = pattern.getPattern();
+        final MultiblockControllerDefinition definition = entry.definition();
+        final MultiblockPattern pattern = definition.pattern();
+        final char[][][] chars = pattern.getPattern();
 
         this.layers = chars.length;
         this.height = chars.length == 0 ? 0 : chars[0].length;
@@ -67,29 +67,29 @@ public class MultiblockInfoWrapper {
         return layers;
     }
 
-    private static List<MaterialStack> collectMaterials(MultiblockControllerDefinitions.PreviewEntry entry,
-                                                        MultiblockControllerDefinition definition,
-                                                        char[][][] chars) {
-        Map<String, MaterialStack> materials = new LinkedHashMap<>();
-        MultiblockPattern pattern = definition.pattern();
-        BlockState controllerState = resolveControllerState(entry.iconStack());
+    private static List<MaterialStack> collectMaterials(final MultiblockControllerDefinitions.PreviewEntry entry,
+                                                        final MultiblockControllerDefinition definition,
+                                                        final char[][][] chars) {
+        final Map<String, MaterialStack> materials = new LinkedHashMap<>();
+        final MultiblockPattern pattern = definition.pattern();
+        final BlockState controllerState = resolveControllerState(entry.iconStack());
 
-        for (char[][] layer : chars) {
-            for (char[] row : layer) {
-                for (char symbol : row) {
-                    BlockState state = symbol == pattern.getControllerChar()
+        for (final char[][] layer : chars) {
+            for (final char[] row : layer) {
+                for (final char symbol : row) {
+                    final BlockState state = symbol == pattern.getControllerChar()
                             ? controllerState
                             : definition.defaultCreativeStates().get(symbol);
                     if (state == null || state.isAir()) {
                         continue;
                     }
 
-                    ItemStack stack = state.getBlock().asItem().getDefaultInstance();
+                    final ItemStack stack = state.getBlock().asItem().getDefaultInstance();
                     if (stack.isEmpty()) {
                         continue;
                     }
 
-                    String key = BuiltInRegistries.ITEM.getKey(stack.getItem()).toString();
+                    final String key = BuiltInRegistries.ITEM.getKey(stack.getItem()).toString();
                     materials.compute(key, (ignored, existing) -> existing == null
                             ? new MaterialStack(stack.copyWithCount(1), 1)
                             : new MaterialStack(existing.stack(), existing.count() + 1));
@@ -102,11 +102,11 @@ public class MultiblockInfoWrapper {
                 .toList();
     }
 
-    private static List<Component> collectLegend(MultiblockPattern pattern, char[][][] chars) {
-        LinkedHashSet<Character> symbols = new LinkedHashSet<>();
-        for (char[][] layer : chars) {
-            for (char[] row : layer) {
-                for (char symbol : row) {
+    private static List<Component> collectLegend(final MultiblockPattern pattern, final char[][][] chars) {
+        final LinkedHashSet<Character> symbols = new LinkedHashSet<>();
+        for (final char[][] layer : chars) {
+            for (final char[] row : layer) {
+                for (final char symbol : row) {
                     if (!Character.isWhitespace(symbol)) {
                         symbols.add(symbol);
                     }
@@ -114,10 +114,10 @@ public class MultiblockInfoWrapper {
             }
         }
 
-        List<Component> lines = new ArrayList<>();
-        for (char symbol : symbols) {
-            Component base = pattern.getLegendName(symbol);
-            List<BlockState> candidates = pattern.getDisplayCandidates(symbol);
+        final List<Component> lines = new ArrayList<>();
+        for (final char symbol : symbols) {
+            final Component base = pattern.getLegendName(symbol);
+            final List<BlockState> candidates = pattern.getDisplayCandidates(symbol);
             if (candidates.isEmpty()) {
                 lines.add(Component.literal(symbol + " - ").append(base));
             } else {
@@ -127,8 +127,8 @@ public class MultiblockInfoWrapper {
         return lines;
     }
 
-    private static BlockState resolveControllerState(ItemStack iconStack) {
-        if (iconStack.getItem() instanceof BlockItem blockItem) {
+    private static BlockState resolveControllerState(final ItemStack iconStack) {
+        if (iconStack.getItem() instanceof final BlockItem blockItem) {
             return blockItem.getBlock().defaultBlockState();
         }
         return Blocks.IRON_BLOCK.defaultBlockState();

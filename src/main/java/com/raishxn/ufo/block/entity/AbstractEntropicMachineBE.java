@@ -26,6 +26,8 @@ import net.minecraft.world.MenuProvider;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -57,7 +59,7 @@ public abstract class AbstractEntropicMachineBE extends AENetworkedBlockEntity
     @Nullable
     protected BlockPos anchorPos;
 
-    protected AbstractEntropicMachineBE(BlockEntityType<?> blockEntityType, BlockPos pos, BlockState blockState) {
+    protected AbstractEntropicMachineBE(final BlockEntityType<?> blockEntityType, final BlockPos pos, final BlockState blockState) {
         super(blockEntityType, pos, blockState);
         this.upgrades = UpgradeInventories.forMachine(blockState.getBlock().asItem(), 4, this::saveChanges);
         this.getMainNode()
@@ -86,17 +88,17 @@ public abstract class AbstractEntropicMachineBE extends AENetworkedBlockEntity
     protected abstract String getMachineNameKey();
 
     @Override
-    public void scanStructure(Level level) {
+    public void scanStructure(final Level level) {
         EntropicMachineLocator.markNearbyDirty(level, this.worldPosition);
     }
 
-    public @Nullable FieldTieredCubeValidator.ValidationResult findStructure(Level level) {
+    public @Nullable FieldTieredCubeValidator.ValidationResult findStructure(final Level level) {
         return FieldTieredCubeValidator.findMatchingCube(level, this.worldPosition, getShellPredicate()).orElse(null);
     }
 
-    public void applyStructure(FieldTieredCubeValidator.ValidationResult result) {
-        boolean wasAssembled = this.assembled;
-        BlockPos previousAnchor = this.anchorPos;
+    public void applyStructure(final FieldTieredCubeValidator.ValidationResult result) {
+        final boolean wasAssembled = this.assembled;
+        final BlockPos previousAnchor = this.anchorPos;
 
         this.assembled = result.valid() && result.shellPositions().contains(this.worldPosition);
         this.machineTier = result.machineTier();
@@ -104,16 +106,16 @@ public abstract class AbstractEntropicMachineBE extends AENetworkedBlockEntity
         this.parts.clear();
         this.partSet.clear();
 
-        for (BlockPos pos : result.shellPositions()) {
+        for (final BlockPos pos : result.shellPositions()) {
             if (!pos.equals(this.worldPosition)) {
-                BlockPos immutable = pos.immutable();
+                final BlockPos immutable = pos.immutable();
                 this.parts.add(immutable);
                 this.partSet.add(immutable);
             }
         }
 
-        for (BlockPos pos : result.interiorPositions()) {
-            BlockPos immutable = pos.immutable();
+        for (final BlockPos pos : result.interiorPositions()) {
+            final BlockPos immutable = pos.immutable();
             this.parts.add(immutable);
             this.partSet.add(immutable);
         }
@@ -126,8 +128,8 @@ public abstract class AbstractEntropicMachineBE extends AENetworkedBlockEntity
     }
 
     public void clearStructureState() {
-        boolean wasAssembled = this.assembled;
-        BlockPos previousAnchor = this.anchorPos;
+        final boolean wasAssembled = this.assembled;
+        final BlockPos previousAnchor = this.anchorPos;
         this.assembled = false;
         this.running = false;
         this.progress = 0;
@@ -153,23 +155,23 @@ public abstract class AbstractEntropicMachineBE extends AENetworkedBlockEntity
     }
 
     @Override
-    public boolean canProxyInteract(BlockPos pos) {
+    public boolean canProxyInteract(final BlockPos pos) {
         return isPrimaryMachine() && (pos.equals(this.worldPosition) || this.partSet.contains(pos));
     }
 
     @Override
     public boolean isNetworkConnected() {
-        IGridNode node = this.getActionableNode();
+        final IGridNode node = this.getActionableNode();
         return node != null && node.getGrid() != null && node.isActive();
     }
 
     @Override
-    public Set<Direction> getGridConnectableSides(BlockOrientation orientation) {
+    public Set<Direction> getGridConnectableSides(final BlockOrientation orientation) {
         return this.assembled ? EnumSet.allOf(Direction.class) : EnumSet.noneOf(Direction.class);
     }
 
     @Override
-    public void onMainNodeStateChanged(IGridNodeListener.State reason) {
+    public void onMainNodeStateChanged(final IGridNodeListener.State reason) {
         if (reason != IGridNodeListener.State.GRID_BOOT) {
             updateVisualState();
         }
@@ -183,15 +185,15 @@ public abstract class AbstractEntropicMachineBE extends AENetworkedBlockEntity
     }
 
     @Override
-    public void addPart(BlockPos partPos) {
-        BlockPos immutable = partPos.immutable();
+    public void addPart(final BlockPos partPos) {
+        final BlockPos immutable = partPos.immutable();
         if (this.partSet.add(immutable)) {
             this.parts.add(immutable);
         }
     }
 
     @Override
-    public void removePart(BlockPos partPos) {
+    public void removePart(final BlockPos partPos) {
         this.partSet.remove(partPos);
         this.parts.remove(partPos);
         markStructureDirty();
@@ -213,7 +215,7 @@ public abstract class AbstractEntropicMachineBE extends AENetworkedBlockEntity
     }
 
     @Override
-    public AECableType getCableConnectionType(Direction dir) {
+    public AECableType getCableConnectionType(final Direction dir) {
         return AECableType.DENSE_SMART;
     }
 
@@ -305,41 +307,33 @@ public abstract class AbstractEntropicMachineBE extends AENetworkedBlockEntity
     }
 
     @Override
-    public void saveAdditional(@NotNull CompoundTag tag, HolderLookup.@NotNull Provider registries) {
-        super.saveAdditional(tag, registries);
-        tag.putBoolean("Assembled", this.assembled);
-        tag.putInt("MachineTier", this.machineTier);
-        tag.putBoolean("SafeMode", this.safeMode);
-        tag.putBoolean("Overclocked", this.overclocked);
+    public void saveAdditional(@NotNull final ValueOutput output) {
+        super.saveAdditional(output);
+        output.putBoolean("Assembled", this.assembled);
+        output.putInt("MachineTier", this.machineTier);
+        output.putBoolean("SafeMode", this.safeMode);
+        output.putBoolean("Overclocked", this.overclocked);
         if (this.anchorPos != null) {
-            tag.put("EntropicAnchor", NbtUtils.writeBlockPos(this.anchorPos));
+            output.store("EntropicAnchor", BlockPos.CODEC, this.anchorPos);
         }
-
-        ListTag partsTag = new ListTag();
-        for (BlockPos partPos : this.parts) {
-            partsTag.add(NbtUtils.writeBlockPos(partPos));
-        }
-        tag.put("EntropicParts", partsTag);
+        final var parts = output.list("EntropicParts", BlockPos.CODEC);
+        this.parts.forEach(parts::add);
     }
 
     @Override
-    public void loadTag(@NotNull CompoundTag tag, HolderLookup.@NotNull Provider registries) {
-        super.loadTag(tag, registries);
-        this.assembled = tag.getBoolean("Assembled");
-        this.machineTier = Math.max(MultiblockMachineTier.MK1.level(), tag.getInt("MachineTier"));
-        this.safeMode = !tag.contains("SafeMode") || tag.getBoolean("SafeMode");
-        this.overclocked = tag.getBoolean("Overclocked");
-        this.anchorPos = null;
-        if (tag.contains("EntropicAnchor")) {
-            NbtUtils.readBlockPos(tag.getCompound("EntropicAnchor"), "").ifPresent(pos -> this.anchorPos = pos.immutable());
-        }
+    protected void loadAdditional(@NotNull final ValueInput input) {
+        super.loadAdditional(input);
+        this.assembled = input.getBooleanOr("Assembled", false);
+        this.machineTier = Math.max(MultiblockMachineTier.MK1.level(), input.getIntOr("MachineTier", this.machineTier));
+        this.safeMode = input.getBooleanOr("SafeMode", true);
+        this.overclocked = input.getBooleanOr("Overclocked", false);
+        this.anchorPos = input.read("EntropicAnchor", BlockPos.CODEC).map(BlockPos::immutable).orElse(null);
 
         this.parts.clear();
         this.partSet.clear();
-        ListTag partsTag = tag.getList("EntropicParts", Tag.TAG_COMPOUND);
-        for (Tag partTag : partsTag) {
-            NbtUtils.readBlockPos((CompoundTag) partTag, "").ifPresent(pos -> {
-                BlockPos immutable = pos.immutable();
+        for (final BlockPos pos : input.listOrEmpty("EntropicParts", BlockPos.CODEC)) {
+            java.util.Optional.of(pos).ifPresent(partPos -> {
+                final BlockPos immutable = partPos.immutable();
                 this.parts.add(immutable);
                 this.partSet.add(immutable);
             });
@@ -353,9 +347,9 @@ public abstract class AbstractEntropicMachineBE extends AENetworkedBlockEntity
             return;
         }
 
-        BlockState current = this.level.getBlockState(this.worldPosition);
-        if (current.getBlock() instanceof com.raishxn.ufo.block.AbstractEntropicMachineBlock<?> block) {
-            BlockState updated = current
+        final BlockState current = this.level.getBlockState(this.worldPosition);
+        if (current.getBlock() instanceof final com.raishxn.ufo.block.AbstractEntropicMachineBlock<?> block) {
+            final BlockState updated = current
                     .setValue(com.raishxn.ufo.block.AbstractEntropicMachineBlock.FORMED, this.assembled)
                     .setValue(com.raishxn.ufo.block.AbstractEntropicMachineBlock.POWERED, this.assembled && this.getMainNode().isOnline());
             if (updated != current) {
@@ -365,7 +359,7 @@ public abstract class AbstractEntropicMachineBE extends AENetworkedBlockEntity
     }
 
     private Iterator<IGridNode> getMultiblockNodes() {
-        List<IGridNode> nodes = new ArrayList<>(this.parts.size() + 1);
+        final List<IGridNode> nodes = new ArrayList<>(this.parts.size() + 1);
 
         if (this.level == null) {
             addNode(nodes, this);
@@ -377,9 +371,9 @@ public abstract class AbstractEntropicMachineBE extends AENetworkedBlockEntity
             return nodes.iterator();
         }
 
-        for (BlockPos partPos : this.parts) {
-            var part = this.level.getBlockEntity(partPos);
-            if (part instanceof AbstractEntropicMachineBE machine
+        for (final BlockPos partPos : this.parts) {
+            final var part = this.level.getBlockEntity(partPos);
+            if (part instanceof final AbstractEntropicMachineBE machine
                     && machine.isAssembled()
                     && machine.getClass() == this.getClass()
                     && java.util.Objects.equals(machine.anchorPos, this.anchorPos)) {
@@ -391,14 +385,14 @@ public abstract class AbstractEntropicMachineBE extends AENetworkedBlockEntity
         return nodes.iterator();
     }
 
-    private static void addNode(List<IGridNode> nodes, AbstractEntropicMachineBE machine) {
-        IGridNode node = machine.getActionableNode();
+    private static void addNode(final List<IGridNode> nodes, final AbstractEntropicMachineBE machine) {
+        final IGridNode node = machine.getActionableNode();
         if (node != null) {
             nodes.add(node);
         }
     }
 
     public boolean isPrimaryMachine() {
-        return this.assembled && this.anchorPos != null && this.worldPosition.equals(this.anchorPos);
+        return this.assembled && this.worldPosition.equals(this.anchorPos);
     }
 }

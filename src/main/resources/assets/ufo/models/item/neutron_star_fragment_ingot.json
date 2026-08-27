@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "ufo:item/neutron_star_fragment_ingot",
+    "layer1": "ufo:item/neutron_star_fragment_ingot_overlay"
+  }
+}

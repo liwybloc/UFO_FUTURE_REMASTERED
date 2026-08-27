@@ -6,7 +6,7 @@ import appeng.api.stacks.GenericStack;
 import com.raishxn.ufo.UfoMod;
 import com.raishxn.ufo.recipe.StellarSimulationRecipe;
 import net.minecraft.data.recipes.RecipeOutput;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.material.Fluid;
@@ -21,8 +21,8 @@ public class StellarSimulationRecipeBuilder {
     private String simulationName = "";
     private final List<IngredientStack.Item> itemInputs = new ArrayList<>();
     private final List<IngredientStack.Fluid> fluidInputs = new ArrayList<>();
-    private final List<GenericStack> itemOutputs = new ArrayList<>();
-    private final List<GenericStack> fluidOutputs = new ArrayList<>();
+    private final List<com.raishxn.ufo.recipe.DimensionalMatterAssemblerRecipe.ItemOutput> itemOutputs = new ArrayList<>();
+    private final List<com.raishxn.ufo.recipe.DimensionalMatterAssemblerRecipe.FluidOutput> fluidOutputs = new ArrayList<>();
     private long energy = 0;
     private int time = 0;
     private int coolingLevel = 3;
@@ -31,86 +31,84 @@ public class StellarSimulationRecipeBuilder {
     private long fuelAmount = 0;
     private long coolantAmount = 0;
 
-    private StellarSimulationRecipeBuilder(String name) {
+    private StellarSimulationRecipeBuilder(final String name) {
         this.name = name;
     }
 
-    public static StellarSimulationRecipeBuilder create(String name) {
+    public static StellarSimulationRecipeBuilder create(final String name) {
         return new StellarSimulationRecipeBuilder(name);
     }
 
-    public StellarSimulationRecipeBuilder simulationName(String simName) {
+    public StellarSimulationRecipeBuilder simulationName(final String simName) {
         this.simulationName = simName;
         return this;
     }
 
-    public StellarSimulationRecipeBuilder inputItem(ItemLike item, int count) {
+    public StellarSimulationRecipeBuilder inputItem(final ItemLike item, final int count) {
         this.itemInputs.add(new IngredientStack.Item(Ingredient.of(item), count));
         return this;
     }
 
-    public StellarSimulationRecipeBuilder inputFluid(Fluid fluid, int amount) {
+    public StellarSimulationRecipeBuilder inputFluid(final Fluid fluid, final int amount) {
         this.fluidInputs.add(new IngredientStack.Fluid(FluidIngredient.of(fluid), amount));
         return this;
     }
 
-    public StellarSimulationRecipeBuilder output(ItemLike item, long amount) {
-        this.itemOutputs.add(new GenericStack(AEItemKey.of(item), amount));
+    public StellarSimulationRecipeBuilder output(final ItemLike item, final long amount) {
+        this.itemOutputs.add(new com.raishxn.ufo.recipe.DimensionalMatterAssemblerRecipe.ItemOutput(item.asItem(), amount));
         return this;
     }
 
-    public StellarSimulationRecipeBuilder outputFluid(Fluid fluid, long amount) {
-        this.fluidOutputs.add(new GenericStack(AEFluidKey.of(fluid), amount));
+    public StellarSimulationRecipeBuilder outputFluid(final Fluid fluid, final long amount) {
+        this.fluidOutputs.add(new com.raishxn.ufo.recipe.DimensionalMatterAssemblerRecipe.FluidOutput(fluid, amount));
         return this;
     }
 
-    public StellarSimulationRecipeBuilder fuel(String fluidRegistryName, long amount) {
+    public StellarSimulationRecipeBuilder fuel(final String fluidRegistryName, final long amount) {
         this.fuelFluid = fluidRegistryName;
         this.fuelAmount = amount;
         return this;
     }
 
-    public StellarSimulationRecipeBuilder fuel(Fluid fluid, long amount) {
-        // Safe to use toString or resource path, StellarSimulation uses direct string
+    public StellarSimulationRecipeBuilder fuel(final Fluid fluid, final long amount) {
         this.fuelFluid = net.minecraft.core.registries.BuiltInRegistries.FLUID.getKey(fluid).toString();
         this.fuelAmount = amount;
         return this;
     }
 
-    public StellarSimulationRecipeBuilder coolant(long amount) {
+    public StellarSimulationRecipeBuilder coolant(final long amount) {
         this.coolantAmount = amount;
         return this;
     }
 
-    public StellarSimulationRecipeBuilder coolant(Fluid fluidPlaceholder, long amount) {
-        // Coolant is determined by tier or just universally required, the original has coolant level and amount
+    public StellarSimulationRecipeBuilder coolant(final Fluid fluidPlaceholder, final long amount) {
         this.coolantAmount = amount;
         return this;
     }
 
-    public StellarSimulationRecipeBuilder fieldLevel(int level) {
+    public StellarSimulationRecipeBuilder fieldLevel(final int level) {
         this.fieldTier = level;
         return this;
     }
 
-    public StellarSimulationRecipeBuilder coolingLevel(int level) {
+    public StellarSimulationRecipeBuilder coolingLevel(final int level) {
         this.coolingLevel = level;
         return this;
     }
 
-    public StellarSimulationRecipeBuilder energy(long energy) {
+    public StellarSimulationRecipeBuilder energy(final long energy) {
         this.energy = energy;
         return this;
     }
 
-    public StellarSimulationRecipeBuilder time(int time) {
+    public StellarSimulationRecipeBuilder time(final int time) {
         this.time = time;
         return this;
     }
 
-    public void save(RecipeOutput output) {
-        var id = ResourceLocation.fromNamespaceAndPath(UfoMod.MOD_ID, this.name);
-        var recipe = new StellarSimulationRecipe(
+    public void save(final RecipeOutput output) {
+        final var id = Identifier.fromNamespaceAndPath(UfoMod.MOD_ID, this.name);
+        final var recipe = new StellarSimulationRecipe(
                 this.itemInputs,
                 this.fluidInputs,
                 this.itemOutputs,

@@ -22,68 +22,68 @@ import java.util.Optional;
 
 public class StructureScannerItem extends Item {
 
-    public StructureScannerItem(Properties properties) {
+    public StructureScannerItem(final Properties properties) {
         super(properties.stacksTo(1));
     }
 
     @Override
-    public @NotNull InteractionResult useOn(UseOnContext context) {
-        Level level = context.getLevel();
-        BlockPos pos = context.getClickedPos();
-        Player player = context.getPlayer();
+    public @NotNull InteractionResult useOn(final UseOnContext context) {
+        final Level level = context.getLevel();
+        final BlockPos pos = context.getClickedPos();
+        final Player player = context.getPlayer();
         if (player == null) {
             return InteractionResult.PASS;
         }
 
-        BlockEntity be = level.getBlockEntity(pos);
-        if (!(be instanceof IMultiblockController controller)) {
+        final BlockEntity be = level.getBlockEntity(pos);
+        if (!(be instanceof final IMultiblockController controller)) {
             return InteractionResult.PASS;
         }
 
-        Optional<MultiblockControllerDefinition> definitionOpt = MultiblockControllerDefinitions.getDefinition(be);
+        final Optional<MultiblockControllerDefinition> definitionOpt = MultiblockControllerDefinitions.getDefinition(be);
         if (definitionOpt.isEmpty()) {
             return InteractionResult.PASS;
         }
 
-        MultiblockControllerDefinition definition = definitionOpt.get();
-        var state = level.getBlockState(pos);
-        var facing = MultiblockControllerDefinitions.getPatternFacing(be, state);
+        final MultiblockControllerDefinition definition = definitionOpt.get();
+        final var state = level.getBlockState(pos);
+        final var facing = MultiblockControllerDefinitions.getPatternFacing(be, state);
 
-        MultiblockPattern.MatchResult result = definition.pattern().match(level, pos, facing);
+        final MultiblockPattern.MatchResult result = definition.pattern().match(level, pos, facing);
 
         if (result.isValid()) {
-            if (!level.isClientSide) {
+            if (!level.isClientSide()) {
                 controller.scanStructure(level);
                 if (controller.isAssembled()) {
-                    player.displayClientMessage(Component.translatable("message.ufo.structure_formed").withStyle(ChatFormatting.GREEN), true);
+                    player.sendOverlayMessage(Component.translatable("message.ufo.structure_formed").withStyle(ChatFormatting.GREEN));
                 } else {
                     player.sendSystemMessage(definition.name().copy()
                             .append(Component.literal(": structure shape is valid, but extra controller validation failed.").withStyle(ChatFormatting.RED)));
                 }
             }
-            return InteractionResult.sidedSuccess(level.isClientSide);
+            return level.isClientSide() ? InteractionResult.SUCCESS : InteractionResult.SUCCESS_SERVER;
         }
 
         if (player.isCreative() && player.isShiftKeyDown()) {
-            if (!level.isClientSide) {
+            if (!level.isClientSide()) {
                 definition.pattern().assembleAsCreative(level, pos, facing, definition.defaultCreativeStates());
                 controller.scanStructure(level);
-                player.displayClientMessage(definition.name().copy()
-                        .append(Component.literal(": instant auto-build completed.").withStyle(ChatFormatting.LIGHT_PURPLE)), true);
+                player.sendOverlayMessage(definition.name().copy()
+                        .append(Component.literal(": instant auto-build completed.").withStyle(ChatFormatting.LIGHT_PURPLE)));
             }
-            return InteractionResult.sidedSuccess(level.isClientSide);
+            return level.isClientSide() ? InteractionResult.SUCCESS : InteractionResult.SUCCESS_SERVER;
         }
 
-        List<MultiblockPattern.PatternError> errors = result.allErrors();
+        final List<MultiblockPattern.PatternError> errors = result.allErrors();
         if (errors != null && !errors.isEmpty()) {
-            if (!level.isClientSide) {
-                int shown = Math.min(errors.size(), 10);
+            if (!level.isClientSide()) {
+                final int shown = Math.min(errors.size(), 10);
                 player.sendSystemMessage(definition.name().copy()
                         .append(Component.literal(": " + errors.size() + " block(s) missing or misplaced.").withStyle(ChatFormatting.RED)));
                 for (int i = 0; i < shown; i++) {
-                    MultiblockPattern.PatternError error = errors.get(i);
-                    BlockPos errorPos = error.pos();
-                    Component message = Component.literal("  [" + errorPos.getX() + ", " + errorPos.getY() + ", " + errorPos.getZ() + "] Expected: ")
+                    final MultiblockPattern.PatternError error = errors.get(i);
+                    final BlockPos errorPos = error.pos();
+                    final Component message = Component.literal("  [" + errorPos.getX() + ", " + errorPos.getY() + ", " + errorPos.getZ() + "] Expected: ")
                             .withStyle(ChatFormatting.GRAY)
                             .append(error.expected().copy().withStyle(ChatFormatting.YELLOW));
                     player.sendSystemMessage(message);
@@ -92,20 +92,20 @@ public class StructureScannerItem extends Item {
                     player.sendSystemMessage(Component.literal("  ... and " + (errors.size() - shown) + " more.").withStyle(ChatFormatting.GRAY));
                 }
             } else {
-                int maxHighlight = Math.min(errors.size(), 50);
+                final int maxHighlight = Math.min(errors.size(), 50);
                 for (int i = 0; i < maxHighlight; i++) {
                     ClientProxy.highlight(errors.get(i).pos(), 15000);
                 }
             }
-            return InteractionResult.sidedSuccess(level.isClientSide);
+            return level.isClientSide() ? InteractionResult.SUCCESS : InteractionResult.SUCCESS_SERVER;
         }
 
-        Optional<MultiblockPattern.PatternError> errOpt = result.error();
+        final Optional<MultiblockPattern.PatternError> errOpt = result.error();
         if (errOpt.isPresent()) {
-            MultiblockPattern.PatternError error = errOpt.get();
-            BlockPos errorPos = error.pos();
-            if (!level.isClientSide) {
-                Component message = Component.translatable("message.ufo.structure_error",
+            final MultiblockPattern.PatternError error = errOpt.get();
+            final BlockPos errorPos = error.pos();
+            if (!level.isClientSide()) {
+                final Component message = Component.translatable("message.ufo.structure_error",
                         errorPos.getX(), errorPos.getY(), errorPos.getZ(),
                         error.expected().copy().withStyle(ChatFormatting.YELLOW));
                 player.sendSystemMessage(message);
@@ -114,20 +114,18 @@ public class StructureScannerItem extends Item {
             }
         }
 
-        return InteractionResult.sidedSuccess(level.isClientSide);
+        return level.isClientSide() ? InteractionResult.SUCCESS : InteractionResult.SUCCESS_SERVER;
     }
 
-    @Override
-    public void appendHoverText(@NotNull ItemStack stack, @NotNull TooltipContext context,
-                                @NotNull List<Component> tooltipComponents, @NotNull TooltipFlag tooltipFlag) {
+    public void appendHoverText(@NotNull final ItemStack stack, @NotNull final TooltipContext context,
+                                @NotNull final List<Component> tooltipComponents, @NotNull final TooltipFlag tooltipFlag) {
         tooltipComponents.add(Component.translatable("item.ufo.structure_scanner.tooltip.0").withStyle(ChatFormatting.GRAY));
         tooltipComponents.add(Component.translatable("item.ufo.structure_scanner.tooltip.1").withStyle(ChatFormatting.DARK_GRAY));
         tooltipComponents.add(Component.literal("Sneak + Right Click in Creative to auto-build.").withStyle(ChatFormatting.YELLOW));
-        super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
     }
 
     private static final class ClientProxy {
-        private static void highlight(BlockPos pos, long duration) {
+        private static void highlight(final BlockPos pos, final long duration) {
             com.raishxn.ufo.client.render.StructureHighlightRenderer.highlight(pos, duration);
         }
     }

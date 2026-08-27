@@ -4,7 +4,7 @@ import com.raishxn.ufo.UfoMod;
 import com.raishxn.ufo.recipe.UniversalMultiblockMachineKind;
 import com.raishxn.ufo.recipe.UniversalMultiblockRecipe;
 import net.minecraft.data.recipes.RecipeOutput;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
@@ -28,62 +28,62 @@ public class UniversalMultiblockRecipeBuilder {
     private int time = 200;
     private int requiredTier = 1;
 
-    private UniversalMultiblockRecipeBuilder(String name, UniversalMultiblockMachineKind machine) {
+    private UniversalMultiblockRecipeBuilder(final String name, final UniversalMultiblockMachineKind machine) {
         this.name = name;
         this.machine = machine;
     }
 
-    public static UniversalMultiblockRecipeBuilder create(String name, UniversalMultiblockMachineKind machine) {
+    public static UniversalMultiblockRecipeBuilder create(final String name, final UniversalMultiblockMachineKind machine) {
         return new UniversalMultiblockRecipeBuilder(name, machine);
     }
 
-    public UniversalMultiblockRecipeBuilder inputItem(ItemLike item, long amount) {
+    public UniversalMultiblockRecipeBuilder inputItem(final ItemLike item, final long amount) {
         this.itemInputs.add(new UniversalMultiblockRecipe.ItemRequirement(Ingredient.of(item), amount));
         return this;
     }
 
-    public UniversalMultiblockRecipeBuilder inputFluid(Fluid fluid, long amount) {
-        this.fluidInputs.add(new UniversalMultiblockRecipe.FluidRequirement(new FluidStack(fluid, 1), amount));
+    public UniversalMultiblockRecipeBuilder inputFluid(final Fluid fluid, final long amount) {
+        this.fluidInputs.add(new UniversalMultiblockRecipe.FluidRequirement(fluid, amount));
         return this;
     }
 
-    public UniversalMultiblockRecipeBuilder inputChemical(ResourceLocation chemicalId, long amount) {
+    public UniversalMultiblockRecipeBuilder inputChemical(final Identifier chemicalId, final long amount) {
         this.chemicalInputs.add(new UniversalMultiblockRecipe.ChemicalRequirement(chemicalId, amount));
         return this;
     }
 
-    public UniversalMultiblockRecipeBuilder outputItem(ItemLike item, int amount) {
+    public UniversalMultiblockRecipeBuilder outputItem(final ItemLike item, final int amount) {
         this.itemOutput = new ItemStack(item, 1);
         this.itemOutputAmount = amount;
         return this;
     }
 
-    public UniversalMultiblockRecipeBuilder outputFluid(Fluid fluid, long amount) {
+    public UniversalMultiblockRecipeBuilder outputFluid(final Fluid fluid, final long amount) {
         this.fluidOutput = new FluidStack(fluid, 1);
         this.fluidOutputAmount = amount;
         return this;
     }
 
-    public UniversalMultiblockRecipeBuilder energy(long energy) {
+    public UniversalMultiblockRecipeBuilder energy(final long energy) {
         this.energy = energy;
         return this;
     }
 
-    public UniversalMultiblockRecipeBuilder time(int time) {
+    public UniversalMultiblockRecipeBuilder time(final int time) {
         this.time = time;
         return this;
     }
 
-    public UniversalMultiblockRecipeBuilder requiredTier(int requiredTier) {
+    public UniversalMultiblockRecipeBuilder requiredTier(final int requiredTier) {
         this.requiredTier = requiredTier;
         return this;
     }
 
-    public void save(RecipeOutput output) {
-        save(output, ResourceLocation.fromNamespaceAndPath(UfoMod.MOD_ID, this.name));
+    public void save(final RecipeOutput output) {
+        save(output, Identifier.fromNamespaceAndPath(UfoMod.MOD_ID, this.name));
     }
 
-    public void save(RecipeOutput output, ResourceLocation id) {
+    public void save(final RecipeOutput output, final Identifier id) {
         output.accept(id, new UniversalMultiblockRecipe(
                 this.machine,
                 this.name,

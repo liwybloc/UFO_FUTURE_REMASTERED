@@ -2,21 +2,11 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "C": {
-      "item": "ufo:dark_matter"
-    },
-    "D": {
-      "item": "ae2:dense_energy_cell"
-    },
-    "E": {
-      "item": "ufo:cosmic_string_component_matrix"
-    },
-    "Q": {
-      "item": "ufo:quantum_anomaly"
-    },
-    "U": {
-      "item": "ufo:ufo_energy_cell"
-    }
+    "C": "ufo:dark_matter",
+    "D": "ae2:dense_energy_cell",
+    "E": "ufo:cosmic_string_component_matrix",
+    "Q": "ufo:quantum_anomaly",
+    "U": "ufo:ufo_energy_cell"
   },
   "pattern": [
     "UEU",

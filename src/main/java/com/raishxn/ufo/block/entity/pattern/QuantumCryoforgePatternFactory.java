@@ -3,7 +3,7 @@ package com.raishxn.ufo.block.entity.pattern;
 import com.raishxn.ufo.api.multiblock.MultiblockPattern;
 import com.raishxn.ufo.block.MultiblockBlocks;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -17,12 +17,12 @@ public final class QuantumCryoforgePatternFactory {
     }
 
     public static Map<Character, BlockState> getDefaultCreativeStates() {
-        Map<Character, BlockState> map = new HashMap<>();
+        final Map<Character, BlockState> map = new HashMap<>();
         map.put('B', MultiblockBlocks.QUANTUM_HYPER_MECHANICAL_CASING.get().defaultBlockState());
         map.put('D', Blocks.BLUE_ICE.defaultBlockState());
         map.put('F', MultiblockBlocks.STELLAR_FIELD_GENERATOR_T1.get().defaultBlockState());
 
-        Block vibrantGlass = BuiltInRegistries.BLOCK.get(ResourceLocation.fromNamespaceAndPath("ae2", "quartz_vibrant_glass"));
+        final Block vibrantGlass = BuiltInRegistries.BLOCK.getValue(Identifier.fromNamespaceAndPath("ae2", "quartz_vibrant_glass"));
         if (vibrantGlass != null && vibrantGlass != Blocks.AIR) {
             map.put('E', vibrantGlass.defaultBlockState());
         }

@@ -14,6 +14,8 @@ import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.redstone.Orientation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.phys.BlockHitResult;
@@ -23,21 +25,21 @@ public abstract class AbstractEntropicMachineBlock<T extends AbstractEntropicMac
     public static final BooleanProperty FORMED = BooleanProperty.create("formed");
     public static final BooleanProperty POWERED = BooleanProperty.create("powered");
 
-    protected AbstractEntropicMachineBlock(BlockBehaviour.Properties properties) {
+    protected AbstractEntropicMachineBlock(final BlockBehaviour.Properties properties) {
         super(properties);
         this.registerDefaultState(this.stateDefinition.any().setValue(FORMED, false).setValue(POWERED, false));
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+    protected void createBlockStateDefinition(final StateDefinition.Builder<Block, BlockState> builder) {
         super.createBlockStateDefinition(builder);
         builder.add(FORMED, POWERED);
     }
 
     @Override
-    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
-        IEntropicMachineController controller = EntropicMachineLocator.findController(level, pos);
-        if (!(controller instanceof AbstractEntropicMachineBE be)) {
+    protected InteractionResult useWithoutItem(final BlockState state, final Level level, final BlockPos pos, final Player player, final BlockHitResult hitResult) {
+        final IEntropicMachineController controller = EntropicMachineLocator.findController(level, pos);
+        if (!(controller instanceof final AbstractEntropicMachineBE be)) {
             return InteractionResult.PASS;
         }
 
@@ -52,33 +54,31 @@ public abstract class AbstractEntropicMachineBlock<T extends AbstractEntropicMac
         if (!level.isClientSide()) {
             player.openMenu(be, pos);
         }
-        return InteractionResult.sidedSuccess(level.isClientSide());
+        return level.isClientSide() ? InteractionResult.SUCCESS : InteractionResult.SUCCESS_SERVER;
     }
 
     @Override
-    public void neighborChanged(BlockState state, Level level, BlockPos pos, Block changedBlock, BlockPos changedPos, boolean isMoving) {
-        super.neighborChanged(state, level, pos, changedBlock, changedPos, isMoving);
+    protected void neighborChanged(final BlockState state, final Level level, final BlockPos pos, final Block changedBlock, final Orientation orientation, final boolean isMoving) {
+        super.neighborChanged(state, level, pos, changedBlock, orientation, isMoving);
         if (!level.isClientSide()) {
             EntropicMachineLocator.markNearbyDirty(level, pos);
         }
     }
 
     @Override
-    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
-        if (!state.is(newState.getBlock()) && !level.isClientSide()) {
-            EntropicMachineLocator.markNearbyDirty(level, pos);
-        }
-        super.onRemove(state, level, pos, newState, isMoving);
+    protected void affectNeighborsAfterRemoval(final BlockState state, final ServerLevel level, final BlockPos pos, final boolean isMoving) {
+        EntropicMachineLocator.markNearbyDirty(level, pos);
+        super.affectNeighborsAfterRemoval(state, level, pos, isMoving);
     }
 
     @Nullable
     @Override
-    public <B extends net.minecraft.world.level.block.entity.BlockEntity> BlockEntityTicker<B> getTicker(Level level, BlockState state, BlockEntityType<B> type) {
+    public <B extends net.minecraft.world.level.block.entity.BlockEntity> BlockEntityTicker<B> getTicker(final Level level, final BlockState state, final BlockEntityType<B> type) {
         if (level.isClientSide()) {
             return null;
         }
         return (lvl, pos, blockState, be) -> {
-            if (be instanceof AbstractEntropicMachineBE machine) {
+            if (be instanceof final AbstractEntropicMachineBE machine) {
                 machine.serverTick();
             }
         };

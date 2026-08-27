@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "formed=false": {
+      "model": "ufo:block/entropic_convergence_engine"
+    },
+    "formed=true": {
+      "model": "ufo:block/entropic_convergence_engine"
+    }
+  }
+}

@@ -1,11 +1,12 @@
 package com.raishxn.ufo.block.entity.processing;
 
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+import com.mojang.serialization.Codec;
 
 public class ParallelProcessState {
-    private ResourceLocation recipeId;
+    private Identifier recipeId;
     private long energyBuffer;
     private long[] itemBuffers = new long[0];
     private long[] fluidBuffers = new long[0];
@@ -13,11 +14,11 @@ public class ParallelProcessState {
     private int progress;
     private boolean patternPushed;
 
-    public ResourceLocation getRecipeId() {
+    public Identifier getRecipeId() {
         return recipeId;
     }
 
-    public void setRecipeId(ResourceLocation recipeId) {
+    public void setRecipeId(final Identifier recipeId) {
         this.recipeId = recipeId;
     }
 
@@ -35,7 +36,7 @@ public class ParallelProcessState {
         this.patternPushed = false;
     }
 
-    public void resizeBuffers(int itemSize, int fluidSize, int chemicalSize) {
+    public void resizeBuffers(final int itemSize, final int fluidSize, final int chemicalSize) {
         if (this.itemBuffers.length != itemSize) {
             this.itemBuffers = new long[itemSize];
         }
@@ -57,7 +58,7 @@ public class ParallelProcessState {
         return energyBuffer;
     }
 
-    public void setEnergyBuffer(long energyBuffer) {
+    public void setEnergyBuffer(final long energyBuffer) {
         this.energyBuffer = energyBuffer;
     }
 
@@ -77,7 +78,7 @@ public class ParallelProcessState {
         return progress;
     }
 
-    public void setProgress(int progress) {
+    public void setProgress(final int progress) {
         this.progress = progress;
     }
 
@@ -85,7 +86,7 @@ public class ParallelProcessState {
         return patternPushed;
     }
 
-    public void setPatternPushed(boolean patternPushed) {
+    public void setPatternPushed(final boolean patternPushed) {
         this.patternPushed = patternPushed;
     }
 
@@ -94,19 +95,19 @@ public class ParallelProcessState {
             return true;
         }
 
-        for (long amount : this.itemBuffers) {
+        for (final long amount : this.itemBuffers) {
             if (amount > 0L) {
                 return true;
             }
         }
 
-        for (long amount : this.fluidBuffers) {
+        for (final long amount : this.fluidBuffers) {
             if (amount > 0L) {
                 return true;
             }
         }
 
-        for (long amount : this.chemicalBuffers) {
+        for (final long amount : this.chemicalBuffers) {
             if (amount > 0L) {
                 return true;
             }
@@ -115,27 +116,35 @@ public class ParallelProcessState {
         return false;
     }
 
-    public CompoundTag save(HolderLookup.Provider registries) {
-        CompoundTag tag = new CompoundTag();
+    public void save(final ValueOutput tag) {
         if (this.recipeId != null) {
             tag.putString("recipeId", this.recipeId.toString());
         }
         tag.putLong("energyBuffer", this.energyBuffer);
-        tag.putLongArray("itemBuffers", this.itemBuffers);
-        tag.putLongArray("fluidBuffers", this.fluidBuffers);
-        tag.putLongArray("chemicalBuffers", this.chemicalBuffers);
+        writeLongArray(tag, "itemBuffers", this.itemBuffers);
+        writeLongArray(tag, "fluidBuffers", this.fluidBuffers);
+        writeLongArray(tag, "chemicalBuffers", this.chemicalBuffers);
         tag.putInt("progress", this.progress);
         tag.putBoolean("patternPushed", this.patternPushed);
-        return tag;
     }
 
-    public void load(CompoundTag tag, HolderLookup.Provider registries) {
-        this.recipeId = tag.contains("recipeId") ? ResourceLocation.parse(tag.getString("recipeId")) : null;
-        this.energyBuffer = tag.getLong("energyBuffer");
-        this.itemBuffers = tag.getLongArray("itemBuffers");
-        this.fluidBuffers = tag.getLongArray("fluidBuffers");
-        this.chemicalBuffers = tag.getLongArray("chemicalBuffers");
-        this.progress = tag.getInt("progress");
-        this.patternPushed = tag.getBoolean("patternPushed");
+    public void load(final ValueInput tag) {
+        final String savedRecipeId = tag.getStringOr("recipeId", "");
+        this.recipeId = savedRecipeId.isEmpty() ? null : Identifier.parse(savedRecipeId);
+        this.energyBuffer = tag.getLongOr("energyBuffer", 0L);
+        this.itemBuffers = readLongArray(tag, "itemBuffers");
+        this.fluidBuffers = readLongArray(tag, "fluidBuffers");
+        this.chemicalBuffers = readLongArray(tag, "chemicalBuffers");
+        this.progress = tag.getIntOr("progress", 0);
+        this.patternPushed = tag.getBooleanOr("patternPushed", false);
+    }
+
+    private static void writeLongArray(final ValueOutput output, final String name, final long[] values) {
+        final var list = output.list(name, Codec.LONG);
+        for (final long value : values) list.add(value);
+    }
+
+    private static long[] readLongArray(final ValueInput input, final String name) {
+        return input.listOrEmpty(name, Codec.LONG).stream().mapToLong(Long::longValue).toArray();
     }
 }

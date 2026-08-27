@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "bonus_rolls": 0.0,
+      "conditions": [
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "ufo:me_massive_fluid_hatch"
+        }
+      ],
+      "rolls": 1.0
+    }
+  ],
+  "random_sequence": "ufo:blocks/me_massive_fluid_hatch"
+}

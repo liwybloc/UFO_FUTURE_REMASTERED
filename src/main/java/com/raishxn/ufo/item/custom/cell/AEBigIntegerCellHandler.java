@@ -14,20 +14,20 @@ public class AEBigIntegerCellHandler implements ICellHandler
     private AEBigIntegerCellHandler() {}
 
     @Override
-    public boolean isCell(ItemStack itemStack)
+    public boolean isCell(final ItemStack itemStack)
     {
         return itemStack.getItem() instanceof IAEBigIntegerCell && itemStack.getCount() == 1;
     }
 
     @Override
-    public @Nullable StorageCell getCellInventory(ItemStack itemStack, @Nullable ISaveProvider iSaveProvider)
+    public @Nullable StorageCell getCellInventory(final ItemStack itemStack, @Nullable final ISaveProvider iSaveProvider)
     {
         if(ServerLifecycleHooks.getCurrentServer() == null) return null;
-        if(!(itemStack.getItem() instanceof IAEBigIntegerCell cellItem)) return null;
+        if(!(itemStack.getItem() instanceof final IAEBigIntegerCell cellItem)) return null;
         if(itemStack.getCount() != 1) return null;
 
-        boolean hadCellId = itemStack.has(com.raishxn.ufo.init.OCDataComponents.CELL_UUID.get());
-        AEBigIntegerCellData cellData = AEBigIntegerCellData.computeIfAbsentCellDataForItemStack(itemStack);
+        final boolean hadCellId = itemStack.has(com.raishxn.ufo.init.OCDataComponents.CELL_UUID.get());
+        final AEBigIntegerCellData cellData = AEBigIntegerCellData.computeIfAbsentCellDataForItemStack(itemStack);
         if(cellData == null) return null;
         if(!hadCellId && iSaveProvider != null)
         {

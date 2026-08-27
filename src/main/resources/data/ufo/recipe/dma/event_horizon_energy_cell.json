@@ -4,30 +4,22 @@
   "fluid_inputs": [
     {
       "amount": 4000,
-      "ingredient": {
-        "fluid": "ufo:source_liquid_starlight_fluid"
-      }
+      "ingredient": "ufo:source_liquid_starlight_fluid"
     }
   ],
   "fluid_outputs": [],
   "item_inputs": [
     {
       "amount": 16,
-      "ingredient": {
-        "item": "ufo:phase_shift_component_matrix"
-      }
+      "ingredient": "ufo:phase_shift_component_matrix"
     },
     {
       "amount": 16,
-      "ingredient": {
-        "item": "ae2:dense_energy_cell"
-      }
+      "ingredient": "ae2:dense_energy_cell"
     },
     {
       "amount": 16,
-      "ingredient": {
-        "item": "ufo:dimensional_processor"
-      }
+      "ingredient": "ufo:dimensional_processor"
     }
   ],
   "item_outputs": [

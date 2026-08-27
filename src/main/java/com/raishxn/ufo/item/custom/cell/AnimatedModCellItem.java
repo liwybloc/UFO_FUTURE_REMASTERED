@@ -14,7 +14,7 @@ public class AnimatedModCellItem extends ModCellItem {
     private final ChatFormatting[] baseNameColors; // <-- ADICIONADO
     private final ChatFormatting[] tierColors;
 
-    public AnimatedModCellItem(StorageTier tier, int maxTypes, AEKeyType keyType, String baseNameKey, String tierNameKey, ChatFormatting[] baseNameColors, ChatFormatting... tierColors) {
+    public AnimatedModCellItem(final StorageTier tier, final int maxTypes, final AEKeyType keyType, final String baseNameKey, final String tierNameKey, final ChatFormatting[] baseNameColors, final ChatFormatting... tierColors) {
         super(tier, maxTypes, keyType);
         this.baseNameKey = baseNameKey;
         this.tierNameKey = tierNameKey;
@@ -23,9 +23,9 @@ public class AnimatedModCellItem extends ModCellItem {
     }
 
     @Override
-    public Component getName(ItemStack stack) {
-        Component baseName = ColorHelper.getAnimatedColoredText(Component.translatable(this.baseNameKey).getString(), this.baseNameColors); // <-- CORRIGIDO
-        Component tierName = ColorHelper.getAnimatedColoredText(Component.translatable(this.tierNameKey).getString(), this.tierColors);
+    public Component getName(final ItemStack stack) {
+        final Component baseName = ColorHelper.getAnimatedColoredText(Component.translatable(this.baseNameKey).getString(), this.baseNameColors); // <-- CORRIGIDO
+        final Component tierName = ColorHelper.getAnimatedColoredText(Component.translatable(this.tierNameKey).getString(), this.tierColors);
 
         return baseName.copy().append(" - ").append(tierName);
     }

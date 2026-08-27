@@ -11,15 +11,15 @@ public class AnimatedNameBlockItem extends BlockItem {
 
     private final ChatFormatting[] colors;
 
-    public AnimatedNameBlockItem(Block block, Properties props, ChatFormatting... colors) {
+    public AnimatedNameBlockItem(final Block block, final Properties props, final ChatFormatting... colors) {
         super(block, props);
         this.colors = colors;
     }
 
     @Override
-    public Component getName(ItemStack stack) {
+    public Component getName(final ItemStack stack) {
         return ColorHelper.getSolidColoredText(
-                Component.translatable(stack.getDescriptionId()).getString(),
+                Component.translatable(stack.getItem().getDescriptionId()).getString(),
                 this.colors
         );
     }

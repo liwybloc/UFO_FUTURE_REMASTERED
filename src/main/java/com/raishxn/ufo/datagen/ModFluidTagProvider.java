@@ -12,12 +12,12 @@ import org.jetbrains.annotations.Nullable;
 import java.util.concurrent.CompletableFuture;
 
 public class ModFluidTagProvider extends FluidTagsProvider {
-    public ModFluidTagProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider, @Nullable ExistingFileHelper existingFileHelper) {
+    public ModFluidTagProvider(final PackOutput output, final CompletableFuture<HolderLookup.Provider> lookupProvider, @Nullable final ExistingFileHelper existingFileHelper) {
         super(output, lookupProvider, UfoMod.MOD_ID, existingFileHelper);
     }
 
     @Override
-    protected void addTags(HolderLookup.Provider provider) {
+    protected void addTags(final HolderLookup.Provider provider) {
         tag(ModTags.Fluids.COOLANTS).add(
                 ModFluids.SOURCE_GELID_CRYOTHEUM.get(),
                 ModFluids.FLOWING_GELID_CRYOTHEUM.get(),

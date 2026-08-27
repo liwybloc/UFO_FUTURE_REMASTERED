@@ -12,7 +12,7 @@ public class QuantumSlicerControllerBlock extends AbstractSimpleMultiblockContro
 
     public static final MapCodec<QuantumSlicerControllerBlock> CODEC = simpleCodec(QuantumSlicerControllerBlock::new);
 
-    public QuantumSlicerControllerBlock(BlockBehaviour.Properties properties) {
+    public QuantumSlicerControllerBlock(final BlockBehaviour.Properties properties) {
         super(properties);
     }
 
@@ -27,7 +27,7 @@ public class QuantumSlicerControllerBlock extends AbstractSimpleMultiblockContro
     }
 
     @Override
-    protected QuantumSlicerControllerBE createBlockEntity(BlockPos pos, BlockState state) {
+    protected QuantumSlicerControllerBE createBlockEntity(final BlockPos pos, final BlockState state) {
         return new QuantumSlicerControllerBE(pos, state);
     }
 }

@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "ufo:block/multiblock/quantum_hyper_mechanical_casing"
+  }
+}

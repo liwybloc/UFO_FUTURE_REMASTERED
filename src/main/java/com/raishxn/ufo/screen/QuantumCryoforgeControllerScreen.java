@@ -6,7 +6,7 @@ import net.minecraft.world.entity.player.Inventory;
 
 public class QuantumCryoforgeControllerScreen extends AbstractUniversalMultiblockControllerScreen<QuantumCryoforgeControllerMenu> {
 
-    public QuantumCryoforgeControllerScreen(QuantumCryoforgeControllerMenu menu, Inventory playerInventory, Component title, ScreenStyle style) {
+    public QuantumCryoforgeControllerScreen(final QuantumCryoforgeControllerMenu menu, final Inventory playerInventory, final Component title, final ScreenStyle style) {
         super(menu, playerInventory, title, style);
     }
 }

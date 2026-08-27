@@ -2,12 +2,8 @@
   "type": "minecraft:crafting_shapeless",
   "category": "misc",
   "ingredients": [
-    {
-      "item": "ufo:quantum_pattern_hatch"
-    },
-    {
-      "item": "ae2:cable_anchor"
-    }
+    "ufo:quantum_pattern_hatch",
+    "ae2:cable_anchor"
   ],
   "result": {
     "count": 1,

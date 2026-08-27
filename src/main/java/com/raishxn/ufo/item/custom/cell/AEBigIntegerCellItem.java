@@ -20,7 +20,7 @@ import appeng.util.Platform;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.Item;
@@ -43,7 +43,7 @@ public class AEBigIntegerCellItem extends Item implements IAEBigIntegerCell, ICe
     private final StorageTier tier;
     private final AEKeyType keyType;
 
-    public AEBigIntegerCellItem(Item.Properties pProperties, double idleDrain,AEKeyType keyType,StorageTier tier)
+    public AEBigIntegerCellItem(final Item.Properties pProperties, final double idleDrain, final AEKeyType keyType, final StorageTier tier)
     {
         super(pProperties);
         this.idleDrain = idleDrain;
@@ -51,46 +51,41 @@ public class AEBigIntegerCellItem extends Item implements IAEBigIntegerCell, ICe
         this.tier = tier;
     }
 
-    @Override
-    public void appendHoverText(@NotNull ItemStack stack,
-                                @NotNull Item.TooltipContext context,
-                                @NotNull List<Component> lines,
-                                @NotNull TooltipFlag tooltipFlag)
+    public void appendHoverText(@NotNull final ItemStack stack,
+                                @NotNull final Item.TooltipContext context,
+                                @NotNull final List<Component> lines,
+                                @NotNull final TooltipFlag tooltipFlag)
     {
         if (Platform.isClient())
         {
-            BigInteger used = IAEBigIntegerCell.getUsedBytes(stack);
-            long maxBytes = getMaxBytes(stack);
+            final BigInteger used = IAEBigIntegerCell.getUsedBytes(stack);
+            final long maxBytes = getMaxBytes(stack);
             lines.add(AEUniversalTooltips.bytesUsed(used, maxBytes != Long.MAX_VALUE ? maxBytes : -1));
             
-            long typesUsed = IAEBigIntegerCell.getUsedTypes(stack);
-            long maxTypes = getMaxTypes(stack);
+            final long typesUsed = IAEBigIntegerCell.getUsedTypes(stack);
+            final long maxTypes = getMaxTypes(stack);
             lines.add(AEUniversalTooltips.typesUsed(typesUsed, maxTypes != Integer.MAX_VALUE ? maxTypes : -1));
         }
     }
 
     @Override
-    public @NotNull Optional<TooltipComponent> getTooltipImage(@NotNull ItemStack stack)
+    public @NotNull Optional<TooltipComponent> getTooltipImage(@NotNull final ItemStack stack)
     {
         final boolean showUpg = AEConfig.instance().isTooltipShowCellUpgrades();
         final boolean showCnt = AEConfig.instance().isTooltipShowCellContent();
 
-        // 升级图标
         List<ItemStack> upgrades = Collections.emptyList();
         if (showUpg) {
-            List<ItemStack> tmp = new ArrayList<>();
+            final List<ItemStack> tmp = new ArrayList<>();
             getUpgrades(stack).forEach(tmp::add);
             upgrades = tmp;
         }
 
-        // 内容预览：从 IAEUniversalCell 约定的 NBT 中读取展示用 GenericStack 列表
-        // 为了兼容 AE2 的组件，按需裁剪数量，并设置 hasMore
         List<GenericStack> content = Collections.emptyList();
         boolean hasMore = false;
         if (showCnt) {
-            List<GenericStack> show = IAEBigIntegerCell.getTooltipShowStacks(stack);
+            final List<GenericStack> show = IAEBigIntegerCell.getTooltipShowStacks(stack);
             if (!show.isEmpty()) {
-                // AE2 通常展示不超过 5 个条目；超过则裁剪并设置 hasMore = true
                 final int limit = 5;
                 if (show.size() > limit) {
                     content = new ArrayList<>(show.subList(0, limit));
@@ -101,7 +96,6 @@ public class AEBigIntegerCellItem extends Item implements IAEBigIntegerCell, ICe
             }
         }
 
-        // 显示进度条：true（进度由组件内部根据存储状态/配色绘制）
         return Optional.of(new StorageCellTooltipComponent(upgrades, content, hasMore, true));
     }
 
@@ -118,41 +112,40 @@ public class AEBigIntegerCellItem extends Item implements IAEBigIntegerCell, ICe
     public AEKeyType getKeyType() { return this.keyType; }
 
     @Override
-    public IUpgradeInventory getUpgrades(ItemStack is)
+    public IUpgradeInventory getUpgrades(final ItemStack is)
     {
         return UpgradeInventories.forItem(is, 2);
     }
 
     @Override
-    public ConfigInventory getConfigInventory(ItemStack is)
+    public ConfigInventory getConfigInventory(final ItemStack is)
     {
         return CellConfig.create(is);
     }
 
     @Override
-    public FuzzyMode getFuzzyMode(ItemStack is)
+    public FuzzyMode getFuzzyMode(final ItemStack is)
     {
         return is.getOrDefault(AEComponents.STORAGE_CELL_FUZZY_MODE, FuzzyMode.IGNORE_ALL);
     }
 
     @Override
-    public void setFuzzyMode(ItemStack is, FuzzyMode fzMode)
+    public void setFuzzyMode(final ItemStack is, final FuzzyMode fzMode)
     {
         is.set(AEComponents.STORAGE_CELL_FUZZY_MODE, fzMode);
     }
 
     @Override
-    public long getMaxBytes(ItemStack stack) {
+    public long getMaxBytes(final ItemStack stack) {
         if (this.tier == null) return Long.MAX_VALUE;
         if (this.tier.bytes() == Integer.MAX_VALUE) return Long.MAX_VALUE;
         return this.tier.bytes();
     }
 
     @Override
-    public int getMaxTypes(ItemStack stack) {
+    public int getMaxTypes(final ItemStack stack) {
         if (this.tier == null || this.tier.bytes() == Integer.MAX_VALUE) return Integer.MAX_VALUE;
-        // Types scale per tier: Echo=1024, Beacon=2048, Nexus=4096, Core=8192
-        int bytes = this.tier.bytes();
+        final int bytes = this.tier.bytes();
         if (bytes >= 750_000_000) return 8192;   // Core (750M)
         if (bytes >= 250_000_000) return 4096;   // Nexus (250M)
         if (bytes >= 100_000_000) return 2048;   // Beacon (100M)
@@ -160,42 +153,44 @@ public class AEBigIntegerCellItem extends Item implements IAEBigIntegerCell, ICe
     }
 
     @Override
-    public int getBytesPerType(ItemStack stack) {
+    public int getBytesPerType(final ItemStack stack) {
         if (this.tier == null || this.tier.bytes() == Integer.MAX_VALUE) return 0;
         return 0; // We define overhead as 0 for all our custom cells so items cost 1 byte exactly.
     }
 
     @Override
-    public @NotNull InteractionResultHolder<ItemStack> use(@NotNull Level level, @NotNull Player player, @NotNull InteractionHand hand) {
+    public @NotNull InteractionResult use(@NotNull final Level level, @NotNull final Player player, @NotNull final InteractionHand hand) {
         this.disassembleDrive(player.getItemInHand(hand), level, player);
-        return new InteractionResultHolder<>(InteractionResult.sidedSuccess(level.isClientSide()),
-                player.getItemInHand(hand));
+        return level.isClientSide() ? InteractionResult.SUCCESS : InteractionResult.SUCCESS_SERVER;
     }
 
-    private boolean disassembleDrive(ItemStack stack, Level level, Player player) {
+    private boolean disassembleDrive(final ItemStack stack, final Level level, final Player player) {
         if (!InteractionUtil.isInAlternateUseMode(player)) {
             return false;
         }
 
-        var disassembledStacks = StorageCellDisassemblyRecipe.getDisassemblyResult(level, stack.getItem());
+        if (!(level instanceof final net.minecraft.server.level.ServerLevel serverLevel)) {
+            return false;
+        }
+        final var disassembledStacks = StorageCellDisassemblyRecipe.getDisassemblyResult(serverLevel, stack.getItem());
         if (disassembledStacks.isEmpty()) {
             return false;
         }
 
-        var playerInventory = player.getInventory();
-        if (playerInventory.getSelected() != stack) {
+        final var playerInventory = player.getInventory();
+        if (playerInventory.getSelectedItem() != stack) {
             return false;
         }
 
-        var inv = StorageCells.getCellInventory(stack, null);
+        final var inv = StorageCells.getCellInventory(stack, null);
         if (inv != null && !inv.getAvailableStacks().isEmpty()) {
-            player.displayClientMessage(PlayerMessages.OnlyEmptyCellsCanBeDisassembled.text(), true);
+            player.sendOverlayMessage(PlayerMessages.OnlyEmptyCellsCanBeDisassembled.text());
             return false;
         }
 
-        playerInventory.setItem(playerInventory.selected, ItemStack.EMPTY);
+        playerInventory.setItem(playerInventory.getSelectedSlot(), ItemStack.EMPTY);
 
-        for (var disassembledStack : disassembledStacks) {
+        for (final var disassembledStack : disassembledStacks) {
             playerInventory.placeItemBackInInventory(disassembledStack.copy());
         }
 
@@ -205,10 +200,10 @@ public class AEBigIntegerCellItem extends Item implements IAEBigIntegerCell, ICe
     }
 
     @Override
-    public @NotNull InteractionResult onItemUseFirst(@NotNull ItemStack stack, UseOnContext context)
+    public @NotNull InteractionResult onItemUseFirst(@NotNull final ItemStack stack, final UseOnContext context)
     {
         return this.disassembleDrive(stack, context.getLevel(), context.getPlayer())
-                ? InteractionResult.sidedSuccess(context.getLevel().isClientSide())
+                ? (context.getLevel().isClientSide() ? InteractionResult.SUCCESS : InteractionResult.SUCCESS_SERVER)
                 : InteractionResult.PASS;
     }
 }

@@ -28,8 +28,11 @@ import java.util.UUID;
  *
  * @author Frostbite
  */
-public class AEBigIntegerCellData extends SavedData
+public class AEBigIntegerCellData
 {
+    public void setDirty() {
+    }
+
     public static final String INV_SAVED_TAG = "inventory";
     private static final String ENTRIES_TAG = "entries";
     private static final String ERROR_ENTRIES_TAG = "error_entries";
@@ -39,52 +42,42 @@ public class AEBigIntegerCellData extends SavedData
     private final Object2ObjectMap<AEKey, BigInteger> storage;
     private final ObjectArrayList<CompoundTag> pendingReadErrors;
 
-    public AEBigIntegerCellData(@NotNull Object2ObjectMap<AEKey, BigInteger> storage)
+    public AEBigIntegerCellData(@NotNull final Object2ObjectMap<AEKey, BigInteger> storage)
     {
         this(storage, new ObjectArrayList<>());
     }
 
-    private AEBigIntegerCellData(@NotNull Object2ObjectMap<AEKey, BigInteger> storage,
-                                @NotNull ObjectArrayList<CompoundTag> pendingReadErrors)
+    private AEBigIntegerCellData(@NotNull final Object2ObjectMap<AEKey, BigInteger> storage,
+                                @NotNull final ObjectArrayList<CompoundTag> pendingReadErrors)
     {
         this.storage = storage;
         this.storage.defaultReturnValue(BigInteger.ZERO);
         this.pendingReadErrors = pendingReadErrors;
     }
-    public static final SavedData.Factory<AEBigIntegerCellData> FACTORY =
-            new SavedData.Factory<>(
-                    () -> {
-                        Object2ObjectOpenHashMap<AEKey, BigInteger> s = new Object2ObjectOpenHashMap<>();
-                        s.defaultReturnValue(BigInteger.ZERO);
-                        return new AEBigIntegerCellData(s, new ObjectArrayList<>());
-                    },
-                    AEBigIntegerCellData::load
-            );
+    private static final java.util.Map<UUID, AEBigIntegerCellData> RUNTIME_DATA = new java.util.concurrent.ConcurrentHashMap<>();
     public @NotNull Object2ObjectMap<AEKey, BigInteger> getOriginalStorage()
     {
         return storage;
     }
-    public static @Nullable AEBigIntegerCellData getCellDataByUUID(@NotNull UUID uuid)
+    public static @Nullable AEBigIntegerCellData getCellDataByUUID(@NotNull final UUID uuid)
     {
-        MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+        final MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
         if (server == null) return null;
 
         ensureSaveDirExists(server);
 
-        final String key = makeKey(uuid);
-        return server.overworld().getDataStorage().get(FACTORY, key);
+        return RUNTIME_DATA.get(uuid);
     }
-    public static @Nullable AEBigIntegerCellData computeIfAbsentCellDataForItemStack(@NotNull ItemStack itemStack)
+    public static @Nullable AEBigIntegerCellData computeIfAbsentCellDataForItemStack(@NotNull final ItemStack itemStack)
     {
-        MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+        final MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
         if (server == null) return null;
 
         ensureSaveDirExists(server);
 
-        final var dataStorage = server.overworld().getDataStorage();
-        UUID existing = itemStack.get(OCDataComponents.CELL_UUID.get());
+        final UUID existing = itemStack.get(OCDataComponents.CELL_UUID.get());
         if (existing != null) {
-            AEBigIntegerCellData data = getCellDataByUUID(existing);
+            final AEBigIntegerCellData data = getCellDataByUUID(existing);
             if (data != null) {
                 return data;
             }
@@ -95,144 +88,38 @@ public class AEBigIntegerCellData extends SavedData
         } while (getCellDataByUUID(fresh) != null);
 
         itemStack.set(OCDataComponents.CELL_UUID.get(), fresh);
-        Object2ObjectOpenHashMap<AEKey, BigInteger> s = new Object2ObjectOpenHashMap<>();
+        final Object2ObjectOpenHashMap<AEKey, BigInteger> s = new Object2ObjectOpenHashMap<>();
         s.defaultReturnValue(BigInteger.ZERO);
-        AEBigIntegerCellData newData = new AEBigIntegerCellData(s);
-        dataStorage.set(makeKey(fresh), newData);
+        final AEBigIntegerCellData newData = new AEBigIntegerCellData(s);
+        RUNTIME_DATA.put(fresh, newData);
         return newData;
     }
 
-    @Override
-    public @NotNull CompoundTag save(@NotNull CompoundTag tag, HolderLookup.@NotNull Provider registries)
-    {
-        CompoundTag invTag = new CompoundTag();
-
-
-        ListTag entriesList = new ListTag();
-        for (Object2ObjectMap.Entry<AEKey, BigInteger> e : storage.object2ObjectEntrySet())
-        {
-            AEKey key = e.getKey();
-            BigInteger amount = e.getValue();
-
-            if (key == null)
-            {
-                System.err.println("[AEUniversalCellData] Skip null key during serialization.");
-                continue;
-            }
-
-            try
-            {
-                CompoundTag entry = new CompoundTag();
-                entry.put(ENTRY_KEY_TAG, key.toTagGeneric(registries));
-                entry.putByteArray(ENTRY_AMOUNT_TAG, amount.toByteArray());
-                entriesList.add(entry);
-            }
-            catch(Throwable ex)
-            {
-                System.err.println("[AEUniversalCellData] Failed to serialize entry: key=" + key
-                        + ", amount=" + amount + " ; cause=" + ex);
-            }
-        }
-        invTag.put(ENTRIES_TAG, entriesList);
-
-        ListTag errorList = new ListTag();
-        for (CompoundTag bad : pendingReadErrors)
-        {
-            errorList.add(bad.copy());
-        }
-        invTag.put(ERROR_ENTRIES_TAG, errorList);
-
-        tag.put(INV_SAVED_TAG, invTag);
-        return tag;
-    }
-
-    public static AEBigIntegerCellData load(CompoundTag tag, HolderLookup.Provider registries)
-    {
-        Object2ObjectMap<AEKey, BigInteger> storage = new Object2ObjectOpenHashMap<>();
-        storage.defaultReturnValue(BigInteger.ZERO);
-        ObjectArrayList<CompoundTag> errorQueue = new ObjectArrayList<>();
-        CompoundTag invTag = tag.getCompound(INV_SAVED_TAG);
-        ListTag entries = invTag.getList(ENTRIES_TAG, Tag.TAG_COMPOUND);
-        for (int i = 0; i < entries.size(); i++)
-        {
-            CompoundTag entry = entries.getCompound(i);
-            try
-            {
-                CompoundTag keyTag = entry.getCompound(ENTRY_KEY_TAG);
-                AEKey key = AEKey.fromTagGeneric(registries, keyTag);
-                if(key == null)
-                {
-                    errorQueue.add(entry.copy());
-                    System.err.println("[AEUniversalCellData] Failed to deserialize entry (null key). Entry=" + entry);
-                    continue;
-                }
-                BigInteger amount = new BigInteger(entry.getByteArray(ENTRY_AMOUNT_TAG));
-                addTo(storage, key, amount);
-            }
-            catch(Throwable ex)
-            {
-                errorQueue.add(entry.copy());
-                System.err.println("[AEUniversalCellData] Failed to deserialize entry: " + entry + " ; cause=" + ex);
-            }
-        }
-        ListTag oldErrors = invTag.getList(ERROR_ENTRIES_TAG, Tag.TAG_COMPOUND);
-        for (int i = 0; i < oldErrors.size(); i++)
-        {
-            CompoundTag badEntry = oldErrors.getCompound(i);
-            boolean recovered = false;
-            try
-            {
-                CompoundTag keyTag = badEntry.getCompound(ENTRY_KEY_TAG);
-                AEKey key = AEKey.fromTagGeneric(registries, keyTag);
-                if(key != null)
-                {
-                    BigInteger amount = new BigInteger(badEntry.getByteArray(ENTRY_AMOUNT_TAG));
-                    addTo(storage, key, amount);
-                    recovered = true;
-                }
-            }
-            catch(Throwable ignored)
-            {
-                recovered = false;
-            }
-
-            if (recovered)
-            {
-                System.err.println("[AEUniversalCellData] Recovered previously failed entry: " + badEntry);
-            }
-            else
-            {
-                errorQueue.add(badEntry.copy());
-            }
-        }
-        return new AEBigIntegerCellData(storage, errorQueue);
-    }
-
-    private static String makeKey(@NotNull UUID uuid)
+    private static String makeKey(@NotNull final UUID uuid)
     {
         return SAVED_FOLDER_NAME + "/" + uuid;
     }
 
-    private static void ensureSaveDirExists(@NotNull MinecraftServer server)
+    private static void ensureSaveDirExists(@NotNull final MinecraftServer server)
     {
-        Path dir = server.getWorldPath(LevelResource.ROOT)
+        final Path dir = server.getWorldPath(LevelResource.ROOT)
                 .resolve("data")
                 .resolve(SAVED_FOLDER_NAME);
         try
         {
             Files.createDirectories(dir);
         }
-        catch(IOException e)
+        catch(final IOException e)
         {
             System.err.println("[AEUniversalCellData] Failed to create save directory: " + dir + " : " + e);
         }
     }
-    private static void addTo(Object2ObjectMap<AEKey, BigInteger> map, AEKey key, BigInteger delta)
+    private static void addTo(final Object2ObjectMap<AEKey, BigInteger> map, final AEKey key, final BigInteger delta)
     {
         if (delta == null) return;
         if (delta.signum() <= 0) return;
-        BigInteger prev = map.getOrDefault(key, BigInteger.ZERO);
-        BigInteger now = prev.add(delta);
+        final BigInteger prev = map.getOrDefault(key, BigInteger.ZERO);
+        final BigInteger now = prev.add(delta);
         if (now.signum() == 0)
         {
             map.remove(key);

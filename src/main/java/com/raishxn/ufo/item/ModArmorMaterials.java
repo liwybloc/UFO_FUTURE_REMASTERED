@@ -1,92 +1,27 @@
 package com.raishxn.ufo.item;
 
-import com.raishxn.ufo.UfoMod;
-import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.world.item.ArmorItem;
-import net.minecraft.world.item.ArmorMaterial;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.crafting.Ingredient;
-import net.neoforged.neoforge.common.Tags;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.world.item.equipment.ArmorMaterial;
+import net.minecraft.world.item.equipment.ArmorType;
+import net.minecraft.world.item.equipment.EquipmentAssets;
 
-import java.util.EnumMap;
-import java.util.List;
+import java.util.Map;
 
-public class ModArmorMaterials {
-    public static final Holder<ArmorMaterial> THERMAL_EXOSUIT = register(
-            "thermal_exosuit",
-            new EnumMap<>(ArmorItem.Type.class) {{
-                put(ArmorItem.Type.BOOTS, 4);
-                put(ArmorItem.Type.LEGGINGS, 7);
-                put(ArmorItem.Type.CHESTPLATE, 9);
-                put(ArmorItem.Type.HELMET, 4);
-            }},
-            38,
-            SoundEvents.ARMOR_EQUIP_IRON,
-            Ingredient.of(Items.NETHERITE_INGOT),
-            0.15f,
-            3.2f
-    );
+public final class ModArmorMaterials {
+    private static final Map<ArmorType, Integer> DEFENSE = Map.of(
+            ArmorType.BOOTS, 4, ArmorType.LEGGINGS, 7, ArmorType.CHESTPLATE, 9,
+            ArmorType.HELMET, 4, ArmorType.BODY, 12);
 
-    public static final Holder<ArmorMaterial> UFO_ARMOR = register(
-            "ufo_armor",
-            new EnumMap<>(ArmorItem.Type.class) {{
-                put(ArmorItem.Type.BOOTS, 4);
-                put(ArmorItem.Type.LEGGINGS, 7);
-                put(ArmorItem.Type.CHESTPLATE, 9);
-                put(ArmorItem.Type.HELMET, 4);
-            }},
-            40,
-            SoundEvents.ARMOR_EQUIP_DIAMOND,
-            Ingredient.of(Tags.Items.GEMS_DIAMOND),
-            2.0f,
-            3.0f
-    );
+    public static final ArmorMaterial THERMAL_EXOSUIT = new ArmorMaterial(
+            38, DEFENSE, 15, SoundEvents.ARMOR_EQUIP_IRON, 3.2F, 0.15F,
+            ItemTags.REPAIRS_NETHERITE_ARMOR, EquipmentAssets.NETHERITE);
+    public static final ArmorMaterial UFO_ARMOR = new ArmorMaterial(
+            40, DEFENSE, 15, SoundEvents.ARMOR_EQUIP_DIAMOND, 3.0F, 0.2F,
+            ItemTags.REPAIRS_DIAMOND_ARMOR, EquipmentAssets.DIAMOND);
+    public static final ArmorMaterial ASTRAL_NEXUS = new ArmorMaterial(
+            42, DEFENSE, 15, SoundEvents.ARMOR_EQUIP_NETHERITE, 3.4F, 0.22F,
+            ItemTags.REPAIRS_NETHERITE_ARMOR, EquipmentAssets.NETHERITE);
 
-    public static final Holder<ArmorMaterial> ASTRAL_NEXUS = register(
-            "astral_nexus",
-            new EnumMap<>(ArmorItem.Type.class) {{
-                put(ArmorItem.Type.BOOTS, 4);
-                put(ArmorItem.Type.LEGGINGS, 7);
-                put(ArmorItem.Type.CHESTPLATE, 9);
-                put(ArmorItem.Type.HELMET, 4);
-            }},
-            42,
-            SoundEvents.ARMOR_EQUIP_NETHERITE,
-            Ingredient.of(Items.NETHER_STAR),
-            2.2f,
-            3.4f
-    );
-
-    private static Holder<ArmorMaterial> register(
-            String name,
-            EnumMap<ArmorItem.Type, Integer> defense,
-            int durabilityMultiplier,
-            Holder<SoundEvent> equipSound,
-            Ingredient repairIngredient,
-            float knockbackResistance,
-            float toughness) {
-        List<ArmorMaterial.Layer> layers = List.of(
-                new ArmorMaterial.Layer(UfoMod.id(name), "", false)
-        );
-
-        ArmorMaterial material = new ArmorMaterial(
-                defense,
-                durabilityMultiplier,
-                equipSound,
-                () -> repairIngredient,
-                layers,
-                knockbackResistance,
-                toughness
-        );
-
-        ResourceKey<ArmorMaterial> key = ResourceKey.create(Registries.ARMOR_MATERIAL, UfoMod.id(name));
-        Registry.register(BuiltInRegistries.ARMOR_MATERIAL, key.location(), material);
-        return BuiltInRegistries.ARMOR_MATERIAL.getHolderOrThrow(key);
-    }
+    private ModArmorMaterials() {}
 }

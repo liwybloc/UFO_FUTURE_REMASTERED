@@ -3,7 +3,7 @@ package com.raishxn.ufo.init;
 import com.raishxn.ufo.UfoMod;
 import appeng.menu.implementations.MenuTypeBuilder;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.inventory.MenuType;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
@@ -40,7 +40,7 @@ public class ModMenus {
                     () -> MenuTypeBuilder
                             .create((id, inv, host) -> new com.raishxn.ufo.screen.QuantumPatternHatchMenu(id, inv, host),
                                     appeng.helpers.patternprovider.PatternProviderLogicHost.class)
-                            .build(ResourceLocation.fromNamespaceAndPath(UfoMod.MOD_ID, "quantum_pattern_hatch_menu")));
+                            .build(Identifier.fromNamespaceAndPath(UfoMod.MOD_ID, "quantum_pattern_hatch_menu")));
 
     public static final Supplier<MenuType<com.raishxn.ufo.screen.EntropicAssemblerMatrixMenu>> ENTROPIC_ASSEMBLER_MATRIX_MENU =
             MENUS.register("entropic_assembler_matrix_menu",
@@ -50,7 +50,7 @@ public class ModMenus {
             MENUS.register("entropic_convergence_engine_menu",
                     () -> IMenuTypeExtension.create(com.raishxn.ufo.screen.EntropicConvergenceEngineMenu::new));
 
-    public static void register(IEventBus eventBus) {
+    public static void register(final IEventBus eventBus) {
         MENUS.register(eventBus);
     }
 }

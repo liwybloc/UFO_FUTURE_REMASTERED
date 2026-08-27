@@ -7,7 +7,7 @@ import com.raishxn.ufo.block.entity.AbstractSimpleMultiblockControllerBE;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -20,6 +20,8 @@ import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.redstone.Orientation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.phys.BlockHitResult;
@@ -30,18 +32,18 @@ public abstract class AbstractSimpleMultiblockControllerBlock<T extends Abstract
 
     public static final BooleanProperty ACTIVE = BooleanProperty.create("active");
 
-    protected AbstractSimpleMultiblockControllerBlock(BlockBehaviour.Properties properties) {
+    protected AbstractSimpleMultiblockControllerBlock(final BlockBehaviour.Properties properties) {
         super(properties);
         this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(ACTIVE, false));
     }
 
     @Override
-    public BlockState getStateForPlacement(BlockPlaceContext context) {
+    public BlockState getStateForPlacement(final BlockPlaceContext context) {
         return this.defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite());
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+    protected void createBlockStateDefinition(final StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(FACING, ACTIVE);
     }
 
@@ -51,32 +53,32 @@ public abstract class AbstractSimpleMultiblockControllerBlock<T extends Abstract
     }
 
     @Override
-    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+    protected InteractionResult useItemOn(final ItemStack stack, final BlockState state, final Level level, final BlockPos pos, final Player player, final InteractionHand hand, final BlockHitResult hitResult) {
         if (stack.is(Tags.Items.TOOLS_WRENCH) && player.isShiftKeyDown()) {
             if (!level.isClientSide()) {
                 level.destroyBlock(pos, true, player);
             }
-            return ItemInteractionResult.sidedSuccess(level.isClientSide());
+            return level.isClientSide() ? InteractionResult.SUCCESS : InteractionResult.SUCCESS_SERVER;
         }
         return super.useItemOn(stack, state, level, pos, player, hand, hitResult);
     }
 
     @Override
-    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
+    protected InteractionResult useWithoutItem(final BlockState state, final Level level, final BlockPos pos, final Player player, final BlockHitResult hitResult) {
         if (player.isShiftKeyDown()) {
-            if (level.isClientSide) {
+            if (level.isClientSide()) {
                 com.raishxn.ufo.client.GhostHologramRenderer.toggleHologram(pos, state.getValue(FACING));
             }
-            return InteractionResult.sidedSuccess(level.isClientSide);
+            return level.isClientSide() ? InteractionResult.SUCCESS : InteractionResult.SUCCESS_SERVER;
         }
 
-        if (!level.isClientSide) {
-            BlockEntity entity = level.getBlockEntity(pos);
-            if (entity instanceof AbstractSimpleMultiblockControllerBE controller) {
+        if (!level.isClientSide()) {
+            final BlockEntity entity = level.getBlockEntity(pos);
+            if (entity instanceof final AbstractSimpleMultiblockControllerBE controller) {
                 player.openMenu(controller, pos);
             }
         }
-        return InteractionResult.sidedSuccess(level.isClientSide);
+        return level.isClientSide() ? InteractionResult.SUCCESS : InteractionResult.SUCCESS_SERVER;
     }
 
     protected abstract BlockEntityType<T> getBlockEntityType();
@@ -85,13 +87,13 @@ public abstract class AbstractSimpleMultiblockControllerBlock<T extends Abstract
 
     @Nullable
     @Override
-    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+    public BlockEntity newBlockEntity(final BlockPos pos, final BlockState state) {
         return createBlockEntity(pos, state);
     }
 
     @Nullable
     @Override
-    public <E extends BlockEntity> BlockEntityTicker<E> getTicker(Level level, BlockState state, BlockEntityType<E> type) {
+    public <E extends BlockEntity> BlockEntityTicker<E> getTicker(final Level level, final BlockState state, final BlockEntityType<E> type) {
         if (level.isClientSide()) {
             return null;
         }
@@ -101,18 +103,18 @@ public abstract class AbstractSimpleMultiblockControllerBlock<T extends Abstract
     }
 
     @Override
-    public void neighborChanged(BlockState state, Level level, BlockPos pos, Block changedBlock, BlockPos changedPos, boolean isMoving) {
-        super.neighborChanged(state, level, pos, changedBlock, changedPos, isMoving);
-        if (!level.isClientSide() && level.getBlockEntity(pos) instanceof AbstractSimpleMultiblockControllerBE controller) {
+    protected void neighborChanged(final BlockState state, final Level level, final BlockPos pos, final Block changedBlock, final Orientation orientation, final boolean isMoving) {
+        super.neighborChanged(state, level, pos, changedBlock, orientation, isMoving);
+        if (!level.isClientSide() && level.getBlockEntity(pos) instanceof final AbstractSimpleMultiblockControllerBE controller) {
             controller.markStructureDirty();
         }
     }
 
     @Override
-    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean moved) {
-        if (!state.is(newState.getBlock()) && level.getBlockEntity(pos) instanceof AbstractSimpleMultiblockControllerBE controller) {
+    protected void affectNeighborsAfterRemoval(final BlockState state, final ServerLevel level, final BlockPos pos, final boolean moved) {
+        if (level.getBlockEntity(pos) instanceof final AbstractSimpleMultiblockControllerBE controller) {
             controller.onControllerBroken();
         }
-        super.onRemove(state, level, pos, newState, moved);
+        super.affectNeighborsAfterRemoval(state, level, pos, moved);
     }
 }

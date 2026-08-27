@@ -22,7 +22,6 @@ public class ModRecipes {
     public static final DeferredRegister<RecipeType<?>> RECIPE_TYPES =
             DeferredRegister.create(BuiltInRegistries.RECIPE_TYPE, UfoMod.MOD_ID);
 
-    // ═══════════════════ DMA ═══════════════════
     public static final String DMA_ID = "dimensional_assembly";
     
     public static final Supplier<RecipeType<DimensionalMatterAssemblerRecipe>> DMA_RECIPE_TYPE = RECIPE_TYPES.register(DMA_ID, () -> new RecipeType<DimensionalMatterAssemblerRecipe>() {
@@ -35,7 +34,6 @@ public class ModRecipes {
     public static final Supplier<RecipeSerializer<DimensionalMatterAssemblerRecipe>> DMA_RECIPE_SERIALIZER =
             SERIALIZERS.register(DMA_ID, () -> DimensionalMatterAssemblerRecipeSerializer.INSTANCE);
 
-    // ═══════════════════ STELLAR NEXUS ═══════════════════
     public static final String STELLAR_SIMULATION_ID = "stellar_simulation";
 
     public static final Supplier<RecipeType<StellarSimulationRecipe>> STELLAR_SIMULATION_TYPE = RECIPE_TYPES.register(STELLAR_SIMULATION_ID, () -> new RecipeType<StellarSimulationRecipe>() {
@@ -48,7 +46,6 @@ public class ModRecipes {
     public static final Supplier<RecipeSerializer<StellarSimulationRecipe>> STELLAR_SIMULATION_SERIALIZER =
             SERIALIZERS.register(STELLAR_SIMULATION_ID, () -> StellarSimulationRecipeSerializer.INSTANCE);
 
-    // ═══════════════════ QUANTUM MATTER FABRICATOR ═══════════════════
     public static final String QMF_ID = "qmf_recipe";
 
     public static final Supplier<RecipeType<com.raishxn.ufo.recipe.QMFRecipe>> QMF_TYPE = RECIPE_TYPES.register(QMF_ID, () -> new RecipeType<com.raishxn.ufo.recipe.QMFRecipe>() {
@@ -59,9 +56,8 @@ public class ModRecipes {
     });
 
     public static final Supplier<RecipeSerializer<com.raishxn.ufo.recipe.QMFRecipe>> QMF_SERIALIZER =
-            SERIALIZERS.register(QMF_ID, com.raishxn.ufo.recipe.QMFRecipe.Serializer::new);
+            SERIALIZERS.register(QMF_ID, () -> com.raishxn.ufo.recipe.QMFRecipe.Serializer.INSTANCE);
 
-    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• UNIVERSAL MULTIBLOCK â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     public static final String UNIVERSAL_MULTIBLOCK_ID = "universal_multiblock";
 
     public static final Supplier<RecipeType<UniversalMultiblockRecipe>> UNIVERSAL_MULTIBLOCK_TYPE = RECIPE_TYPES.register(UNIVERSAL_MULTIBLOCK_ID, () -> new RecipeType<UniversalMultiblockRecipe>() {
@@ -72,9 +68,9 @@ public class ModRecipes {
     });
 
     public static final Supplier<RecipeSerializer<UniversalMultiblockRecipe>> UNIVERSAL_MULTIBLOCK_SERIALIZER =
-            SERIALIZERS.register(UNIVERSAL_MULTIBLOCK_ID, UniversalMultiblockRecipe.Serializer::new);
+            SERIALIZERS.register(UNIVERSAL_MULTIBLOCK_ID, () -> UniversalMultiblockRecipe.Serializer.INSTANCE);
 
-    public static void register(IEventBus eventBus) {
+    public static void register(final IEventBus eventBus) {
         SERIALIZERS.register(eventBus);
         RECIPE_TYPES.register(eventBus);
     }

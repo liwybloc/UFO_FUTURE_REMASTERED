@@ -97,15 +97,6 @@ Single-resource cells that store **unlimited** amounts of a specific item or flu
 |------|----------------|-------------|
 | Sky Stone | AE2 Sky Stone Block | `ufo:infinity_sky_stone_cell` |
 
-#### Mekanism Resources (Requires Mekanism)
-
-| Cell | Stored Resource | Registry ID |
-|------|----------------|-------------|
-| Antimatter Pellet | Antimatter Pellet | `ufo:infinity_antimatter_pellet_cell` |
-| Plutonium Pellet | Plutonium Pellet | `ufo:infinity_plutonium_pellet_cell` |
-| Polonium Pellet | Polonium Pellet | `ufo:infinity_polonium_pellet_cell` |
-| HDPE Pellet | HDPE Pellet | `ufo:infinity_hdpe_pellet_cell` |
-
 #### Dye Cells (All 16 Colors)
 
 | Cell | Registry ID |

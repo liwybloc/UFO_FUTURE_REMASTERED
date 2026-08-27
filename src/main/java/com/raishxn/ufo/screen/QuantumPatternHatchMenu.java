@@ -32,20 +32,20 @@ public class QuantumPatternHatchMenu extends AEBaseMenu {
     @GuiSync(7)
     public GenericStack unlockStack = null;
 
-    public QuantumPatternHatchMenu(MenuType<? extends QuantumPatternHatchMenu> menuType, int id, Inventory playerInventory,
-            PatternProviderLogicHost host) {
+    public QuantumPatternHatchMenu(final MenuType<? extends QuantumPatternHatchMenu> menuType, final int id, final Inventory playerInventory,
+                                   final PatternProviderLogicHost host) {
         super(menuType, id, playerInventory, host);
         this.toolbox = new ToolboxMenu(this);
         this.createPlayerInventorySlots(playerInventory);
         this.logic = host.getLogic();
 
-        var patternInv = logic.getPatternInv();
+        final var patternInv = logic.getPatternInv();
         for (int slot = 0; slot < patternInv.size(); slot++) {
             this.addSlot(new RestrictedInputSlot(RestrictedInputSlot.PlacableItemType.PROVIDER_PATTERN, patternInv, slot),
                     SlotSemantics.ENCODED_PATTERN);
         }
 
-        var returnInv = logic.getReturnInv().createMenuWrapper();
+        final var returnInv = logic.getReturnInv().createMenuWrapper();
         for (int slot = 0; slot < PatternProviderReturnInventory.NUMBER_OF_SLOTS; slot++) {
             if (slot < returnInv.size()) {
                 this.addSlot(new AppEngSlot(returnInv, slot), SlotSemantics.STORAGE);
@@ -53,7 +53,7 @@ public class QuantumPatternHatchMenu extends AEBaseMenu {
         }
     }
 
-    public QuantumPatternHatchMenu(int id, Inventory playerInventory, PatternProviderLogicHost host) {
+    public QuantumPatternHatchMenu(final int id, final Inventory playerInventory, final PatternProviderLogicHost host) {
         this(com.raishxn.ufo.init.ModMenus.QUANTUM_PATTERN_HATCH_MENU.get(), id, playerInventory, host);
     }
 

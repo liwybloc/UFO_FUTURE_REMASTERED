@@ -8,6 +8,7 @@ import com.raishxn.ufo.init.ModRecipes;
 import com.raishxn.ufo.recipe.UniversalMultiblockMachineKind;
 import com.raishxn.ufo.screen.QmfControllerMenu;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -22,7 +23,7 @@ public class QmfControllerBE extends AbstractParallelMultiblockControllerBE {
 
     private static MultiblockPattern PATTERN;
 
-    public QmfControllerBE(BlockPos pos, BlockState state) {
+    public QmfControllerBE(final BlockPos pos, final BlockState state) {
         super(ModBlockEntities.QMF_CONTROLLER.get(), pos, state);
     }
 
@@ -41,27 +42,27 @@ public class QmfControllerBE extends AbstractParallelMultiblockControllerBE {
 
     @Nullable
     @Override
-    public AbstractContainerMenu createMenu(int id, Inventory playerInventory, Player player) {
+    public AbstractContainerMenu createMenu(final int id, final Inventory playerInventory, final Player player) {
         return new QmfControllerMenu(id, playerInventory, this);
     }
 
     @Override
     protected List<MultiblockProcessingRecipe> getAvailableRecipes() {
-        if (this.level == null) {
+        if (!(this.level instanceof final ServerLevel serverLevel)) {
             return List.of();
         }
 
-        List<MultiblockProcessingRecipe> recipes = new ArrayList<>();
-        for (RecipeHolder<?> holder : this.level.getRecipeManager().getAllRecipesFor(ModRecipes.QMF_TYPE.get())) {
-            recipes.add(MultiblockProcessingRecipe.fromQmf(holder.id(), (com.raishxn.ufo.recipe.QMFRecipe) holder.value()));
+        final List<MultiblockProcessingRecipe> recipes = new ArrayList<>();
+        for (final RecipeHolder<?> holder : serverLevel.recipeAccess().recipeMap().byType(ModRecipes.QMF_TYPE.get())) {
+            recipes.add(MultiblockProcessingRecipe.fromQmf(holder.id().identifier(), (com.raishxn.ufo.recipe.QMFRecipe) holder.value()));
         }
-        for (RecipeHolder<?> holder : this.level.getRecipeManager().getAllRecipesFor(ModRecipes.DMA_RECIPE_TYPE.get())) {
-            recipes.add(MultiblockProcessingRecipe.fromDma(holder.id(), (com.raishxn.ufo.recipe.DimensionalMatterAssemblerRecipe) holder.value()));
+        for (final RecipeHolder<?> holder : serverLevel.recipeAccess().recipeMap().byType(ModRecipes.DMA_RECIPE_TYPE.get())) {
+            recipes.add(MultiblockProcessingRecipe.fromDma(holder.id().identifier(), (com.raishxn.ufo.recipe.DimensionalMatterAssemblerRecipe) holder.value()));
         }
-        for (RecipeHolder<?> holder : this.level.getRecipeManager().getAllRecipesFor(ModRecipes.UNIVERSAL_MULTIBLOCK_TYPE.get())) {
-            var recipe = (com.raishxn.ufo.recipe.UniversalMultiblockRecipe) holder.value();
-            if (recipe.getMachine() == UniversalMultiblockMachineKind.QMF) {
-                recipes.add(MultiblockProcessingRecipe.fromUniversal(holder.id(), recipe));
+        for (final RecipeHolder<?> holder : serverLevel.recipeAccess().recipeMap().byType(ModRecipes.UNIVERSAL_MULTIBLOCK_TYPE.get())) {
+            final var recipe = (com.raishxn.ufo.recipe.UniversalMultiblockRecipe) holder.value();
+            if (recipe.machine() == UniversalMultiblockMachineKind.QMF) {
+                recipes.add(MultiblockProcessingRecipe.fromUniversal(holder.id().identifier(), recipe));
             }
         }
         return recipes;

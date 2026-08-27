@@ -7,7 +7,7 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
@@ -111,7 +111,6 @@ public class ModCreativeModeTabs {
                         output.accept(ModCells.INFINITY_SAND_CELL.get());
                         output.accept(ModCells.INFINITY_LAVA_CELL.get());
                         output.accept(ModCells.INFINITY_SKY_STONE_CELL.get());
-                        output.accept(ModCells.INFINITY_ANTIMATTER_PELLET_CELL.get());
 
                         output.accept(ModCells.INFINITY_COBBLED_DEEPSLATE_CELL.get());
                         output.accept(ModCells.INFINITY_END_STONE_CELL.get());
@@ -119,20 +118,14 @@ public class ModCreativeModeTabs {
                         output.accept(ModCells.INFINITY_SAND_CELL.get());
                         output.accept(ModCells.INFINITY_LAVA_CELL.get());
                         output.accept(ModCells.INFINITY_SKY_STONE_CELL.get());
-                        output.accept(ModCells.INFINITY_ANTIMATTER_PELLET_CELL.get());
 
-                        // --- NOVAS CÉLULAS INFINITAS (adicionais que você criou) ---
                         output.accept(ModCells.INFINITY_WATER_CELL.get());
                         output.accept(ModCells.INFINITY_COBBLESTONE_CELL.get());
-                        output.accept(ModCells.INFINITY_PLUTONIUM_PELLET_CELL.get());
-                        output.accept(ModCells.INFINITY_POLONIUM_PELLET_CELL.get());
-                        output.accept(ModCells.INFINITY_HDPE_PELLET_CELL.get());
                         output.accept(ModCells.INFINITY_OBSIDIAN_CELL.get());
                         output.accept(ModCells.INFINITY_GRAVEL_CELL.get());
                         output.accept(ModCells.INFINITY_OAK_LOG_CELL.get());
                         output.accept(ModCells.INFINITY_GLASS_CELL.get());
                         output.accept(ModCells.INFINITY_AMETHYST_SHARD_CELL.get());
-                        // Cells de corante
                         output.accept(ModCells.INFINITY_WHITE_DYE_CELL.get());
                         output.accept(ModCells.INFINITY_ORANGE_DYE_CELL.get());
                         output.accept(ModCells.INFINITY_MAGENTA_DYE_CELL.get());
@@ -152,33 +145,20 @@ public class ModCreativeModeTabs {
                         output.accept(ModCells.INFINITY_GENESIS_CELL.get());
 
 
-                        // --- HOUSINGS DE CÉLULAS (de ModCellItems) ---
                         output.accept(ModCellItems.WHITE_DWARF_ITEM_CELL_HOUSING.get());
                         output.accept(ModCellItems.NEUTRON_FLUID_CELL_HOUSING.get());
-                        output.accept(ModCellItems.PULSAR_CELL_HOUSING.get());
 
-                        // --- ITEM CELLS: WHITE DWARF (de ModCellItems) ---
                         output.accept(ModCellItems.ITEM_CELL_40M.get());
                         output.accept(ModCellItems.ITEM_CELL_100M.get());
                         output.accept(ModCellItems.ITEM_CELL_250M.get());
                         output.accept(ModCellItems.ITEM_CELL_750M.get());
                         output.accept(ModCellItems.ITEM_CELL_SINGULARITY.get());
 
-                        // --- FLUID CELLS: NEUTRON STAR RESERVOIR (de ModCellItems) ---
                         output.accept(ModCellItems.FLUID_CELL_40M.get());
                         output.accept(ModCellItems.FLUID_CELL_100M.get());
                         output.accept(ModCellItems.FLUID_CELL_250M.get());
                         output.accept(ModCellItems.FLUID_CELL_750M.get());
                         output.accept(ModCellItems.FLUID_CELL_SINGULARITY.get());
-
-                        // --- CHEMICAL CELLS: PULSAR CHAMBER (de ModCellItems) ---
-                        output.accept(ModCellItems.CHEMICAL_CELL_40M.get());
-                        output.accept(ModCellItems.CHEMICAL_CELL_100M.get());
-                        output.accept(ModCellItems.CHEMICAL_CELL_250M.get());
-                        output.accept(ModCellItems.CHEMICAL_CELL_750M.get());
-                        output.accept(ModCellItems.CHEMICAL_CELL_SINGULARITY.get());
-
-
 
                     }).build());
 
@@ -198,7 +178,6 @@ public class ModCreativeModeTabs {
                         ModBlocks.CRAFTING_STORAGE_BLOCKS.values().forEach(block -> output.accept(block.get()));
                         ModBlocks.CO_PROCESSOR_BLOCKS.values().forEach(block -> output.accept(block.get()));
 
-                        // --- STELLAR NEXUS ---
                         output.accept(MultiblockBlocks.STELLAR_NEXUS_CONTROLLER.get());
                         output.accept(MultiblockBlocks.QUANTUM_HYPER_MECHANICAL_CASING.get());
                         output.accept(MultiblockBlocks.QUANTUM_MATTER_FABRICATOR_CONTROLLER.get());
@@ -215,7 +194,6 @@ public class ModCreativeModeTabs {
                         output.accept(MultiblockBlocks.STELLAR_FIELD_GENERATOR_T2.get());
                         output.accept(MultiblockBlocks.STELLAR_FIELD_GENERATOR_T3.get());
 
-                        // --- ENTROPY MULTIBLOCK ---
                         output.accept(MultiblockBlocks.ENTROPY_ASSEMBLER_CORE_CASING.get());
                         output.accept(MultiblockBlocks.ENTROPY_SINGULARITY_CASING.get());
                         output.accept(MultiblockBlocks.ENTROPIC_ASSEMBLER_CASING.get());
@@ -226,16 +204,16 @@ public class ModCreativeModeTabs {
 
 
 
-    public static void register(IEventBus eventBus) {
+    public static void register(final IEventBus eventBus) {
         CREATIVE_MODE_TAB.register(eventBus);
     }
 
-    private static ItemStack createQuantumEnergyCellVariant(boolean charged) {
-        ItemStack stack = new ItemStack(ModBlocks.QUANTUM_ENERGY_CELL.get());
+    private static ItemStack createQuantumEnergyCellVariant(final boolean charged) {
+        final ItemStack stack = new ItemStack(ModBlocks.QUANTUM_ENERGY_CELL.get());
         stack.set(DataComponents.CUSTOM_NAME, Component.literal(charged
                 ? "Quantum Energy Cell (Charged)"
                 : "Quantum Energy Cell (Discharged)"));
-        CompoundTag tag = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
+        final CompoundTag tag = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
         tag.putBoolean("ufoQuantumEnergyCellChargedPreview", charged);
         stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
         return stack;
