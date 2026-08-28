@@ -13,7 +13,7 @@ import net.neoforged.neoforge.registries.DeferredItem;
 
 import static com.raishxn.ufo.item.ModItems.ITEMS;
 
-public class ModCells {
+public final class ModCells {
 
     public static final DeferredItem<Item> INFINITY_WATER_CELL = ITEMS.registerItem("infinity_water_cell",
             properties -> new InfinityCell(properties, () -> AEFluidKey.of(Fluids.WATER),

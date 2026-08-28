@@ -16,7 +16,7 @@ import net.pedroksl.ae2addonlib.recipes.IngredientStack;
 import java.util.ArrayList;
 import java.util.List;
 
-public class StellarSimulationRecipeBuilder {
+public final class StellarSimulationRecipeBuilder {
     private final String name;
     private String simulationName = "";
     private final List<IngredientStack.Item> itemInputs = new ArrayList<>();

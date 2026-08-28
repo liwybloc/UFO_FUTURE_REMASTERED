@@ -11,7 +11,7 @@
     "amount": 1,
     "id": "ufo:source_uu_amplifier_fluid"
   },
-  "fluid_output_amount": 16000,
+  "fluid_output_amount": 32000,
   "item_inputs": [
     {
       "amount": 64,
@@ -20,5 +20,5 @@
   ],
   "machine": "qmf",
   "recipe_name": "universal/qmf/bulk/uu_amplifier",
-  "time": 300
+  "time": 100
 }

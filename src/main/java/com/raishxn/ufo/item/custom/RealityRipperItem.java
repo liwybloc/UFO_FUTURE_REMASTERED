@@ -16,7 +16,7 @@ import net.neoforged.neoforge.entity.PartEntity;
 
 import java.util.List;
 
-public class RealityRipperItem extends Item {
+public final class RealityRipperItem extends Item {
 
     public RealityRipperItem(final ToolMaterial material, final Item.Properties properties) {
         super(properties.sword(material, 20, -2.4F).stacksTo(1));

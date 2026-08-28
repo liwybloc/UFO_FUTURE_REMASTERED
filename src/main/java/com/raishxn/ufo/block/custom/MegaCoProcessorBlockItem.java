@@ -8,7 +8,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 
-public class MegaCoProcessorBlockItem extends AEBaseBlockItem {
+public final class MegaCoProcessorBlockItem extends AEBaseBlockItem {
 
     private final MegaCoProcessorTier tier;
 

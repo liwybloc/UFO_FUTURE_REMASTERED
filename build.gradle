@@ -29,6 +29,9 @@ repositories {
             includeGroup "com.geckolib"
         }
     }
+    maven {
+        url = "https://maven.firstdark.dev/snapshots"
+    }
 }
 
 base {
@@ -97,9 +100,9 @@ sourceSets.main.java.exclude(
         'com/raishxn/ufo/screen/QuantumPatternHatchLockReason.java'
         ,'com/raishxn/ufo/client/render/FluidTankRenderer.java'
         ,'com/raishxn/ufo/client/tutorial/screen/UfoTutorialScreen.java'
-        ,'com/raishxn/ufo/compat/jei/**'
+        ,'com/raishxn/ufo/compat/jei/MultiblockInfoCategory.java'
+        ,'com/raishxn/ufo/compat/jei/MultiblockInfoWrapper.java'
         ,'com/raishxn/ufo/compat/appflux/**'
-        ,'com/raishxn/ufo/screen/*Screen.java'
         ,'com/raishxn/ufo/registry/RegistryHandler.java'
 )
 
@@ -116,9 +119,12 @@ dependencies {
     // for api access
     compileOnly "curse.maven:kubejs-238086:${kubejs_file_id}"
     compileOnly "curse.maven:rhino-416294:${rhino_file_id}"
+    compileOnly "curse.maven:jei-238222:${jei_version}"
+    compileOnly "com.lowdragmc.ldlib2:ldlib2-neoforge-26.1:26.1.2.37"
 
     // dev test mods
     localRuntime "com.geckolib:geckolib-neoforge-${minecraft_version}:${geckolib_version}"
+    localRuntime "curse.maven:jei-238222:${jei_version}"
 }
 
 var generateModMetadata = tasks.register("generateModMetadata", ProcessResources) {

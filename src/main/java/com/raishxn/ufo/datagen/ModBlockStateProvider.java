@@ -19,7 +19,7 @@ import net.neoforged.neoforge.client.model.generators.ModelFile;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import net.neoforged.neoforge.registries.DeferredBlock;
 
-public class ModBlockStateProvider extends BlockStateProvider {
+public final class ModBlockStateProvider extends BlockStateProvider {
     public ModBlockStateProvider(final PackOutput output, final ExistingFileHelper exFileHelper) {
         super(output, UfoMod.MOD_ID, exFileHelper);
     }

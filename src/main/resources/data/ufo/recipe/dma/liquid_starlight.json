@@ -9,7 +9,7 @@
   ],
   "fluid_outputs": [
     {
-      "#": 10000,
+      "#": 20000,
       "#t": "ae2:f",
       "id": "ufo:source_liquid_starlight_fluid"
     }

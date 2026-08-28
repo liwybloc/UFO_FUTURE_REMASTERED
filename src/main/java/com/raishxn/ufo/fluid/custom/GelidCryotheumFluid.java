@@ -19,7 +19,7 @@ public abstract class GelidCryotheumFluid extends BaseFlowingFluid {
                 .block(ModBlocks.GELID_CRYOTHEUM_BLOCK));
     }
 
-    public static class Source extends GelidCryotheumFluid {
+    public static final class Source extends GelidCryotheumFluid {
         public Source() {
             super();
         }
@@ -33,7 +33,7 @@ public abstract class GelidCryotheumFluid extends BaseFlowingFluid {
         }
     }
 
-    public static class Flowing extends GelidCryotheumFluid {
+    public static final class Flowing extends GelidCryotheumFluid {
         public Flowing() {
             super();
             registerDefaultState(getStateDefinition().any().setValue(LEVEL, 7));

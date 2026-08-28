@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class EntropicAssemblerMatrixBE extends AbstractEntropicMachineBE implements ICraftingMachine {
+public final class EntropicAssemblerMatrixBE extends AbstractEntropicMachineBE implements ICraftingMachine {
     private static final int MAX_JOBS = 256;
     private final List<JobState> jobs = new ArrayList<>();
 

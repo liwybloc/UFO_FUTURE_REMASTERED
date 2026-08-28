@@ -7,7 +7,7 @@ import net.neoforged.neoforge.transfer.energy.EnergyHandler;
 import net.neoforged.neoforge.transfer.transaction.SnapshotJournal;
 import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 
-public class UfoPersistentEnergyStorage implements EnergyHandler {
+public final class UfoPersistentEnergyStorage implements EnergyHandler {
     private final ItemStack parent;
     private final DataComponentType<Integer> componentType;
     private final int capacity;

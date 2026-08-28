@@ -12,7 +12,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
-public class QuantumProcessorAssemblerControllerBE extends AbstractParallelMultiblockControllerBE {
+public final class QuantumProcessorAssemblerControllerBE extends AbstractParallelMultiblockControllerBE {
 
     private static MultiblockPattern PATTERN;
 

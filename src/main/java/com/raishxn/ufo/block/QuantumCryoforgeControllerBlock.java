@@ -8,7 +8,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 
-public class QuantumCryoforgeControllerBlock extends AbstractSimpleMultiblockControllerBlock<QuantumCryoforgeControllerBE> {
+public final class QuantumCryoforgeControllerBlock extends AbstractSimpleMultiblockControllerBlock<QuantumCryoforgeControllerBE> {
 
     public static final MapCodec<QuantumCryoforgeControllerBlock> CODEC = simpleCodec(QuantumCryoforgeControllerBlock::new);
 

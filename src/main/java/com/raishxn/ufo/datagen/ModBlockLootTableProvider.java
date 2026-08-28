@@ -11,7 +11,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class ModBlockLootTableProvider extends BlockLootSubProvider {
+public final class ModBlockLootTableProvider extends BlockLootSubProvider {
 
     protected ModBlockLootTableProvider(final HolderLookup.Provider provider) {
         super(Set.of(), FeatureFlags.REGISTRY.allFlags(), provider);

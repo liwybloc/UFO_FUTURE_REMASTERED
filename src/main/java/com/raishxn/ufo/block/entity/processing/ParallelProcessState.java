@@ -5,7 +5,7 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import com.mojang.serialization.Codec;
 
-public class ParallelProcessState {
+public final class ParallelProcessState {
     private Identifier recipeId;
     private long energyBuffer;
     private long[] itemBuffers = new long[0];

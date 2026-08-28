@@ -20,7 +20,7 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 @EventBusSubscriber(modid = UfoMod.MOD_ID)
-public class HazardHandler {
+public final class HazardHandler {
     private static final Logger LOGGER = LogManager.getLogger();
     public static final TagKey<Item> HAZARDOUS = ItemTags.create(Identifier.fromNamespaceAndPath(UfoMod.MOD_ID, "hazardous"));
 

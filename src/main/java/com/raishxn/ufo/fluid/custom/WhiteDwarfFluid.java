@@ -36,7 +36,7 @@ public abstract class WhiteDwarfFluid extends BaseFlowingFluid {
     protected boolean canConvertToSource(final Level level) {
         return false;
     }
-    public static class Source extends WhiteDwarfFluid {
+    public static final class Source extends WhiteDwarfFluid {
         public Source() { super(); }
         public int getAmount(final FluidState state) {
             return 8; // Bloco cheio
@@ -45,7 +45,7 @@ public abstract class WhiteDwarfFluid extends BaseFlowingFluid {
             return true;
         }
     }
-    public static class Flowing extends WhiteDwarfFluid {
+    public static final class Flowing extends WhiteDwarfFluid {
         public Flowing() { super(); }
         protected void createFluidStateDefinition(final StateDefinition.Builder<Fluid, FluidState> builder) {
             super.createFluidStateDefinition(builder);

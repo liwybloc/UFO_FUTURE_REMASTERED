@@ -30,7 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class HammerItem extends Item implements IEnergyTool, IHasModeHUD, IHasCycleableModes {
+public final class HammerItem extends Item implements IEnergyTool, IHasModeHUD, IHasCycleableModes {
 
     private static final String TAG_RANGE = "range";
     private static final int[] RANGES = {0, 1, 2, 3}; // 0=1x1, 1=3x3, 2=5x5, 3=7x7

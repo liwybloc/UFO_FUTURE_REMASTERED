@@ -26,7 +26,7 @@ import net.minecraft.world.level.Level;
 import java.util.List;
 
 
-public class ThermalResistorExosuitItem extends ArmorItem implements IThermalArmor {
+public final class ThermalResistorExosuitItem extends ArmorItem implements IThermalArmor {
 
     private final Multimap<Holder<Attribute>, AttributeModifier> customAttributeModifiers;
 

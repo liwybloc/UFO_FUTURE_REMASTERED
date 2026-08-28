@@ -22,7 +22,7 @@ import net.minecraft.world.entity.EntityType;
 
 import java.util.List;
 
-public class UfoEnergyBowItem extends BowItem implements IEnergyTool, IHasModeHUD, IHasCycleableModes {
+public final class UfoEnergyBowItem extends BowItem implements IEnergyTool, IHasModeHUD, IHasCycleableModes {
 
     private static final int ENERGY_COST_NORMAL = 500;
     private static final int ENERGY_COST_FAST = 25000;

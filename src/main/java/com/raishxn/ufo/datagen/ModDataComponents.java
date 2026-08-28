@@ -1,33 +1,36 @@
 package com.raishxn.ufo.datagen;
 
 import appeng.api.stacks.GenericStack;
+import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import com.raishxn.ufo.UfoMod;
-import com.raishxn.ufo.item.ModItems;
-import com.raishxn.ufo.item.custom.cell.BigIntegerCodec;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.network.codec.ByteBufCodecs; // Importe este
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.world.item.component.ItemContainerContents;
 import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.fluids.SimpleFluidContent;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
-import java.math.BigInteger;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.UnaryOperator;
 
-public class ModDataComponents {
+public final class ModDataComponents {
+    private static final Codec<Long> LEGACY_LONG_CODEC = Codec.either(Codec.LONG, Codec.STRING).comapFlatMap(
+            value -> value.map(DataResult::success, ModDataComponents::parseLegacyLong),
+            Either::left);
+
     private static final DeferredRegister<DataComponentType<?>> DATA_COMPONENTS =
             DeferredRegister.create(Registries.DATA_COMPONENT_TYPE, UfoMod.MOD_ID);
 
-    public static final DeferredHolder<DataComponentType<?>, DataComponentType<BigInteger>> CELL_BYTE_USAGE_BIG = register("cell_byte_usage_big", builder -> builder.persistent(BigIntegerCodec.INSTANCE).networkSynchronized(BigIntegerCodec.STREAM_CODEC));
-    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Long>> CELL_TYPES_USAGE =
-            register("cell_types_usage", builder -> builder.persistent(Codec.LONG).networkSynchronized(ByteBufCodecs.VAR_LONG));
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Long>> CELL_BYTE_USAGE =
+            register("cell_byte_usage_big", builder -> builder.persistent(LEGACY_LONG_CODEC).networkSynchronized(ByteBufCodecs.VAR_LONG));
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Integer>> CELL_TYPES_USAGE =
+            register("cell_types_usage", builder -> builder.persistent(Codec.INT).networkSynchronized(ByteBufCodecs.VAR_INT));
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<String>> CELL_STATE = register("cell_state", builder -> builder.persistent(Codec.STRING).networkSynchronized(ByteBufCodecs.STRING_UTF8));
 
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<List<GenericStack>>> CELL_SHOW_TOOLTIP_STACKS = register("cell_show_tooltip_stacks", builder -> builder.persistent(GenericStack.CODEC.listOf()).networkSynchronized(GenericStack.STREAM_CODEC.apply(ByteBufCodecs.list())));
@@ -87,6 +90,18 @@ public class ModDataComponents {
     private static <T> DeferredHolder<DataComponentType<?>, DataComponentType<T>> register(final String name, final UnaryOperator<DataComponentType.Builder<T>> operator) {
         return DATA_COMPONENTS.register(name, () -> operator.apply(DataComponentType.builder()).build());
     }
+
+    private static DataResult<Long> parseLegacyLong(final String value) {
+        try {
+            final long parsed = Long.parseLong(value);
+            return parsed >= 0L
+                    ? DataResult.success(parsed)
+                    : DataResult.error(() -> "Cell byte usage cannot be negative: " + value);
+        } catch (final NumberFormatException exception) {
+            return DataResult.error(() -> "Invalid cell byte usage: " + value);
+        }
+    }
+
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<UUID>> CELL_UUID = register("cell_uuid", builder -> builder.persistent(UUIDUtil.CODEC).networkSynchronized(UUIDUtil.STREAM_CODEC));
     public static void register(final IEventBus eventBus) {
         DATA_COMPONENTS.register(eventBus);

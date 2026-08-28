@@ -12,7 +12,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jetbrains.annotations.NotNull;
 
-public class QuantumProcessorAssemblerControllerMenu extends AbstractUniversalMultiblockControllerMenu<QuantumProcessorAssemblerControllerBE> {
+public final class QuantumProcessorAssemblerControllerMenu extends AbstractUniversalMultiblockControllerMenu<QuantumProcessorAssemblerControllerBE> {
 
     public QuantumProcessorAssemblerControllerMenu(final int id, final Inventory inv, final FriendlyByteBuf extraData) {
         this(id, inv, inv.player.level().getBlockEntity(extraData.readBlockPos()));

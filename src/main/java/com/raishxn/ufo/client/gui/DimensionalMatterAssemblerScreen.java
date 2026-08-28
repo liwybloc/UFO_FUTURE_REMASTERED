@@ -25,7 +25,7 @@ import appeng.client.gui.style.Blitter;
 import appeng.client.gui.style.ScreenStyle;
 import appeng.client.gui.widgets.*;
 
-public class DimensionalMatterAssemblerScreen extends UpgradeableScreen<DimensionalMatterAssemblerMenu> implements IFluidTankScreen {
+public final class DimensionalMatterAssemblerScreen extends UpgradeableScreen<DimensionalMatterAssemblerMenu> implements IFluidTankScreen {
 
     private final ProgressBar pb;
     private final SettingToggleButton<YesNo> autoExportBtn;
@@ -323,7 +323,7 @@ public class DimensionalMatterAssemblerScreen extends UpgradeableScreen<Dimensio
     }
 
 
-    private static class AlertWidget extends AbstractWidget {
+    private static final class AlertWidget extends AbstractWidget {
 
         private final Blitter powerAlert;
 

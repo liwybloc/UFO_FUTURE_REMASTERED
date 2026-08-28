@@ -19,7 +19,7 @@ public abstract class SpatialFluid extends BaseFlowingFluid {
                 .block(ModBlocks.SPATIAL_FLUID_BLOCK));
     }
 
-    public static class Source extends SpatialFluid {
+    public static final class Source extends SpatialFluid {
         public Source() {
             super();
         }
@@ -33,7 +33,7 @@ public abstract class SpatialFluid extends BaseFlowingFluid {
         }
     }
 
-    public static class Flowing extends SpatialFluid {
+    public static final class Flowing extends SpatialFluid {
         public Flowing() {
             super();
             registerDefaultState(getStateDefinition().any().setValue(LEVEL, 7));

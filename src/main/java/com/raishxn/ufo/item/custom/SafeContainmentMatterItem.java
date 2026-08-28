@@ -15,7 +15,7 @@ import net.neoforged.neoforge.items.ComponentItemHandler;
 
 import java.util.List;
 
-public class SafeContainmentMatterItem extends Item {
+public final class SafeContainmentMatterItem extends Item {
     public SafeContainmentMatterItem(final Properties properties) {
         super(properties.stacksTo(1));
     }

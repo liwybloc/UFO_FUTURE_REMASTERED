@@ -35,10 +35,11 @@ import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import org.slf4j.Logger;
 
 @Mod(UfoMod.MOD_ID)
-public class UfoMod {
+public final class UfoMod {
     public static final String MOD_ID = "ufo";
     public static final Logger LOGGER = LogUtils.getLogger();
     private static final int TUTORIAL_HOLD_TICKS = 12;
@@ -86,6 +87,25 @@ public class UfoMod {
     }
     private void loadComplete(final FMLLoadCompleteEvent event) {
         event.enqueueWork(LazyInits::initFinal);
+    }
+
+    @SubscribeEvent
+    public void sendRecipeSnapshot(final PlayerEvent.PlayerLoggedInEvent event) {
+        if (!(event.getEntity() instanceof final net.minecraft.server.level.ServerPlayer player)) {
+            return;
+        }
+
+        final var recipes = player.level().getServer().getRecipeManager().getRecipes().stream()
+                .filter(holder -> holder.id().identifier().getNamespace().equals(MOD_ID))
+                .filter(holder -> holder.value() instanceof com.raishxn.ufo.recipe.DimensionalMatterAssemblerRecipe
+                        || holder.value() instanceof com.raishxn.ufo.recipe.QMFRecipe
+                        || holder.value() instanceof com.raishxn.ufo.recipe.UniversalMultiblockRecipe
+                        || holder.value() instanceof com.raishxn.ufo.recipe.StellarSimulationRecipe)
+                .toList();
+        net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(
+                player,
+                new com.raishxn.ufo.network.packet.ClientboundRecipeSnapshotPacket(recipes)
+        );
     }
 
     @SubscribeEvent
@@ -141,7 +161,7 @@ public class UfoMod {
         event.register(ModKeyBindings.CYCLE_MODE);
     }
 
-    public static class ClientModEvents {
+    public static final class ClientModEvents {
         @SubscribeEvent
         public static void onRegisterKeys(final RegisterKeyMappingsEvent event) {
             event.register(ModKeyBindings.CYCLE_TOOL_FORWARD);

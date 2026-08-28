@@ -17,7 +17,7 @@ import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.client.event.RenderGuiLayerEvent;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 
-public class ClientEvents {
+public final class ClientEvents {
 
     @SubscribeEvent
     public void onKeyInput(final InputEvent.Key event) {

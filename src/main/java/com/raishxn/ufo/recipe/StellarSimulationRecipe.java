@@ -45,7 +45,7 @@ import appeng.api.stacks.GenericStack;
  *   <li>3 = Temporal Fluid (ufo:source_temporal_fluid)</li>
  * </ul>
  */
-public class StellarSimulationRecipe implements Recipe<RecipeInput> {
+public final class StellarSimulationRecipe implements Recipe<RecipeInput> {
 
     protected final List<IngredientStack.Item> itemInputs;
     protected final List<IngredientStack.Fluid> fluidInputs;

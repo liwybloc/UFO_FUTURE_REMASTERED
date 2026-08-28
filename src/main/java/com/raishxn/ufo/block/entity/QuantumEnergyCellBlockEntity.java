@@ -8,7 +8,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.transfer.energy.EnergyHandler;
 import net.neoforged.neoforge.transfer.energy.InfiniteEnergyHandler;
 
-public class QuantumEnergyCellBlockEntity extends CreativeEnergyCellBlockEntity {
+public final class QuantumEnergyCellBlockEntity extends CreativeEnergyCellBlockEntity {
     private static final int CREATIVE_EXPORT_RATE = Integer.MAX_VALUE;
 
     private final EnergyHandler exposedEnergy = InfiniteEnergyHandler.INSTANCE;

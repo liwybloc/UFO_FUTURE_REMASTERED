@@ -18,7 +18,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @EventBusSubscriber(modid = UfoMod.MOD_ID, value = Dist.CLIENT)
-public class StructureHighlightRenderer {
+public final class StructureHighlightRenderer {
 
     private static final Map<BlockPos, Long> HIGHLIGHTS = new ConcurrentHashMap<>();
 

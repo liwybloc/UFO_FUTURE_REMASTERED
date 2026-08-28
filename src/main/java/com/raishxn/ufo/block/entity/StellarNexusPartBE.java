@@ -19,7 +19,7 @@ import org.jetbrains.annotations.Nullable;
  * Implements {@link IMultiblockPart} to track its link to a controller.
  * This is a lightweight BE — it stores only the controller position.
  */
-public class StellarNexusPartBE extends BlockEntity implements IMultiblockPart {
+public final class StellarNexusPartBE extends BlockEntity implements IMultiblockPart {
 
     @Nullable
     private BlockPos controllerPos = null;

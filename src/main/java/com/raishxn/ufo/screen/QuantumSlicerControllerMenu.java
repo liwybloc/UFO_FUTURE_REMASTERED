@@ -12,7 +12,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jetbrains.annotations.NotNull;
 
-public class QuantumSlicerControllerMenu extends AbstractUniversalMultiblockControllerMenu<QuantumSlicerControllerBE> {
+public final class QuantumSlicerControllerMenu extends AbstractUniversalMultiblockControllerMenu<QuantumSlicerControllerBE> {
 
     public QuantumSlicerControllerMenu(final int id, final Inventory inv, final FriendlyByteBuf extraData) {
         this(id, inv, inv.player.level().getBlockEntity(extraData.readBlockPos()));

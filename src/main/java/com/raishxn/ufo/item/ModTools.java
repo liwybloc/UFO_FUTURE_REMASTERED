@@ -12,7 +12,7 @@ import net.neoforged.neoforge.registries.DeferredItem;
 
 import static com.raishxn.ufo.item.ModItems.ITEMS;
 
-public class ModTools {
+public final class ModTools {
     private static Item.Properties unbreakableToolProperties(final Item.Properties properties) {
         return properties.component(DataComponents.UNBREAKABLE, Unit.INSTANCE);
     }

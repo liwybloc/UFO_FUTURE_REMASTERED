@@ -13,10 +13,16 @@ import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
-public class ModPackets {
+public final class ModPackets {
 
     public static void register(final RegisterPayloadHandlersEvent event) {
         final PayloadRegistrar registrar = event.registrar(UfoMod.MOD_ID).versioned("1.0");
+
+        registrar.playToClient(
+                ClientboundRecipeSnapshotPacket.TYPE,
+                ClientboundRecipeSnapshotPacket.STREAM_CODEC,
+                ClientboundRecipeSnapshotPacket::handle
+        );
 
         registrar.playToServer(CycleToolKeyPacket.TYPE, CycleToolKeyPacket.STREAM_CODEC,
                 ModPackets::handleCycleToolKey);

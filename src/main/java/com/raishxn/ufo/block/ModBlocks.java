@@ -30,7 +30,7 @@ import net.pedroksl.ae2addonlib.registry.BlockRegistry;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import java.util.EnumMap;
 
-public class ModBlocks extends BlockRegistry {
+public final class ModBlocks extends BlockRegistry {
     public static final DeferredRegister.Blocks BLOCKS =
             DeferredRegister.createBlocks(UfoMod.MOD_ID);
 

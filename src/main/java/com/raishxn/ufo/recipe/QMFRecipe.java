@@ -17,7 +17,7 @@ import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.fluids.FluidStack;
 import java.util.List;
 
-public class QMFRecipe implements Recipe<RecipeInput> {
+public final class QMFRecipe implements Recipe<RecipeInput> {
     private final String recipeName;
     private final List<QMFRecipeIngredient> itemInputs;
     private final List<QMFFluidIngredient> fluidInputs;
@@ -59,7 +59,11 @@ public class QMFRecipe implements Recipe<RecipeInput> {
     public String group() { return "ufo:qmf"; }
 
     @Override
-    public PlacementInfo placementInfo() { return PlacementInfo.NOT_PLACEABLE; }
+    public PlacementInfo placementInfo() {
+        return PlacementInfo.create(this.itemInputs.stream()
+                .map(QMFRecipeIngredient::ingredient)
+                .toList());
+    }
 
     @Override
     public RecipeBookCategory recipeBookCategory() { return RecipeBookCategories.CRAFTING_MISC; }

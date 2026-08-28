@@ -49,7 +49,7 @@ import java.util.Set;
  *   <li>The hatch uses {@code grid.getStorageService().getInventory().insert(...)} to push items directly into ME storage</li>
  * </ol>
  */
-public class MassiveOutputHatchBE extends AENetworkedBlockEntity
+public final class MassiveOutputHatchBE extends AENetworkedBlockEntity
         implements IMassiveInjector, IMultiblockPart, IGridTickable {
 
     /** Controller position for multiblock link (null if standalone). */

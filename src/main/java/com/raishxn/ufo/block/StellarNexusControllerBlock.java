@@ -30,7 +30,7 @@ import com.raishxn.ufo.init.ModBlockEntities;
  * Handles directional placement and the ASSEMBLED state property which
  * controls the visual appearance (active overlay vs inactive).
  */
-public class StellarNexusControllerBlock extends DirectionalBlock implements net.minecraft.world.level.block.EntityBlock {
+public final class StellarNexusControllerBlock extends DirectionalBlock implements net.minecraft.world.level.block.EntityBlock {
 
     public static final MapCodec<StellarNexusControllerBlock> CODEC = simpleCodec(StellarNexusControllerBlock::new);
     public static final BooleanProperty ASSEMBLED = BooleanProperty.create("assembled");

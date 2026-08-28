@@ -13,7 +13,7 @@ import net.neoforged.neoforge.data.event.GatherDataEvent;
 import java.util.concurrent.CompletableFuture;
 
 @EventBusSubscriber(modid = UfoMod.MOD_ID, bus = EventBusSubscriber.Bus.MOD)
-public class DataGenerators {
+public final class DataGenerators {
     @SubscribeEvent
     public static void gatherData(final GatherDataEvent event) {
         final DataGenerator generator = event.getGenerator();

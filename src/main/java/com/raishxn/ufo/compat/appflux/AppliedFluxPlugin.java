@@ -18,7 +18,7 @@ import appeng.api.upgrades.Upgrades;
 import net.neoforged.neoforge.transfer.energy.EnergyHandler;
 import net.neoforged.neoforge.transfer.transaction.Transaction;
 
-public class AppliedFluxPlugin {
+public final class AppliedFluxPlugin {
 
 
 

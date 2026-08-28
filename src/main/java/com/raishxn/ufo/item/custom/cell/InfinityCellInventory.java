@@ -14,7 +14,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
-public class InfinityCellInventory implements StorageCell {
+public final class InfinityCellInventory implements StorageCell {
 
     public static final ICellHandler HANDLER = new Handler();
     private final ItemStack stack;
@@ -65,7 +65,7 @@ public class InfinityCellInventory implements StorageCell {
         return what.equals(this.record);
     }
 
-    private static class Handler implements ICellHandler {
+    private static final class Handler implements ICellHandler {
         @Override
         public boolean isCell(final ItemStack is) {
             return is != null && is.getItem() instanceof InfinityCell;

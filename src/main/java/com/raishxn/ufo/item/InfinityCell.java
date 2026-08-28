@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-public class InfinityCell extends AEBaseItem {
+public final class InfinityCell extends AEBaseItem {
 
     private final Supplier<AEKey> type;
     private final ChatFormatting[] nameFormatting;

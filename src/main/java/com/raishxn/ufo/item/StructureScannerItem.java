@@ -20,7 +20,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.Optional;
 
-public class StructureScannerItem extends Item {
+public final class StructureScannerItem extends Item {
 
     public StructureScannerItem(final Properties properties) {
         super(properties.stacksTo(1));

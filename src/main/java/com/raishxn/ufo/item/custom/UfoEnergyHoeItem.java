@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-public class UfoEnergyHoeItem extends HoeItem implements IEnergyTool, IHasModeHUD, IHasCycleableModes {
+public final class UfoEnergyHoeItem extends HoeItem implements IEnergyTool, IHasModeHUD, IHasCycleableModes {
 
     private static final String TAG_RANGE = "range";
     private static final int[] RANGES = {0, 1, 2, 3, 5}; // 0=1x1, 1=3x3...

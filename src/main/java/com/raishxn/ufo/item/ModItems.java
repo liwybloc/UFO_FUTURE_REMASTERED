@@ -31,7 +31,7 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 
 import java.util.function.Supplier;
 
-public class ModItems {
+public final class ModItems {
     public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(UfoMod.MOD_ID);
 
     public static final DeferredItem<Item> BISMUTH = ITEMS.registerItem("bismuth",

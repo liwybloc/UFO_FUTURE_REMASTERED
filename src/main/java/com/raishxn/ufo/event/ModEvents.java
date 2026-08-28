@@ -38,7 +38,7 @@ import java.util.List;
 import java.util.Optional;
 
 @EventBusSubscriber(modid = UfoMod.MOD_ID)
-public class ModEvents {
+public final class ModEvents {
 
     @SubscribeEvent
     public static void onBlockBreak(final BreakBlockEvent event) {

@@ -20,7 +20,6 @@ import appeng.util.Platform;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.Item;
@@ -30,20 +29,19 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-/** BigInteger版元件物品的承载类，仅用于创造元件 */
-public class AEBigIntegerCellItem extends Item implements IAEBigIntegerCell, ICellWorkbenchItem
-{
+public class AECellItem extends Item implements IAECell, ICellWorkbenchItem {
+    public static final long MAX_CELL_BYTES = 1_000_000_000_000_000L;
+
     private final double idleDrain;
     private final StorageTier tier;
     private final AEKeyType keyType;
 
-    public AEBigIntegerCellItem(final Item.Properties pProperties, final double idleDrain, final AEKeyType keyType, final StorageTier tier)
+    public AECellItem(final Item.Properties pProperties, final double idleDrain, final AEKeyType keyType, final StorageTier tier)
     {
         super(pProperties);
         this.idleDrain = idleDrain;
@@ -58,11 +56,11 @@ public class AEBigIntegerCellItem extends Item implements IAEBigIntegerCell, ICe
     {
         if (Platform.isClient())
         {
-            final BigInteger used = IAEBigIntegerCell.getUsedBytes(stack);
+            final long used = IAECell.getUsedBytes(stack);
             final long maxBytes = getMaxBytes(stack);
-            lines.add(AEUniversalTooltips.bytesUsed(used, maxBytes != Long.MAX_VALUE ? maxBytes : -1));
+            lines.add(AEUniversalTooltips.bytesUsed(used, maxBytes));
             
-            final long typesUsed = IAEBigIntegerCell.getUsedTypes(stack);
+            final long typesUsed = IAECell.getUsedTypes(stack);
             final long maxTypes = getMaxTypes(stack);
             lines.add(AEUniversalTooltips.typesUsed(typesUsed, maxTypes != Integer.MAX_VALUE ? maxTypes : -1));
         }
@@ -84,7 +82,7 @@ public class AEBigIntegerCellItem extends Item implements IAEBigIntegerCell, ICe
         List<GenericStack> content = Collections.emptyList();
         boolean hasMore = false;
         if (showCnt) {
-            final List<GenericStack> show = IAEBigIntegerCell.getTooltipShowStacks(stack);
+            final List<GenericStack> show = IAECell.getTooltipStacks(stack);
             if (!show.isEmpty()) {
                 final int limit = 5;
                 if (show.size() > limit) {
@@ -137,25 +135,23 @@ public class AEBigIntegerCellItem extends Item implements IAEBigIntegerCell, ICe
 
     @Override
     public long getMaxBytes(final ItemStack stack) {
-        if (this.tier == null) return Long.MAX_VALUE;
-        if (this.tier.bytes() == Integer.MAX_VALUE) return Long.MAX_VALUE;
+        if (this.tier == null || this.tier.bytes() == Integer.MAX_VALUE) return MAX_CELL_BYTES;
         return this.tier.bytes();
     }
 
     @Override
     public int getMaxTypes(final ItemStack stack) {
-        if (this.tier == null || this.tier.bytes() == Integer.MAX_VALUE) return Integer.MAX_VALUE;
+        if (this.tier == null || this.tier.bytes() == Integer.MAX_VALUE) return 16_384;
         final int bytes = this.tier.bytes();
-        if (bytes >= 750_000_000) return 8192;   // Core (750M)
-        if (bytes >= 250_000_000) return 4096;   // Nexus (250M)
-        if (bytes >= 100_000_000) return 2048;   // Beacon (100M)
-        return 1024;                              // Echo (40M) and below
+        if (bytes >= 750_000_000) return 8192;
+        if (bytes >= 250_000_000) return 4096;
+        if (bytes >= 100_000_000) return 2048;
+        return 1024;
     }
 
     @Override
     public int getBytesPerType(final ItemStack stack) {
-        if (this.tier == null || this.tier.bytes() == Integer.MAX_VALUE) return 0;
-        return 0; // We define overhead as 0 for all our custom cells so items cost 1 byte exactly.
+        return 0;
     }
 
     @Override

@@ -7,7 +7,7 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 
-public class AnimatedNameBlockItem extends BlockItem {
+public final class AnimatedNameBlockItem extends BlockItem {
 
     private final ChatFormatting[] colors;
 

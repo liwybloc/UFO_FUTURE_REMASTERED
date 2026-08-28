@@ -20,7 +20,7 @@ import net.neoforged.neoforge.transfer.energy.EnergyHandler;
 
 import java.util.List;
 
-public class UfoEnergyPickaxeItem extends Item implements IEnergyTool, IHasModeHUD, IHasCycleableModes {
+public final class UfoEnergyPickaxeItem extends Item implements IEnergyTool, IHasModeHUD, IHasCycleableModes {
 
     private static final int ENERGY_COST_NORMAL = 200;
     private static final int ENERGY_COST_FAST = 2000;

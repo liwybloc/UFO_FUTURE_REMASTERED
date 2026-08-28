@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-public class RegistryHandler {
+public final class RegistryHandler {
     protected final String id;
     protected final List<Pair<String, Block>> blocks = new ArrayList<>();
     protected final List<Pair<String, Item>> items = new ArrayList<>();

@@ -33,7 +33,7 @@ import org.jetbrains.annotations.Nullable;
  * BE type because it needs to hold an AE2 grid node and implement
  * {@link com.raishxn.ufo.api.ae.IMassiveInjector}.
  */
-public class MassiveOutputHatchBlock extends DirectionalBlock implements net.minecraft.world.level.block.EntityBlock {
+public final class MassiveOutputHatchBlock extends DirectionalBlock implements net.minecraft.world.level.block.EntityBlock {
 
     public MassiveOutputHatchBlock(final BlockBehaviour.Properties properties) {
         super(properties);

@@ -6,7 +6,7 @@ import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.Map;
 
-public class QuantumSlicerPatternFactory {
+public final class QuantumSlicerPatternFactory {
 
     public static Map<Character, BlockState> getDefaultCreativeStates() {
         return QuantumPatternPredicates.getDefaultCreativeStates();

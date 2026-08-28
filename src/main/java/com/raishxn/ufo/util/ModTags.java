@@ -10,8 +10,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.Fluid;
 
-public class ModTags {
-    public static class Blocks {
+public final class ModTags {
+    public static final class Blocks {
         public static final TagKey<Block> NEEDS_UFO_TOOL = createTag("needs_ufo_tool");
         public static final TagKey<Block> INCORRECT_FOR_UFO_TOOL = createTag("incorrect_for_ufo_tool");
 
@@ -21,7 +21,7 @@ public class ModTags {
     }
 
 
-    public static class Items {
+    public static final class Items {
         public static final TagKey<Item> TRANSFORMABLE_ITEMS = createTag("transformable_items");
         public static final TagKey<Item> STAFF = createTag("staff");
         public static final TagKey<Item> INGREDIENTS_UFO = createTag("ingredients/ufo");
@@ -44,7 +44,7 @@ public class ModTags {
             return ItemTags.create(Identifier.fromNamespaceAndPath(UfoMod.MOD_ID, name));
         }
     }
-    public static class Fluids {
+    public static final class Fluids {
         public static final TagKey<Fluid> COOLANTS = tag("coolants");
         public static final TagKey<Fluid> SYNTHETIC_FLUID = tag("synthetic_fluid");
         public static final TagKey<Fluid> ENERGY_FLUID = tag("energy_fluid");

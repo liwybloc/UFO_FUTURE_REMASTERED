@@ -17,7 +17,7 @@ import net.neoforged.neoforge.transfer.energy.EnergyHandler;
 
 import java.util.List;
 
-public class UfoEnergyShovelItem extends ShovelItem implements IEnergyTool, IHasModeHUD, IHasCycleableModes {
+public final class UfoEnergyShovelItem extends ShovelItem implements IEnergyTool, IHasModeHUD, IHasCycleableModes {
 
     private static final int ENERGY_COST_NORMAL = 100;
     private static final int ENERGY_COST_FAST = 1000;

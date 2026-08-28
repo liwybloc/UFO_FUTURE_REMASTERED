@@ -8,7 +8,7 @@ import net.neoforged.neoforge.transfer.transaction.Transaction;
 
 import java.util.Optional;
 
-public class EnergyToolHelper {
+public final class EnergyToolHelper {
     public static EnergyHandler getEnergyHandler(final ItemStack stack) {
         return ItemAccess.forStack(stack).getCapability(Capabilities.Energy.ITEM);
     }

@@ -28,7 +28,7 @@ import com.raishxn.ufo.init.ModBlockEntities;
  * Each instance gets its own unique registry ID and texture, but
  * they all share the same block entity type and linking logic.
  */
-public class StellarNexusPartBlock extends Block implements net.minecraft.world.level.block.EntityBlock {
+public final class StellarNexusPartBlock extends Block implements net.minecraft.world.level.block.EntityBlock {
 
     public StellarNexusPartBlock(final BlockBehaviour.Properties properties) {
         super(properties);

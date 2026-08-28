@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
-public class DMARecipeBuilder {
+public final class DMARecipeBuilder {
     private static final int BULK_QMF_FACTOR = 64;
     private final String name;
     private final List<IngredientStack.Item> itemInputs = new ArrayList<>();

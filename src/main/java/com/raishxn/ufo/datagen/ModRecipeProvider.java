@@ -43,7 +43,7 @@ import java.util.function.Supplier;
 import com.raishxn.ufo.datagen.StellarSimulationRecipeBuilder;
 import com.raishxn.ufo.recipe.UniversalMultiblockMachineKind;
 
-public class ModRecipeProvider extends RecipeProvider {
+public final class ModRecipeProvider extends RecipeProvider {
 
     public ModRecipeProvider(final PackOutput output, final CompletableFuture<HolderLookup.Provider> lookupProvider) {
         super(output, lookupProvider);
@@ -196,7 +196,7 @@ public class ModRecipeProvider extends RecipeProvider {
         DMARecipeBuilder.create("dma/safe_containment_matter").output(ModItems.SAFE_CONTAINMENT_MATTER.get()).inputItem(ModItems.OBSIDIAN_MATRIX.get(), 4).inputItem(Items.NETHERITE_INGOT).inputFluid(ModFluids.SOURCE_UU_MATTER_FLUID.get(), 500).energy(100000).time(200).save(c);
         DMARecipeBuilder.create("dma/aether_containment_capsule").output(ModItems.AETHER_CONTAINMENT_CAPSULE.get()).inputItem(ModItems.SAFE_CONTAINMENT_MATTER.get(), 2).inputItem(ModItems.PHASE_SHIFT_COMPONENT_MATRIX.get()).inputFluid(ModFluids.SOURCE_SPATIAL_FLUID.get(), 1000).energy(500000).time(400).save(c);
         DMARecipeBuilder.create("dma/scrap_from_matrix").output(ModItems.SCRAP.get(), 4).output(AEItems.MATTER_BALL.get(), 1, 0.1F).inputItem(ModItems.OBSIDIAN_MATRIX.get()).inputFluid(Fluids.WATER, 1000).energy(100000).time(200).save(c);
-        DMARecipeBuilder.create("dma/scrap_box").output(ModItems.SCRAP_BOX.get()).inputItem(ModItems.SCRAP.get(), 56).inputFluid(Fluids.WATER, 1000).energy(10000000).time(2000).noBulkQmfMirror().save(c);
+        DMARecipeBuilder.create("dma/scrap_box").output(ModItems.SCRAP_BOX.get()).inputItem(ModItems.SCRAP.get(), 24).inputFluid(Fluids.WATER, 1000).energy(10000000).time(300).noBulkQmfMirror().save(c);
         
         this.buildFluidRecipes(c);
         this.buildMatterProgression(c);
@@ -217,13 +217,13 @@ public class ModRecipeProvider extends RecipeProvider {
     }
 
     private void buildFluidRecipes(final RecipeOutput c) {
-        DMARecipeBuilder.create("dma/uu_amplifier").outputFluid(ModFluids.SOURCE_UU_AMPLIFIER_FLUID.get(), 250, 1.0F).inputItem(ModItems.SCRAP_BOX.get()).inputFluid(Fluids.WATER, 1000).energy(20000).time(300).save(c);
+        DMARecipeBuilder.create("dma/uu_amplifier").outputFluid(ModFluids.SOURCE_UU_AMPLIFIER_FLUID.get(), 500, 1.0F).inputItem(ModItems.SCRAP_BOX.get()).inputFluid(Fluids.WATER, 1000).energy(20000).time(100).save(c);
         DMARecipeBuilder.create("dma/uu_matter").outputFluid(ModFluids.SOURCE_UU_MATTER_FLUID.get(), 250, 1.0F).inputItem(AEItems.MATTER_BALL.get(), 64).inputFluid(ModFluids.SOURCE_UU_AMPLIFIER_FLUID.get(), 1000).energy(100000).time(300).save(c);
         this.createFluidRecipe(c, ModFluids.SOURCE_TEMPORAL_FLUID, ModItems.QUANTUM_ANOMALY, ModFluids.SOURCE_LIQUID_STARLIGHT_FLUID, 2000000);
         this.createFluidRecipe(c, ModFluids.SOURCE_SPATIAL_FLUID, ModItems.NUCLEAR_STAR, ModFluids.SOURCE_PRIMORDIAL_MATTER_FLUID, 6000000);
         DMARecipeBuilder.create("dma/gelid_cryotheum").outputFluid(ModFluids.SOURCE_GELID_CRYOTHEUM.get(), 16000, 1.0F).inputItem(ModItems.DUST_CRYOTHEUM.get(), 4).inputFluid(Fluids.WATER, 2000).energy(50000).time(100).save(c);
         DMARecipeBuilder.create("dma/primordial_matter_liquid").outputFluid(ModFluids.SOURCE_PRIMORDIAL_MATTER_FLUID.get(), 5000, 1.0F).inputItem(ModItems.QUANTUM_ANOMALY.get()).inputFluid(ModFluids.SOURCE_RAW_STAR_MATTER_PLASMA_FLUID.get(), 5000).energy(3000000).time(700).save(c);
-        DMARecipeBuilder.create("dma/liquid_starlight").outputFluid(ModFluids.SOURCE_LIQUID_STARLIGHT_FLUID.get(), 10000, 1.0F).inputItem(ModItems.OBSIDIAN_MATRIX.get(), 4).inputItem(Items.NETHER_STAR, 16).inputFluid(ModFluids.SOURCE_UU_AMPLIFIER_FLUID.get(), 100).energy(500000).time(400).save(c);
+        DMARecipeBuilder.create("dma/liquid_starlight").outputFluid(ModFluids.SOURCE_LIQUID_STARLIGHT_FLUID.get(), 20000, 1.0F).inputItem(ModItems.OBSIDIAN_MATRIX.get(), 4).inputItem(Items.NETHER_STAR, 16).inputFluid(ModFluids.SOURCE_UU_AMPLIFIER_FLUID.get(), 100).energy(500000).time(400).save(c);
         DMARecipeBuilder.create("dma/raw_star_matter_plasma")
                 .outputFluid(ModFluids.SOURCE_RAW_STAR_MATTER_PLASMA_FLUID.get(), 10000, 1.0F)
                 .inputItem(ModItems.WHITE_DWARF_FRAGMENT_INGOT.get(), 8)
@@ -936,11 +936,11 @@ public class ModRecipeProvider extends RecipeProvider {
                 .save(c);
 
         UniversalMultiblockRecipeBuilder.create("universal/qmf/scrap_box_massive", UniversalMultiblockMachineKind.QMF)
-                .inputItem(ModItems.SCRAP.get(), 57_344)
+                .inputItem(ModItems.SCRAP.get(), 24_576)
                 .inputFluid(Fluids.WATER, 1_024_000)
                 .outputItem(ModItems.SCRAP_BOX.get(), 1024)
                 .energy(10_240_000_000L)
-                .time(2000)
+                .time(300)
                 .requiredTier(1)
                 .save(c);
 

@@ -32,7 +32,7 @@ import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import java.util.function.Function;
 
-public class MultiblockBlocks {
+public final class MultiblockBlocks {
     public static final DeferredRegister.Blocks BLOCKS =
             DeferredRegister.createBlocks(UfoMod.MOD_ID);
 
@@ -159,7 +159,7 @@ public class MultiblockBlocks {
         BLOCKS.register(eventBus);
     }
 
-    public static class OrientableMultiblock extends DirectionalBlock {
+    public static final class OrientableMultiblock extends DirectionalBlock {
         public static final MapCodec<OrientableMultiblock> CODEC = simpleCodec(OrientableMultiblock::new);
 
         public OrientableMultiblock(final Properties properties) {
@@ -183,7 +183,7 @@ public class MultiblockBlocks {
         }
     }
 
-    public static class ControllerBlock extends DirectionalBlock implements net.minecraft.world.level.block.EntityBlock, IOrientableBlock {
+    public static final class ControllerBlock extends DirectionalBlock implements net.minecraft.world.level.block.EntityBlock, IOrientableBlock {
         public static final MapCodec<ControllerBlock> CODEC = simpleCodec(ControllerBlock::new);
         public static final BooleanProperty ACTIVE = BooleanProperty.create("active");
 

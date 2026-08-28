@@ -5,7 +5,7 @@ import net.minecraft.client.KeyMapping;
 import com.raishxn.ufo.UfoMod;
 import org.lwjgl.glfw.GLFW;
 
-public class ModKeyBindings {
+public final class ModKeyBindings {
     private static final KeyMapping.Category CATEGORY = KeyMapping.Category.register(UfoMod.id("ufo"));
     public static final String KEY_CATEGORY_UFO = "key.category.ufo";
     public static final String KEY_TOGGLE_AUTO_SMELT = "key.ufo.toggle_auto_smelt";

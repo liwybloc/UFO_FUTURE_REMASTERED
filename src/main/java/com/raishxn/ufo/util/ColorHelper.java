@@ -7,7 +7,7 @@ import net.minecraft.util.Mth;
 
 import java.awt.Color;
 
-public class ColorHelper {
+public final class ColorHelper {
 
     private static final ChatFormatting[] LOW_CONTRAST_DARKS = new ChatFormatting[] {
             ChatFormatting.BLACK,

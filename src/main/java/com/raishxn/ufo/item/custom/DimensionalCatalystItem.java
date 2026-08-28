@@ -16,7 +16,7 @@ import java.util.List;
  * Catalisador Criativo.
  * Extends UpgradeCardItem for AE2 upgrade slot compatibility.
  */
-public class DimensionalCatalystItem extends UpgradeCardItem {
+public final class DimensionalCatalystItem extends UpgradeCardItem {
 
     public DimensionalCatalystItem(final Properties properties) {
         super(properties);

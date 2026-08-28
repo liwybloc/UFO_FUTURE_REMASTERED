@@ -12,7 +12,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jetbrains.annotations.NotNull;
 
-public class QmfControllerMenu extends AbstractUniversalMultiblockControllerMenu<QmfControllerBE> {
+public final class QmfControllerMenu extends AbstractUniversalMultiblockControllerMenu<QmfControllerBE> {
 
     public QmfControllerMenu(final int id, final Inventory inv, final FriendlyByteBuf extraData) {
         this(id, inv, inv.player.level().getBlockEntity(extraData.readBlockPos()));

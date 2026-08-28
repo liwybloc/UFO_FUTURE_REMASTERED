@@ -16,7 +16,7 @@ import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 
-public class QuantumPatternHatchLockReason implements ICompositeWidget {
+public final class QuantumPatternHatchLockReason implements ICompositeWidget {
     private final QuantumPatternHatchScreen screen;
     private boolean visible;
     private int x;

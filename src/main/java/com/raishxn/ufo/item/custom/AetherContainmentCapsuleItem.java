@@ -20,7 +20,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public class AetherContainmentCapsuleItem extends Item {
+public final class AetherContainmentCapsuleItem extends Item {
     public static final int CAPACITY = 4000;
 
     public AetherContainmentCapsuleItem(final Properties properties) {
@@ -46,7 +46,7 @@ public class AetherContainmentCapsuleItem extends Item {
         }
     }
 
-    public static class HazardousFluidHandler extends FluidHandlerItemStack {
+    public static final class HazardousFluidHandler extends FluidHandlerItemStack {
         public HazardousFluidHandler(@NotNull final ItemStack container, final int capacity) {
             super(ModDataComponents.FLUID_CONTENT, container, capacity);
         }

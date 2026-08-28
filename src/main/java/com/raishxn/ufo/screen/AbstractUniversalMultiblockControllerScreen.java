@@ -3,7 +3,6 @@ package com.raishxn.ufo.screen;
 import appeng.client.gui.implementations.UpgradeableScreen;
 import appeng.client.gui.style.ScreenStyle;
 import appeng.menu.SlotSemantics;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.raishxn.ufo.api.multiblock.IMultiblockController;
 import com.raishxn.ufo.api.multiblock.MultiblockControllerDefinition;
 import com.raishxn.ufo.api.multiblock.MultiblockControllerDefinitions;
@@ -20,8 +19,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
-import net.minecraft.util.FormattedCharSequence;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.Direction;
@@ -91,8 +88,6 @@ public abstract class AbstractUniversalMultiblockControllerScreen<M extends Abst
     @Override
     public void drawBG(final GuiGraphicsExtractor guiGraphics, final int offsetX, final int offsetY, final int mouseX, final int mouseY, final float partialTick) {
         super.drawBG(guiGraphics, offsetX, offsetY, mouseX, mouseY, partialTick);
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         renderTemperatureBar(guiGraphics);
         renderRecipeList(guiGraphics);
     }
@@ -116,8 +111,8 @@ public abstract class AbstractUniversalMultiblockControllerScreen<M extends Abst
         final int maxTextWidth = 156;
         final List<GroupedRecipe> recipes = buildGroupedRecipes();
 
-        guiGraphics.drawString(this.font, this.font.plainSubstrByWidth(getScreenTitle().getString(), maxTextWidth), listX, listY, 0xF0F0F0, false);
-        guiGraphics.drawString(this.font, this.font.plainSubstrByWidth(buildStatusLine(), maxTextWidth), listX, listY + 10, 0xD0D7E6, false);
+        guiGraphics.text(this.font, this.font.plainSubstrByWidth(getScreenTitle().getString(), maxTextWidth), listX, listY, 0xF0F0F0, false);
+        guiGraphics.text(this.font, this.font.plainSubstrByWidth(buildStatusLine(), maxTextWidth), listX, listY + 10, 0xD0D7E6, false);
         renderSummaryLine(guiGraphics, listX, listY + 20, maxTextWidth, recipes);
 
         for (int i = 0; i < 8; i++) {
@@ -125,7 +120,7 @@ public abstract class AbstractUniversalMultiblockControllerScreen<M extends Abst
             if (i < recipes.size()) {
                 renderRecipeRow(guiGraphics, recipes.get(i), listX, rowY);
             } else if (i == 0 && recipes.isEmpty()) {
-                guiGraphics.drawString(this.font, this.menu.isAssembled() ? "No active recipes." : "Structure incomplete.", listX, rowY, 0x8A91A6, false);
+                guiGraphics.text(this.font, this.menu.isAssembled() ? "No active recipes." : "Structure incomplete.", listX, rowY, 0x8A91A6, false);
             }
         }
     }
@@ -144,11 +139,11 @@ public abstract class AbstractUniversalMultiblockControllerScreen<M extends Abst
 
         int textX = x;
         if (!iconStack.isEmpty()) {
-            guiGraphics.pose().pushPose();
-            guiGraphics.pose().translate(x, y - 1, 0.0F);
-            guiGraphics.pose().scale(0.5F, 0.5F, 1.0F);
-            guiGraphics.renderItem(iconStack, 0, 0);
-            guiGraphics.pose().popPose();
+            guiGraphics.pose().pushMatrix();
+            guiGraphics.pose().translate(x, y - 1);
+            guiGraphics.pose().scale(0.5F, 0.5F);
+            guiGraphics.item(iconStack, 0, 0);
+            guiGraphics.pose().popMatrix();
             textX += 10;
         }
 
@@ -162,8 +157,8 @@ public abstract class AbstractUniversalMultiblockControllerScreen<M extends Abst
         if (groupedRecipe.copyCount() > 1) {
             leftText += " [" + groupedRecipe.copyCount() + "]";
         }
-        guiGraphics.drawString(this.font, this.font.plainSubstrByWidth(leftText, availableWidth), textX, y, 0xE6EBF5, false);
-        guiGraphics.drawString(this.font, time, this.leftPos + 162 - timeWidth, y, 0xB9D8FF, false);
+        guiGraphics.text(this.font, this.font.plainSubstrByWidth(leftText, availableWidth), textX, y, 0xE6EBF5, false);
+        guiGraphics.text(this.font, time, this.leftPos + 162 - timeWidth, y, 0xB9D8FF, false);
     }
 
     private String buildStatusLine() {
@@ -178,7 +173,7 @@ public abstract class AbstractUniversalMultiblockControllerScreen<M extends Abst
 
     private void renderSummaryLine(final GuiGraphicsExtractor guiGraphics, final int x, final int y, final int maxTextWidth, final List<GroupedRecipe> recipes) {
         final String summaryText = buildSummaryText(recipes);
-        guiGraphics.drawString(this.font, this.font.plainSubstrByWidth(summaryText, maxTextWidth), x, y, 0xB9D8FF, false);
+        guiGraphics.text(this.font, this.font.plainSubstrByWidth(summaryText, maxTextWidth), x, y, 0xB9D8FF, false);
     }
 
     private String buildSummaryText(final List<GroupedRecipe> recipes) {
@@ -243,27 +238,30 @@ public abstract class AbstractUniversalMultiblockControllerScreen<M extends Abst
     }
 
     @Override
-    protected void renderTooltip(final GuiGraphicsExtractor guiGraphics, final int mouseX, final int mouseY) {
+    public void extractRenderState(
+            final GuiGraphicsExtractor guiGraphics,
+            final int mouseX,
+            final int mouseY,
+            final float partialTick) {
+        super.extractRenderState(guiGraphics, mouseX, mouseY, partialTick);
+
         if (isHovering(14, 9, 146, 10, mouseX, mouseY)) {
-            guiGraphics.renderTooltip(this.font,
-                    Component.literal("Temperature: " + this.menu.getTemperature() + " / " + this.menu.getMaxTemperature()),
-                    mouseX, mouseY);
+            guiGraphics.setTooltipForNextFrame(this.font,
+                    Component.literal("Temperature: " + this.menu.getTemperature() + " / " + this.menu.getMaxTemperature()), mouseX, mouseY);
             return;
         }
         if (isHoveringParallelText(mouseX, mouseY)) {
-            guiGraphics.renderTooltip(this.font, buildParallelTooltip().stream().map(Component::getVisualOrderText).toList(), mouseX, mouseY);
+            guiGraphics.setComponentTooltipForNextFrame(this.font, buildParallelTooltip(), mouseX, mouseY);
             return;
         }
         if (isHoveringSummaryLine(mouseX, mouseY)) {
-            guiGraphics.renderTooltip(this.font, buildSummaryTooltip().stream().map(Component::getVisualOrderText).toList(), mouseX, mouseY);
+            guiGraphics.setComponentTooltipForNextFrame(this.font, buildSummaryTooltip(), mouseX, mouseY);
             return;
         }
         final GroupedRecipe hoveredRecipe = getHoveredGroupedRecipe(mouseX, mouseY);
         if (hoveredRecipe != null) {
-            guiGraphics.renderTooltip(this.font, buildGroupedRecipeTooltip(hoveredRecipe).stream().map(Component::getVisualOrderText).toList(), mouseX, mouseY);
-            return;
+            guiGraphics.setComponentTooltipForNextFrame(this.font, buildGroupedRecipeTooltip(hoveredRecipe), mouseX, mouseY);
         }
-        super.renderTooltip(guiGraphics, mouseX, mouseY);
     }
 
     private boolean isHoveringParallelText(final int mouseX, final int mouseY) {

@@ -70,7 +70,7 @@ import appeng.util.inv.FilteredInternalInventory;
 import appeng.util.inv.filter.AEItemFilters;
 import net.pedroksl.ae2addonlib.api.IDirectionalOutputHost;
 
-public class DimensionalMatterAssemblerBlockEntity extends AENetworkedPoweredBlockEntity
+public final class DimensionalMatterAssemblerBlockEntity extends AENetworkedPoweredBlockEntity
         implements IGridTickable, IUpgradeableObject, IConfigurableObject, IDirectionalOutputHost {
     private static final int MAX_INPUT_SLOTS = 9;
     private static final int MAX_OUTPUT_SLOTS = 2;
@@ -1138,7 +1138,7 @@ public class DimensionalMatterAssemblerBlockEntity extends AENetworkedPoweredBlo
         return new ItemStack(this.getBlockState().getBlock().asItem());
     }
 
-    public static class CustomGenericInv extends GenericStackInv {
+    public static final class CustomGenericInv extends GenericStackInv {
         public CustomGenericInv(final Set<AEKeyType> supportedKeyTypes, @Nullable final Runnable listener, final Mode mode, final int size) {
             super(supportedKeyTypes, listener, mode, size);
         }

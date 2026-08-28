@@ -22,7 +22,7 @@ import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 @EventBusSubscriber(modid = UfoMod.MOD_ID)
-public class AstralNexusEvents {
+public final class AstralNexusEvents {
     private static final Identifier STEP_ASSIST_ID = UfoMod.id("astral_nexus_step_assist");
     private static final String FLIGHT_TAG = "ufoAstralNexusFlight";
     private static final float REFLECT_MULTIPLIER = 1_000_000.0F;

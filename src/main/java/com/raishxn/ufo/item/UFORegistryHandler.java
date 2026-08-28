@@ -3,13 +3,13 @@ package com.raishxn.ufo.item;
 import appeng.api.client.StorageCellModels;
 import appeng.api.storage.StorageCells;
 import com.raishxn.ufo.UfoMod;
-import com.raishxn.ufo.item.custom.cell.AEBigIntegerCellHandler;
+import com.raishxn.ufo.item.custom.cell.AECellHandler;
 import com.raishxn.ufo.item.custom.cell.InfinityGenesisCellInventory;
 import com.raishxn.ufo.item.custom.cell.InfinityCellInventory;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.loading.FMLEnvironment;
 
-public class UFORegistryHandler {
+public final class UFORegistryHandler {
 
     public static final UFORegistryHandler INSTANCE = new UFORegistryHandler();
 
@@ -50,7 +50,7 @@ public class UFORegistryHandler {
     private void registerStorageHandler() {
         StorageCells.addCellHandler(InfinityCellInventory.HANDLER);
         StorageCells.addCellHandler(InfinityGenesisCellInventory.HANDLER);
-        StorageCells.addCellHandler(AEBigIntegerCellHandler.INSTANCE);
+        StorageCells.addCellHandler(AECellHandler.INSTANCE);
         if (FMLEnvironment.getDist() == Dist.CLIENT) {
             registerStorageModels();
         }

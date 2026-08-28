@@ -12,7 +12,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jetbrains.annotations.NotNull;
 
-public class EntropicConvergenceEngineMenu extends AbstractUniversalMultiblockControllerMenu<EntropicConvergenceEngineBE> {
+public final class EntropicConvergenceEngineMenu extends AbstractUniversalMultiblockControllerMenu<EntropicConvergenceEngineBE> {
     public EntropicConvergenceEngineMenu(final int id, final Inventory inv, final FriendlyByteBuf extraData) {
         this(id, inv, inv.player.level().getBlockEntity(extraData.readBlockPos()));
     }

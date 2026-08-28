@@ -8,7 +8,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 
-public class QuantumSlicerControllerBlock extends AbstractSimpleMultiblockControllerBlock<QuantumSlicerControllerBE> {
+public final class QuantumSlicerControllerBlock extends AbstractSimpleMultiblockControllerBlock<QuantumSlicerControllerBE> {
 
     public static final MapCodec<QuantumSlicerControllerBlock> CODEC = simpleCodec(QuantumSlicerControllerBlock::new);
 

@@ -11,7 +11,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.CompletableFuture;
 
-public class ModFluidTagProvider extends FluidTagsProvider {
+public final class ModFluidTagProvider extends FluidTagsProvider {
     public ModFluidTagProvider(final PackOutput output, final CompletableFuture<HolderLookup.Provider> lookupProvider, @Nullable final ExistingFileHelper existingFileHelper) {
         super(output, lookupProvider, UfoMod.MOD_ID, existingFileHelper);
     }

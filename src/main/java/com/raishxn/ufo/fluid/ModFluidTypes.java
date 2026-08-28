@@ -13,7 +13,7 @@ import org.joml.Vector3f;
 
 import java.util.function.Supplier;
 
-public class ModFluidTypes {
+public final class ModFluidTypes {
     public static final DeferredRegister<FluidType> FLUID_TYPES =
             DeferredRegister.create(NeoForgeRegistries.FLUID_TYPES, UfoMod.MOD_ID);
     public static void register(final IEventBus eventBus) {
@@ -102,8 +102,8 @@ public class ModFluidTypes {
         final Identifier texture = Identifier.fromNamespaceAndPath(UfoMod.MOD_ID, "block/fluid/" + textureName);
         return FLUID_TYPES.register(name, () -> new BaseFluidType(
                 texture, texture, texture,
-                0xFFFFFFFF, // Usa a cor personalizada (Roxo/Verde)
-                new Vector3f(0.5f, 0.8f, 1.0f), // Neblina azulada
+                0xFFFFFFFF,
+                new Vector3f(0.5f, 0.8f, 1.0f),
                 FluidType.Properties.create()
                         .temperature(temperature)
                         .density(3000)

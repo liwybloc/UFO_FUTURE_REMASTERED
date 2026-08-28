@@ -1,8 +1,6 @@
 package com.raishxn.ufo.screen;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.raishxn.ufo.UfoMod;
-import com.raishxn.ufo.init.ModRecipes;
 import com.raishxn.ufo.network.ModPackets;
 import com.raishxn.ufo.network.packet.PacketChangeStellarRecipe;
 import com.raishxn.ufo.network.packet.PacketScanStellarStructure;
@@ -13,9 +11,11 @@ import com.raishxn.ufo.network.packet.PacketToggleStellarLock;
 import com.raishxn.ufo.network.packet.PacketToggleStellarOverclock;
 import com.raishxn.ufo.client.tutorial.UfoTutorialScreens;
 import com.raishxn.ufo.recipe.StellarSimulationRecipe;
+import com.raishxn.ufo.recipe.ClientRecipeCache;
 
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -28,7 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.core.BlockPos;
 
-public class StellarNexusControllerScreen extends AbstractContainerScreen<StellarNexusControllerMenu> {
+public final class StellarNexusControllerScreen extends AbstractContainerScreen<StellarNexusControllerMenu> {
     private static final Identifier TEXTURE =
             Identifier.fromNamespaceAndPath(UfoMod.MOD_ID, "textures/gui/stellar_nexus_controller.png");
 
@@ -46,9 +46,7 @@ public class StellarNexusControllerScreen extends AbstractContainerScreen<Stella
     private Button tutorialButton;
 
     public StellarNexusControllerScreen(final StellarNexusControllerMenu pMenu, final Inventory pPlayerInventory, final Component pTitle) {
-        super(pMenu, pPlayerInventory, pTitle);
-        this.imageWidth = 191;
-        this.imageHeight = 160;
+        super(pMenu, pPlayerInventory, pTitle, 191, 160);
     }
 
     @Override
@@ -59,12 +57,12 @@ public class StellarNexusControllerScreen extends AbstractContainerScreen<Stella
         this.titleLabelX = (this.imageWidth - this.font.width(this.title)) / 2;
 
         if (this.minecraft != null && this.minecraft.level != null) {
-            this.availableRecipes = new ArrayList<>();
+            this.availableRecipes = new ArrayList<>(ClientRecipeCache.stellarSimulationRecipeHolders());
             
             final Identifier activeId = this.menu.getBlockEntity().getActiveRecipeId();
             if (activeId != null) {
                 for (int i = 0; i < this.availableRecipes.size(); i++) {
-                    if (this.availableRecipes.get(i).id().equals(activeId)) {
+                    if (this.availableRecipes.get(i).id().identifier().equals(activeId)) {
                         this.currentRecipeIndex = i;
                         break;
                     }
@@ -286,35 +284,51 @@ public class StellarNexusControllerScreen extends AbstractContainerScreen<Stella
             this.currentRecipeIndex += this.availableRecipes.size();
         }
 
-        final Identifier newId = this.availableRecipes.get(this.currentRecipeIndex).id();
+        final Identifier newId = this.availableRecipes.get(this.currentRecipeIndex).id().identifier();
         ModPackets.sendToServer(new PacketChangeStellarRecipe(this.menu.getBlockEntity().getBlockPos(), newId));
         updateButtonTooltips();
     }
 
     @Override
-    protected void renderBg(final GuiGraphicsExtractor guiGraphics, final float pPartialTick, final int pMouseX, final int pMouseY) {
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        guiGraphics.blit(TEXTURE, this.leftPos, this.topPos, 0, 0, 191, 160);
+    public void extractContents(
+            final GuiGraphicsExtractor guiGraphics,
+            final int mouseX,
+            final int mouseY,
+            final float partialTick) {
+        guiGraphics.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, this.leftPos, this.topPos, 0, 0, 191, 160, 256, 256);
 
         final int p = this.menu.getProgress();
         final int max = this.menu.getTotalTime();
         if (max > 0 && p > 0) {
             final int progressWidth = (int) ((float) p / max * 157.0f);
-            guiGraphics.blit(TEXTURE, this.leftPos + 17, this.topPos + 106, 17, 180, progressWidth, 12);
+            guiGraphics.blit(
+                    RenderPipelines.GUI_TEXTURED,
+                    TEXTURE,
+                    this.leftPos + 17,
+                    this.topPos + 106,
+                    17,
+                    180,
+                    progressWidth,
+                    12,
+                    256,
+                    256);
         }
+
+        super.extractContents(guiGraphics, mouseX, mouseY, partialTick);
     }
 
     @Override
-    public void render(final GuiGraphicsExtractor guiGraphics, final int mouseX, final int mouseY, final float delta) {
-        renderBackground(guiGraphics, mouseX, mouseY, delta);
-        super.render(guiGraphics, mouseX, mouseY, delta);
-        renderTooltip(guiGraphics, mouseX, mouseY);
-
-        renderCustomTooltips(guiGraphics, mouseX, mouseY);
+    public void extractRenderState(
+            final GuiGraphicsExtractor guiGraphics,
+            final int mouseX,
+            final int mouseY,
+            final float partialTick) {
         updateButtonTooltips();
+        super.extractRenderState(guiGraphics, mouseX, mouseY, partialTick);
+        extractCustomTooltips(guiGraphics, mouseX, mouseY);
     }
 
-    private void renderCustomTooltips(final GuiGraphicsExtractor guiGraphics, final int mouseX, final int mouseY) {
+    private void extractCustomTooltips(final GuiGraphicsExtractor guiGraphics, final int mouseX, final int mouseY) {
         final int localX = mouseX - this.leftPos;
         final int localY = mouseY - this.topPos;
 
@@ -329,7 +343,7 @@ public class StellarNexusControllerScreen extends AbstractContainerScreen<Stella
                 tips.add(Component.literal("§cNo Field Generator detected."));
                 tips.add(Component.literal("§7Place a Stellar Field Generator in the structure."));
             }
-            guiGraphics.renderTooltip(this.font, tips, java.util.Optional.empty(), mouseX, mouseY);
+            guiGraphics.setComponentTooltipForNextFrame(this.font, tips, mouseX, mouseY);
         }
 
         if (localX >= 125 && localX <= 178 && localY >= 129 && localY <= 139) {
@@ -346,7 +360,7 @@ public class StellarNexusControllerScreen extends AbstractContainerScreen<Stella
             if (energyPct >= 100) {
                 tips.add(Component.literal("§a✓ Energy fully charged."));
             }
-            guiGraphics.renderTooltip(this.font, tips, java.util.Optional.empty(), mouseX, mouseY);
+            guiGraphics.setComponentTooltipForNextFrame(this.font, tips, mouseX, mouseY);
         }
 
         if (localX >= 125 && localX <= 175 && localY >= 40 && localY <= 55) {
@@ -361,12 +375,12 @@ public class StellarNexusControllerScreen extends AbstractContainerScreen<Stella
             } else {
                 tips.add(Component.literal("§4⚗ WARNING: Explosion on overheat!"));
             }
-            guiGraphics.renderTooltip(this.font, tips, java.util.Optional.empty(), mouseX, mouseY);
+            guiGraphics.setComponentTooltipForNextFrame(this.font, tips, mouseX, mouseY);
         }
     }
 
     @Override
-    protected void renderLabels(final GuiGraphicsExtractor guiGraphics, final int pMouseX, final int pMouseY) {
+    protected void extractLabels(final GuiGraphicsExtractor guiGraphics, final int mouseX, final int mouseY) {
         final Component statusText;
         if (this.menu.getCooldownTimer() > 0) {
             final int secLeft = this.menu.getCooldownTimer() / 20;
@@ -380,7 +394,7 @@ public class StellarNexusControllerScreen extends AbstractContainerScreen<Stella
         } else {
             statusText = Component.literal("Offline").withStyle(ChatFormatting.RED);
         }
-        guiGraphics.drawString(this.font, statusText, 15, 44, 0xFFFFFF);
+        guiGraphics.text(this.font, statusText, 15, 44, 0xFFFFFF);
 
         final int heat = this.menu.getHeatLevel();
         final float heatPct = heat / 10.0f;
@@ -399,7 +413,7 @@ public class StellarNexusControllerScreen extends AbstractContainerScreen<Stella
             heatStr = String.format("%.0f%% \u26A0", heatPct);
             heatColor = 0xFF0000;
         }
-        guiGraphics.drawString(this.font, heatStr, 127, 44, heatColor);
+        guiGraphics.text(this.font, heatStr, 127, 44, heatColor);
 
         Component recipeName = Component.literal("No Program");
         if (!this.availableRecipes.isEmpty()) {
@@ -408,36 +422,36 @@ public class StellarNexusControllerScreen extends AbstractContainerScreen<Stella
         
         final int textWidth = this.font.width(recipeName);
         final int textX = 44 + ((103 - textWidth) / 2);
-        guiGraphics.drawString(this.font, recipeName, textX, 72, 0xFFFFFF);
+        guiGraphics.text(this.font, recipeName, textX, 72, 0xFFFFFF);
         
         final int p = this.menu.getProgress();
         final int max = this.menu.getTotalTime();
         if (max > 0) {
             final String prog = String.format("%.1f %%", (p / (float)max) * 100f);
-            guiGraphics.drawString(this.font, prog, 22, 95, 0x00FF00);
+            guiGraphics.text(this.font, prog, 22, 95, 0x00FF00);
         }
         
         final int fl = this.menu.getFieldLevel();
         final String fieldLevel = fl > 0 ? "Mk." + toRoman(fl) : "Lv. 0";
         final int fieldColor = fl >= 3 ? 0xFF00FF : (fl >= 2 ? 0xAA00AA : (fl >= 1 ? 0x8800AA : 0x666666));
-        guiGraphics.drawString(this.font, fieldLevel, 15, 131, fieldColor);
+        guiGraphics.text(this.font, fieldLevel, 15, 131, fieldColor);
         
         final int energyPct = this.menu.getEnergyPercent();
         final String energyAmount = energyPct + "%";
         final int energyColor = energyPct >= 100 ? 0x00FF00 : (energyPct > 50 ? 0xFFFF00 : 0xFF4444);
-        guiGraphics.drawString(this.font, energyAmount, 127, 131, energyColor);
+        guiGraphics.text(this.font, energyAmount, 127, 131, energyColor);
 
         final boolean safeMode = this.menu.isSafeMode();
-        guiGraphics.drawString(this.font, safeMode ? "§a●" : "§c●", -3, 110, 0xFFFFFF);
+        guiGraphics.text(this.font, safeMode ? "§a●" : "§c●", -3, 110, 0xFFFFFF);
 
         final boolean autoStart = this.menu.isAutoStart();
-        guiGraphics.drawString(this.font, autoStart ? "§a●" : "§c●", -3, 92, 0xFFFFFF);
+        guiGraphics.text(this.font, autoStart ? "§a●" : "§c●", -3, 92, 0xFFFFFF);
 
         final boolean isLocked = this.menu.isSimulationLocked();
-        guiGraphics.drawString(this.font, isLocked ? "§a●" : "§c●", -3, 128, 0xFFFFFF);
+        guiGraphics.text(this.font, isLocked ? "§a●" : "§c●", -3, 128, 0xFFFFFF);
 
         final boolean overclocked = this.menu.isOverclocked();
-        guiGraphics.drawString(this.font, overclocked ? "§a●" : "§c●", -3, 74, 0xFFFFFF);
+        guiGraphics.text(this.font, overclocked ? "§a●" : "§c●", -3, 74, 0xFFFFFF);
     }
 
     /**
@@ -449,7 +463,7 @@ public class StellarNexusControllerScreen extends AbstractContainerScreen<Stella
         if (simName != null && !simName.isEmpty()) {
             return simName;
         }
-        return formatRecipeId(holder.id());
+        return formatRecipeId(holder.id().identifier());
     }
 
     private String formatRecipeId(final Identifier id) {

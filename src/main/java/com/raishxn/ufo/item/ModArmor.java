@@ -13,7 +13,7 @@ import java.util.function.Supplier;
 
 import static com.raishxn.ufo.item.ModItems.ITEMS;
 
-public class ModArmor {
+public final class ModArmor {
 
     public static final DeferredItem<Item> UFO_HELMET = ITEMS.registerItem("ufo_helmet",
             properties -> new UfoArmorItem(ModArmorMaterials.UFO_ARMOR, ArmorType.HELMET, properties

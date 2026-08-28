@@ -36,7 +36,7 @@ public abstract class TranscendingMatterFluid extends BaseFlowingFluid {
     protected boolean canConvertToSource(final Level level) {
         return false;
     }
-    public static class Source extends TranscendingMatterFluid {
+    public static final class Source extends TranscendingMatterFluid {
         public Source() { super(); }
         public int getAmount(final FluidState state) {
             return 8; // Bloco cheio
@@ -45,7 +45,7 @@ public abstract class TranscendingMatterFluid extends BaseFlowingFluid {
             return true;
         }
     }
-    public static class Flowing extends TranscendingMatterFluid {
+    public static final class Flowing extends TranscendingMatterFluid {
         public Flowing() { super(); }
         protected void createFluidStateDefinition(final StateDefinition.Builder<Fluid, FluidState> builder) {
             super.createFluidStateDefinition(builder);

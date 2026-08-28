@@ -15,7 +15,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RenderGuiEvent;
 
 @EventBusSubscriber(value = Dist.CLIENT)
-public class ClientForgeEvents {
+public final class ClientForgeEvents {
 
     @SubscribeEvent
     public static void onRightClickBlock(final net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.RightClickBlock event) {

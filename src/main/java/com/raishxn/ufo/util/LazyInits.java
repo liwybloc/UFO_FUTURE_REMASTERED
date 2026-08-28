@@ -3,7 +3,7 @@ package com.raishxn.ufo.util;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LazyInits {
+public final class LazyInits {
 
     private static final List<Runnable> INIT_F = new ArrayList<>();
     private static final List<Runnable> INIT_C = new ArrayList<>();

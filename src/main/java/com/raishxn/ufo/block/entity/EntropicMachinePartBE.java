@@ -15,7 +15,7 @@ import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class EntropicMachinePartBE extends AENetworkedBlockEntity implements IMultiblockPart {
+public final class EntropicMachinePartBE extends AENetworkedBlockEntity implements IMultiblockPart {
     @Nullable
     private BlockPos controllerPos;
 

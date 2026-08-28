@@ -20,6 +20,7 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 
 public abstract class AbstractEntropicMachineBlock<T extends AbstractEntropicMachineBE> extends AEBaseEntityBlock<T> {
     public static final BooleanProperty FORMED = BooleanProperty.create("formed");
@@ -37,7 +38,7 @@ public abstract class AbstractEntropicMachineBlock<T extends AbstractEntropicMac
     }
 
     @Override
-    protected InteractionResult useWithoutItem(final BlockState state, final Level level, final BlockPos pos, final Player player, final BlockHitResult hitResult) {
+    protected @NonNull InteractionResult useWithoutItem(final BlockState state, final Level level, final BlockPos pos, final Player player, final BlockHitResult hitResult) {
         final IEntropicMachineController controller = EntropicMachineLocator.findController(level, pos);
         if (!(controller instanceof final AbstractEntropicMachineBE be)) {
             return InteractionResult.PASS;
@@ -58,7 +59,7 @@ public abstract class AbstractEntropicMachineBlock<T extends AbstractEntropicMac
     }
 
     @Override
-    protected void neighborChanged(final BlockState state, final Level level, final BlockPos pos, final Block changedBlock, final Orientation orientation, final boolean isMoving) {
+    protected void neighborChanged(final @NonNull BlockState state, final @NonNull Level level, final @NonNull BlockPos pos, final @NonNull Block changedBlock, final Orientation orientation, final boolean isMoving) {
         super.neighborChanged(state, level, pos, changedBlock, orientation, isMoving);
         if (!level.isClientSide()) {
             EntropicMachineLocator.markNearbyDirty(level, pos);
@@ -66,7 +67,7 @@ public abstract class AbstractEntropicMachineBlock<T extends AbstractEntropicMac
     }
 
     @Override
-    protected void affectNeighborsAfterRemoval(final BlockState state, final ServerLevel level, final BlockPos pos, final boolean isMoving) {
+    protected void affectNeighborsAfterRemoval(final @NonNull BlockState state, final @NonNull ServerLevel level, final @NonNull BlockPos pos, final boolean isMoving) {
         EntropicMachineLocator.markNearbyDirty(level, pos);
         super.affectNeighborsAfterRemoval(state, level, pos, isMoving);
     }
@@ -85,5 +86,5 @@ public abstract class AbstractEntropicMachineBlock<T extends AbstractEntropicMac
     }
 
     @Override
-    protected abstract MapCodec<? extends AEBaseEntityBlock<T>> codec();
+    protected abstract @NonNull MapCodec<? extends AEBaseEntityBlock<T>> codec();
 }

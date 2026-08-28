@@ -17,7 +17,7 @@ import net.neoforged.neoforge.transfer.energy.EnergyHandler;
 
 import java.util.List;
 
-public class UfoEnergyAxeItem extends AxeItem implements IEnergyTool, IHasModeHUD, IHasCycleableModes {
+public final class UfoEnergyAxeItem extends AxeItem implements IEnergyTool, IHasModeHUD, IHasCycleableModes {
 
     private static final int ENERGY_COST_NORMAL = 150;
     private static final int ENERGY_COST_FAST = 1500;

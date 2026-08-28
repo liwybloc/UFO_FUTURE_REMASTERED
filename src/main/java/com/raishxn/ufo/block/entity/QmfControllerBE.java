@@ -19,7 +19,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class QmfControllerBE extends AbstractParallelMultiblockControllerBE {
+public final class QmfControllerBE extends AbstractParallelMultiblockControllerBE {
 
     private static MultiblockPattern PATTERN;
 

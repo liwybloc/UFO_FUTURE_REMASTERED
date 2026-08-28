@@ -36,7 +36,7 @@ import appeng.menu.interfaces.IProgressProvider;
 import appeng.menu.slot.AppEngSlot;
 import appeng.menu.slot.OutputSlot;
 
-public class DimensionalMatterAssemblerMenu extends UpgradeableMenu<DimensionalMatterAssemblerBlockEntity>
+public final class DimensionalMatterAssemblerMenu extends UpgradeableMenu<DimensionalMatterAssemblerBlockEntity>
         implements IProgressProvider, IFluidTankHandler {
 
     @GuiSync(2)

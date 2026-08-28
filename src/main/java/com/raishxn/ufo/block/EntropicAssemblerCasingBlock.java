@@ -5,8 +5,9 @@ import com.raishxn.ufo.block.entity.EntropicAssemblerMatrixBE;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
+import org.jspecify.annotations.NonNull;
 
-public class EntropicAssemblerCasingBlock extends AbstractEntropicMachineBlock<EntropicAssemblerMatrixBE> {
+public final class EntropicAssemblerCasingBlock extends AbstractEntropicMachineBlock<EntropicAssemblerMatrixBE> {
     public static final MapCodec<EntropicAssemblerCasingBlock> CODEC = simpleCodec(EntropicAssemblerCasingBlock::new);
 
     public EntropicAssemblerCasingBlock() {
@@ -23,7 +24,7 @@ public class EntropicAssemblerCasingBlock extends AbstractEntropicMachineBlock<E
     }
 
     @Override
-    protected MapCodec<? extends AbstractEntropicMachineBlock<EntropicAssemblerMatrixBE>> codec() {
+    protected @NonNull MapCodec<? extends AbstractEntropicMachineBlock<EntropicAssemblerMatrixBE>> codec() {
         return CODEC;
     }
 

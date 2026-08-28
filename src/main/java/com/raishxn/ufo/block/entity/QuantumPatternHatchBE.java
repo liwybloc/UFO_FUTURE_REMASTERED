@@ -28,7 +28,7 @@ import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class QuantumPatternHatchBE extends PatternProviderBlockEntity implements IMultiblockPart, MenuProvider {
+public final class QuantumPatternHatchBE extends PatternProviderBlockEntity implements IMultiblockPart, MenuProvider {
     public static final int PATTERN_CAPACITY = 72;
 
     @Nullable

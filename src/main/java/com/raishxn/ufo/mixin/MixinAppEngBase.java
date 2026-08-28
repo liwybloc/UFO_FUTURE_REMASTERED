@@ -7,7 +7,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(value = AppEngBase.class, remap = false)
-public class MixinAppEngBase {
+public final class MixinAppEngBase {
 
     private static boolean ufo$postInitComplete = false;
 

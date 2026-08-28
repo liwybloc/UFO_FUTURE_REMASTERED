@@ -36,7 +36,7 @@ public abstract class RawStarMatterPlasmaFluid extends BaseFlowingFluid {
     protected boolean canConvertToSource(final Level level) {
         return false;
     }
-    public static class Source extends RawStarMatterPlasmaFluid {
+    public static final class Source extends RawStarMatterPlasmaFluid {
         public Source() { super(); }
         public int getAmount(final FluidState state) {
             return 8; // Bloco cheio
@@ -45,7 +45,7 @@ public abstract class RawStarMatterPlasmaFluid extends BaseFlowingFluid {
             return true;
         }
     }
-    public static class Flowing extends RawStarMatterPlasmaFluid {
+    public static final class Flowing extends RawStarMatterPlasmaFluid {
         public Flowing() { super(); }
         protected void createFluidStateDefinition(final StateDefinition.Builder<Fluid, FluidState> builder) {
             super.createFluidStateDefinition(builder);

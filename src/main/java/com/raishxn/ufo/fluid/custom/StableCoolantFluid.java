@@ -17,7 +17,7 @@ public abstract class StableCoolantFluid extends BaseFlowingFluid {
                 .block(ModBlocks.STABLE_COOLANT_BLOCK));
     }
 
-    public static class Source extends StableCoolantFluid {
+    public static final class Source extends StableCoolantFluid {
         public Source() {
             super();
         }
@@ -31,7 +31,7 @@ public abstract class StableCoolantFluid extends BaseFlowingFluid {
         }
     }
 
-    public static class Flowing extends StableCoolantFluid {
+    public static final class Flowing extends StableCoolantFluid {
         public Flowing() {
             super();
             registerDefaultState(getStateDefinition().any().setValue(LEVEL, 7));

@@ -38,7 +38,7 @@ import java.util.*;
  *     .build();
  * }</pre>
  */
-public class MultiblockPattern {
+public final class MultiblockPattern {
 
     /** Functional interface used to test whether a block satisfies a pattern slot. */
     @FunctionalInterface
@@ -268,7 +268,7 @@ public class MultiblockPattern {
             boolean hasUnloadedPositions) {}
 
 
-    public static class Builder {
+    public static final class Builder {
         private final List<String[]> layers = new ArrayList<>();
         private final Map<Character, BlockPredicate> legend = new HashMap<>();
         private final Map<Character, Component> legendNames = new HashMap<>();

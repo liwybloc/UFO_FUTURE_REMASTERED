@@ -6,7 +6,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
-public class AnimatedNameItem extends Item {
+public final class AnimatedNameItem extends Item {
 
     private final ChatFormatting[] colors;
 

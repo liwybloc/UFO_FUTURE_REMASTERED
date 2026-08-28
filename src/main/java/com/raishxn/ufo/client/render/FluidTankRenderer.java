@@ -15,7 +15,7 @@ import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.FluidType;
 import org.joml.Matrix4f;
 
-public class FluidTankRenderer {
+public final class FluidTankRenderer {
     private final long capacity;
     private final int width;
     private final int height;

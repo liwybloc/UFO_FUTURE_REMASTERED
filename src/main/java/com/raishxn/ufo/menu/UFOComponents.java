@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class UFOComponents extends ComponentRegistry {
+public final class UFOComponents extends ComponentRegistry {
 
     public static final UFOComponents INSTANCE = new UFOComponents();
     UFOComponents() {

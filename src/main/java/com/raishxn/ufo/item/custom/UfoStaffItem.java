@@ -12,7 +12,7 @@ import net.minecraft.world.level.Level;
 
 import java.util.List;
 
-public class UfoStaffItem extends Item implements IEnergyTool {
+public final class UfoStaffItem extends Item implements IEnergyTool {
 
     public UfoStaffItem(final Properties pProperties) {
         super(pProperties);

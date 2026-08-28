@@ -19,7 +19,7 @@ public abstract class TemporalFluid extends BaseFlowingFluid {
                 .block(ModBlocks.TEMPORAL_FLUID_BLOCK));
     }
 
-    public static class Source extends TemporalFluid {
+    public static final class Source extends TemporalFluid {
         public Source() {
             super();
         }
@@ -33,7 +33,7 @@ public abstract class TemporalFluid extends BaseFlowingFluid {
         }
     }
 
-    public static class Flowing extends TemporalFluid {
+    public static final class Flowing extends TemporalFluid {
         public Flowing() {
             super();
             registerDefaultState(getStateDefinition().any().setValue(LEVEL, 7));

@@ -14,7 +14,7 @@ import net.minecraft.world.level.Level;
 
 import java.util.List;
 
-public class UfoEnergyFishingRodItem extends FishingRodItem implements IEnergyTool {
+public final class UfoEnergyFishingRodItem extends FishingRodItem implements IEnergyTool {
 
     public UfoEnergyFishingRodItem(final Properties pProperties) {
         super(pProperties.stacksTo(1));

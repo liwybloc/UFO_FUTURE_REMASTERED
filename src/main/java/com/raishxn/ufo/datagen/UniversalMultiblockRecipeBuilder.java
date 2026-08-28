@@ -14,7 +14,7 @@ import net.neoforged.neoforge.fluids.FluidStack;
 import java.util.ArrayList;
 import java.util.List;
 
-public class UniversalMultiblockRecipeBuilder {
+public final class UniversalMultiblockRecipeBuilder {
     private final String name;
     private final UniversalMultiblockMachineKind machine;
     private final List<UniversalMultiblockRecipe.ItemRequirement> itemInputs = new ArrayList<>();

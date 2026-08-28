@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.OptionalInt;
 
-public class UfoTutorialScreen extends Screen {
+public final class UfoTutorialScreen extends Screen {
     private static final int SIDEBAR_WIDTH = 172;
     private static final int TIMELINE_HEIGHT = 44;
     private static final int TICKS_PER_BLOCK = 6;

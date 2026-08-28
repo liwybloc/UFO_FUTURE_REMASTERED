@@ -36,7 +36,7 @@ import appeng.block.AEBaseEntityBlock;
 import appeng.menu.MenuOpener;
 import appeng.menu.locator.MenuLocators;
 
-public class DimensionalMatterAssemblerBlock extends AEBaseEntityBlock<DimensionalMatterAssemblerBlockEntity> {
+public final class DimensionalMatterAssemblerBlock extends AEBaseEntityBlock<DimensionalMatterAssemblerBlockEntity> {
 
     public static final BooleanProperty WORKING = BooleanProperty.create("working");
 

@@ -17,7 +17,7 @@ import java.util.List;
  * Extends AE2's UpgradeCardItem so it is accepted by AE2's upgrade slot validation.
  * Cuida automaticamente da lógica da tooltip (com SHIFT).
  */
-public class BaseCatalystItem extends UpgradeCardItem {
+public final class BaseCatalystItem extends UpgradeCardItem {
 
     protected final String family;
     protected final int tier;

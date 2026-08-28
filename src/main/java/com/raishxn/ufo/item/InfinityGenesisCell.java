@@ -16,7 +16,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.Optional;
 
-public class InfinityGenesisCell extends AEBaseItem {
+public final class InfinityGenesisCell extends AEBaseItem {
 
     public InfinityGenesisCell(final Item.Properties properties) {
         super(properties.stacksTo(1).rarity(Rarity.EPIC).fireResistant());

@@ -17,7 +17,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 
-public class EntropicConvergenceEngineBlock extends AbstractCraftingUnitBlock<EntropicConvergenceEngineBE> {
+public final class EntropicConvergenceEngineBlock extends AbstractCraftingUnitBlock<EntropicConvergenceEngineBE> {
     public EntropicConvergenceEngineBlock(final BlockBehaviour.Properties properties) {
         super(metalProps(properties), CraftingUnitType.UNIT);
     }

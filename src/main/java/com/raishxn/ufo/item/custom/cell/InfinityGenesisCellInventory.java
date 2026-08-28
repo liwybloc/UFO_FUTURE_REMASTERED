@@ -22,7 +22,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class InfinityGenesisCellInventory implements StorageCell {
+public final class InfinityGenesisCellInventory implements StorageCell {
     public static final ICellHandler HANDLER = new Handler();
 
     private final ItemStack stack;
@@ -115,7 +115,7 @@ public class InfinityGenesisCellInventory implements StorageCell {
         return false;
     }
 
-    private static class Handler implements ICellHandler {
+    private static final class Handler implements ICellHandler {
         @Override
         public boolean isCell(final ItemStack stack) {
             return !stack.isEmpty() && stack.getItem() instanceof InfinityGenesisCell && stack.getCount() == 1;

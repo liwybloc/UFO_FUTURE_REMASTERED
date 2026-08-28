@@ -12,7 +12,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jetbrains.annotations.NotNull;
 
-public class QuantumCryoforgeControllerMenu extends AbstractUniversalMultiblockControllerMenu<QuantumCryoforgeControllerBE> {
+public final class QuantumCryoforgeControllerMenu extends AbstractUniversalMultiblockControllerMenu<QuantumCryoforgeControllerBE> {
 
     public QuantumCryoforgeControllerMenu(final int id, final Inventory inv, final FriendlyByteBuf extraData) {
         this(id, inv, inv.player.level().getBlockEntity(extraData.readBlockPos()));

@@ -7,7 +7,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 
-public class AnimatedModCellItem extends ModCellItem {
+public final class AnimatedModCellItem extends ModCellItem {
 
     private final String baseNameKey;
     private final String tierNameKey;

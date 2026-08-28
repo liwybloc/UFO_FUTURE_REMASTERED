@@ -11,7 +11,7 @@ import net.minecraft.world.item.equipment.ArmorType;
 
 import java.util.function.Consumer;
 
-public class AstralNexusArmorItem extends Item {
+public final class AstralNexusArmorItem extends Item {
 
     public AstralNexusArmorItem(final ArmorMaterial material, final ArmorType type, final Item.Properties properties) {
         super(properties.humanoidArmor(material, type).stacksTo(1));

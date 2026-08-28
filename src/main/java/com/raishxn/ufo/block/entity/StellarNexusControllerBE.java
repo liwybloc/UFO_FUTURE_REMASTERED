@@ -78,7 +78,7 @@ import java.util.Optional;
 import com.raishxn.ufo.screen.StellarNexusControllerMenu;
 import com.raishxn.ufo.block.MultiblockBlocks;
 
-public class StellarNexusControllerBE extends BlockEntity implements IMultiblockController, MenuProvider {
+public final class StellarNexusControllerBE extends BlockEntity implements IMultiblockController, MenuProvider {
 
     private boolean assembled = false;
     private boolean structureDirty = true;

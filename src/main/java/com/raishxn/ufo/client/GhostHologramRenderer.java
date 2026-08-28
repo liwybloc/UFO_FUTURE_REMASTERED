@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @EventBusSubscriber(value = Dist.CLIENT)
-public class GhostHologramRenderer {
+public final class GhostHologramRenderer {
 
     private static BlockPos activeControllerPos;
     private static net.minecraft.core.Direction activeFacing;

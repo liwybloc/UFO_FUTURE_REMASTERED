@@ -13,7 +13,7 @@ import net.neoforged.neoforge.transfer.energy.EnergyHandler;
 import net.neoforged.neoforge.transfer.transaction.SnapshotJournal;
 import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 
-public class UfoEnergyCellBlockEntity extends EnergyCellBlockEntity {
+public final class UfoEnergyCellBlockEntity extends EnergyCellBlockEntity {
     private final SnapshotJournal<Double> energyJournal = new SnapshotJournal<>() {
         @Override
         protected Double createSnapshot() {

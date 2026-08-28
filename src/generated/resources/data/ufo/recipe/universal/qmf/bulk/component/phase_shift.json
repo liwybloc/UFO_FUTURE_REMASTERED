@@ -13,7 +13,7 @@
       "ingredient": "ufo:dimensional_processor"
     },
     {
-      "amount": 16384,
+      "amount": 2048,
       "ingredient": "ae2:cell_component_256k"
     },
     {
@@ -31,5 +31,5 @@
   },
   "machine": "qmf",
   "recipe_name": "universal/qmf/bulk/component/phase_shift",
-  "time": 600
+  "time": 300
 }

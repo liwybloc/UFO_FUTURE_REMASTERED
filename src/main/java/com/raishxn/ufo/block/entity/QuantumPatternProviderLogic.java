@@ -15,7 +15,7 @@ import org.jetbrains.annotations.Nullable;
  * If this hatch is linked to a multiblock controller that accepts AE2 crafting plans,
  * forward the pattern directly to that controller.
  */
-public class QuantumPatternProviderLogic extends PatternProviderLogic {
+public final class QuantumPatternProviderLogic extends PatternProviderLogic {
 
     private final QuantumPatternHatchBE hatch;
 

@@ -19,7 +19,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 
-public class EntropicConvergenceCasingBlock extends AbstractCraftingUnitBlock<EntropicConvergenceEngineBE> {
+public final class EntropicConvergenceCasingBlock extends AbstractCraftingUnitBlock<EntropicConvergenceEngineBE> {
     public static final MapCodec<EntropicConvergenceCasingBlock> CODEC = simpleCodec(EntropicConvergenceCasingBlock::new);
 
     public EntropicConvergenceCasingBlock() {

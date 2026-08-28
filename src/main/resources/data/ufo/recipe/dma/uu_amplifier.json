@@ -9,7 +9,7 @@
   ],
   "fluid_outputs": [
     {
-      "#": 250,
+      "#": 500,
       "#t": "ae2:f",
       "id": "ufo:source_uu_amplifier_fluid"
     }
@@ -20,5 +20,5 @@
     }
   ],
   "item_outputs": [],
-  "time": 300
+  "time": 100
 }

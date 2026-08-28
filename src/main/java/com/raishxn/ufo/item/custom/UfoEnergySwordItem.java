@@ -16,7 +16,7 @@ import net.minecraft.world.level.Level;
 
 import java.util.List;
 
-public class UfoEnergySwordItem extends Item implements IEnergyTool {
+public final class UfoEnergySwordItem extends Item implements IEnergyTool {
 
     public UfoEnergySwordItem(final ToolMaterial material, final Properties properties) {
         super(properties.sword(material, 3, -2.0F).stacksTo(1));

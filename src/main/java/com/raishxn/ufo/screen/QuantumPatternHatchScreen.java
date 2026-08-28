@@ -11,7 +11,7 @@ import appeng.client.gui.widgets.ToolboxPanel;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 
-public class QuantumPatternHatchScreen extends AEBaseScreen<QuantumPatternHatchMenu> {
+public final class QuantumPatternHatchScreen extends AEBaseScreen<QuantumPatternHatchMenu> {
     private final SettingToggleButton<YesNo> blockingModeButton;
     private final SettingToggleButton<LockCraftingMode> lockCraftingModeButton;
     private final SettingToggleButton<YesNo> showInPatternAccessTerminalButton;

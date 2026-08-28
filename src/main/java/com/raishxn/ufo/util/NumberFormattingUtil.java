@@ -4,7 +4,7 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Locale;
 
-public class NumberFormattingUtil {
+public final class NumberFormattingUtil {
 
     private static final DecimalFormat COMPACT_FORMAT = new DecimalFormat("#.##");
     private static final String[] SI_UNITS = {"", "K", "M", "G", "T", "P", "E"}; // Base 1000

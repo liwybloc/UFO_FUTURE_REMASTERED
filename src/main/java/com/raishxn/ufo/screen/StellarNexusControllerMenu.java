@@ -15,7 +15,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jetbrains.annotations.NotNull;
 
-public class StellarNexusControllerMenu extends AbstractContainerMenu {
+public final class StellarNexusControllerMenu extends AbstractContainerMenu {
 
     private final StellarNexusControllerBE blockEntity;
     private final ContainerLevelAccess levelAccess;

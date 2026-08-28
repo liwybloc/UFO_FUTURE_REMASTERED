@@ -14,7 +14,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 
-public class QuantumPatternHatchBlock extends PatternProviderBlock {
+public final class QuantumPatternHatchBlock extends PatternProviderBlock {
 
     public QuantumPatternHatchBlock(final BlockBehaviour.Properties properties) {
         super(properties.strength(5.0F).requiresCorrectToolForDrops());

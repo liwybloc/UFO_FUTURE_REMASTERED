@@ -5,7 +5,7 @@ import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 
-public class ModItemProperties {
+public final class ModItemProperties {
     public static void addCustomItemProperties() {
         makeCustomBow(ModTools.UFO_BOW.get());
     }

@@ -118,7 +118,11 @@ public record UniversalMultiblockRecipe(UniversalMultiblockMachineKind machine, 
     public String group() { return "ufo:universal_multiblock"; }
 
     @Override
-    public PlacementInfo placementInfo() { return PlacementInfo.NOT_PLACEABLE; }
+    public PlacementInfo placementInfo() {
+        return PlacementInfo.create(this.itemInputs.stream()
+                .map(ItemRequirement::ingredient)
+                .toList());
+    }
 
     @Override
     public RecipeBookCategory recipeBookCategory() { return RecipeBookCategories.CRAFTING_MISC; }

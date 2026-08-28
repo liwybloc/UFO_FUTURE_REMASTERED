@@ -14,7 +14,7 @@
       "ingredient": "ufo:dimensional_processor"
     },
     {
-      "amount": 256,
+      "amount": 32,
       "ingredient": "ae2:cell_component_256k"
     },
     {
@@ -33,5 +33,5 @@
       "id": "ufo:phase_shift_component_matrix"
     }
   ],
-  "time": 600
+  "time": 300
 }

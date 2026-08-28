@@ -10,7 +10,7 @@ import appeng.menu.implementations.MenuTypeBuilder;
 
 import java.util.function.Supplier;
 
-public class UFOMenus extends MenuRegistry {
+public final class UFOMenus extends MenuRegistry {
 
     public static final UFOMenus INSTANCE = new UFOMenus();
 

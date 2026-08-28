@@ -1,26 +1,13 @@
 package com.raishxn.ufo.fluid;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexFormat;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.resources.Identifier;
-import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
-import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.FluidType;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
-
-import java.util.function.Consumer;
 
 /**
  * Classe base utilitária para facilitar a criação de tipos de fluidos com texturas e cores personalizadas no NeoForge.
  */
-public class BaseFluidType extends FluidType {
+public final class BaseFluidType extends FluidType {
     private final Identifier stillTexture;
     private final Identifier flowingTexture;
     private final Identifier overlayTexture;
@@ -67,39 +54,4 @@ public class BaseFluidType extends FluidType {
         return fogColor;
     }
 
-    public void initializeClient(final Consumer<IClientFluidTypeExtensions> consumer) {
-        consumer.accept(new IClientFluidTypeExtensions() {
-            public @NotNull Identifier getStillTexture() {
-                return stillTexture;
-            }
-
-            public @NotNull Identifier getFlowingTexture() {
-                return flowingTexture;
-            }
-
-            public @Nullable Identifier getOverlayTexture() {
-                return overlayTexture;
-            }
-
-            public @NotNull Identifier getStillTexture(final FluidStack stack) {
-                return stillTexture;
-            }
-
-            public @NotNull Identifier getFlowingTexture(final FluidStack stack) {
-                return flowingTexture;
-            }
-
-            public @Nullable Identifier getOverlayTexture(final FluidStack stack) {
-                return overlayTexture;
-            }
-
-            public int getTintColor() {
-                return tintColor;
-            }
-
-            public int getTintColor(final FluidStack stack) {
-                return tintColor;
-            }
-        });
-    }
 }

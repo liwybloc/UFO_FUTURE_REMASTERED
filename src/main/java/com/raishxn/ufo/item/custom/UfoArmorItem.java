@@ -25,7 +25,7 @@ import net.neoforged.neoforge.transfer.energy.EnergyHandler;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class UfoArmorItem extends Item implements IEnergyTool {
+public final class UfoArmorItem extends Item implements IEnergyTool {
 
     private static final int ENERGY_COST_PER_SECOND = 400; // 20 RF/tick * 20 ticks
     private static final int DRAIN_INTERVAL = 20; // Drain every 20 ticks (1 second) to avoid triggering equip sound

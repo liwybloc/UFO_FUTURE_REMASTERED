@@ -8,7 +8,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import java.util.Map;
 import java.util.HashMap;
 
-public class StellarNexusPatternFactory {
+public final class StellarNexusPatternFactory {
 
     public static Map<Character, BlockState> getDefaultCreativeStates() {
         final Map<Character, BlockState> map = new HashMap<>();

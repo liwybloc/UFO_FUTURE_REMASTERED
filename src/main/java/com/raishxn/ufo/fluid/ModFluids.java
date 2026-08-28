@@ -1,7 +1,7 @@
 package com.raishxn.ufo.fluid;
 
 import com.raishxn.ufo.UfoMod;
-import com.raishxn.ufo.fluid.custom.*; // Importe suas classes novas aqui
+import com.raishxn.ufo.fluid.custom.*;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraft.world.level.material.Fluid;
@@ -9,7 +9,7 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
-public class ModFluids {
+public final class ModFluids {
     public static final DeferredRegister<Fluid> FLUIDS =
             DeferredRegister.create(BuiltInRegistries.FLUID, UfoMod.MOD_ID);
 

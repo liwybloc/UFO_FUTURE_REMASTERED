@@ -34,7 +34,7 @@ import com.geckolib.util.GeckoLibUtil;
 
 import java.util.EnumSet;
 
-public class ApocalypseTypeAEntity extends Monster implements GeoEntity {
+public final class ApocalypseTypeAEntity extends Monster implements GeoEntity {
     private static final RawAnimation IDLE = RawAnimation.begin().thenLoop("idle");
     private static final RawAnimation WALK = RawAnimation.begin().thenLoop("walk");
     private static final RawAnimation DEATH = RawAnimation.begin().thenPlay("death");

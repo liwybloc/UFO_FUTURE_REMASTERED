@@ -9,7 +9,7 @@
   ],
   "item_inputs": [
     {
-      "amount": 57344,
+      "amount": 24576,
       "ingredient": "ufo:scrap"
     }
   ],
@@ -19,5 +19,5 @@
   },
   "machine": "qmf",
   "recipe_name": "universal/qmf/scrap_box_massive",
-  "time": 2000
+  "time": 300
 }

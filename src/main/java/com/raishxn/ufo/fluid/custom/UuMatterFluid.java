@@ -36,7 +36,7 @@ public abstract class UuMatterFluid extends BaseFlowingFluid {
     protected boolean canConvertToSource(final Level level) {
         return false;
     }
-    public static class Source extends UuMatterFluid {
+    public static final class Source extends UuMatterFluid {
         public Source() { super(); }
         public int getAmount(final FluidState state) {
             return 8; // Bloco cheio
@@ -45,7 +45,7 @@ public abstract class UuMatterFluid extends BaseFlowingFluid {
             return true;
         }
     }
-    public static class Flowing extends UuMatterFluid {
+    public static final class Flowing extends UuMatterFluid {
         public Flowing() { super(); }
         protected void createFluidStateDefinition(final StateDefinition.Builder<Fluid, FluidState> builder) {
             super.createFluidStateDefinition(builder);

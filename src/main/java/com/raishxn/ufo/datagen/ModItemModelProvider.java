@@ -20,7 +20,7 @@ import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.minecraft.world.item.BucketItem;
 
-public class ModItemModelProvider extends ItemModelProvider {
+public final class ModItemModelProvider extends ItemModelProvider {
     public ModItemModelProvider(final PackOutput output, final ExistingFileHelper existingFileHelper) {
         super(output, UfoMod.MOD_ID, existingFileHelper);
     }

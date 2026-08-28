@@ -22,7 +22,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 
 @EventBusSubscriber(modid = "ufo", value = Dist.CLIENT)
-public class ModTooltipEventHandler {
+public final class ModTooltipEventHandler {
 
     @SubscribeEvent
     public static void onTooltip(final ItemTooltipEvent event) {

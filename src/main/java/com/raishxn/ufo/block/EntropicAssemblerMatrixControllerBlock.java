@@ -11,7 +11,7 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
-public class EntropicAssemblerMatrixControllerBlock extends EntropicMachineShellBlock implements net.minecraft.world.level.block.EntityBlock {
+public final class EntropicAssemblerMatrixControllerBlock extends EntropicMachineShellBlock implements net.minecraft.world.level.block.EntityBlock {
     public EntropicAssemblerMatrixControllerBlock(final BlockBehaviour.Properties properties) {
         super(properties);
     }

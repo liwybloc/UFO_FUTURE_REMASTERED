@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
-public class ModLootTableProvider {
+public final class ModLootTableProvider {
     public static LootTableProvider create(final PackOutput output, final CompletableFuture<HolderLookup.Provider> lookupProvider) {
         return new LootTableProvider(
                 output,

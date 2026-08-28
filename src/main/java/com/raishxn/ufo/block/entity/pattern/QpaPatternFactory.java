@@ -6,7 +6,7 @@ import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.Map;
 
-public class QpaPatternFactory {
+public final class QpaPatternFactory {
 
     public static Map<Character, BlockState> getDefaultCreativeStates() {
         return QuantumPatternPredicates.getDefaultCreativeStates();

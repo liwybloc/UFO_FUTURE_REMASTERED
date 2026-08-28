@@ -20,7 +20,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.CompletableFuture;
 
-public class ModItemTagProvider extends ItemTagsProvider {
+public final class ModItemTagProvider extends ItemTagsProvider {
     public ModItemTagProvider(final PackOutput output, final CompletableFuture<HolderLookup.Provider> lookupProvider,
                               final CompletableFuture<TagLookup<Block>> blockTags, @Nullable final ExistingFileHelper existingFileHelper) {
         super(output, lookupProvider, blockTags, UfoMod.MOD_ID, existingFileHelper);
