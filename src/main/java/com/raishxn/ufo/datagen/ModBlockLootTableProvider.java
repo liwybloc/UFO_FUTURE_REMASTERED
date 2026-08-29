@@ -7,13 +7,15 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.data.loot.BlockLootSubProvider;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.level.block.Block;
+import org.jspecify.annotations.NonNull;
+
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public final class ModBlockLootTableProvider extends BlockLootSubProvider {
 
-    protected ModBlockLootTableProvider(final HolderLookup.Provider provider) {
+    ModBlockLootTableProvider(final HolderLookup.Provider provider) {
         super(Set.of(), FeatureFlags.REGISTRY.allFlags(), provider);
     }
 
@@ -59,7 +61,7 @@ public final class ModBlockLootTableProvider extends BlockLootSubProvider {
     }
 
     @Override
-    protected Iterable<Block> getKnownBlocks() {
+    protected @NonNull Iterable<Block> getKnownBlocks() {
         return Stream.concat(
                 ModBlocks.BLOCKS.getEntries().stream().map(Holder::value),
                 Stream.concat(

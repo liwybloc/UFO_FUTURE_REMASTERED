@@ -62,7 +62,7 @@ neoForge {
 
         data {
             clientData()
-            programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/main/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+            programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
         }
 
         configureEach {
@@ -79,7 +79,7 @@ neoForge {
     }
 }
 
-sourceSets.main.resources.setSrcDirs(['src/main/resources'])
+sourceSets.main.resources.setSrcDirs(['src/main/resources', 'src/generated/resources'])
 
 sourceSets.main.java.exclude(
         'com/raishxn/ufo/datagen/DataGenerators.java',

@@ -11,7 +11,7 @@
     "amount": 1,
     "id": "ufo:source_liquid_starlight_fluid"
   },
-  "fluid_output_amount": 640000,
+  "fluid_output_amount": 1280000,
   "item_inputs": [
     {
       "amount": 256,

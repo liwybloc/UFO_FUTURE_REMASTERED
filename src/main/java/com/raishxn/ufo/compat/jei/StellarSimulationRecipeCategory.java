@@ -144,17 +144,21 @@ public final class StellarSimulationRecipeCategory
             final long amount = input.getAmount();
 
             final var ingredient = UfoJeiPlugin.stackOf(input);
+            final var displayedIngredient = ingredient.stream()
+                    .map(stack -> stack.copyWithCount(1))
+                    .toList();
 
             builder.addInputSlot(
                             ITEM_INPUT_X + column * SLOT_SPACING,
                             ITEM_INPUT_Y + row * SLOT_SPACING
                     )
-                    .addItemStacks(ingredient)
+                    .addItemStacks(displayedIngredient)
+                    .setOverlay(new AmountOverlay(amount), 0, 0)
                     .addRichTooltipCallback(
                             (_, tooltip) ->
                                     tooltip.add(
                                             Component.literal(
-                                                    "Required: " + amount + "x"
+                                                    "Required: " + formatExactAmount(amount) + "x"
                                             )
                                     )
                     );
@@ -220,13 +224,14 @@ public final class StellarSimulationRecipeCategory
                             ITEM_OUTPUT_X + column * SLOT_SPACING,
                             ITEM_OUTPUT_Y + row * SLOT_SPACING
                     )
-                    .add(itemKey.toStack(safeInt(amount)))
+                    .add(itemKey.toStack(1))
+                    .setOverlay(new AmountOverlay(amount), 0, 0)
                     .addRichTooltipCallback(
                             (recipeSlotView, tooltip) ->
                                     tooltip.add(
                                             Component.literal(
                                                     "Amount Produced: "
-                                                            + formatAmount(amount)
+                                                            + formatExactAmount(amount)
                                             )
                                     )
                     );
@@ -584,47 +589,47 @@ public final class StellarSimulationRecipeCategory
 
     public static String formatAmount(final long amount) {
         if (amount >= 1_000_000_000L) {
-            return formatScaledAmount(
-                    amount,
-                    1_000_000_000.0,
-                    "G"
-            );
+            return amount / 1_000_000_000L + "B";
         }
 
         if (amount >= 1_000_000L) {
-            return formatScaledAmount(
-                    amount,
-                    1_000_000.0,
-                    "M"
-            );
+            return amount / 1_000_000L + "M";
         }
 
         if (amount >= 1_000L) {
-            return formatScaledAmount(
-                    amount,
-                    1_000.0,
-                    "K"
-            );
+            return amount / 1_000L + "K";
         }
 
         return Long.toString(amount);
     }
 
-    private static String formatScaledAmount(
-            final long amount,
-            final double divisor,
-            final String suffix
-    ) {
-        final double value = amount / divisor;
+    private static String formatExactAmount(final long amount) {
+        return String.format(Locale.ROOT, "%,d", amount);
+    }
 
-        return value == Math.rint(value)
-                ? "%d%s".formatted((long) value, suffix)
-                : String.format(
-                Locale.ROOT,
-                "%.1f%s",
-                value,
-                suffix
-        );
+    private record AmountOverlay(long amount) implements IDrawable {
+        @Override
+        public int getWidth() {
+            return 16;
+        }
+
+        @Override
+        public int getHeight() {
+            return 16;
+        }
+
+        @Override
+        public void draw(final GuiGraphicsExtractor gfx, final int xOffset, final int yOffset) {
+            final Font font = Minecraft.getInstance().font;
+            final String text = formatAmount(this.amount);
+            final float scale = 0.65F;
+
+            gfx.pose().pushMatrix();
+            gfx.pose().translate(xOffset + 16, yOffset + 18);
+            gfx.pose().scale(scale, scale);
+            gfx.text(font, text, -font.width(text), -font.lineHeight, 0xFFFFFFFF, true);
+            gfx.pose().popMatrix();
+        }
     }
 
     private static String formatFluidName(final String path) {

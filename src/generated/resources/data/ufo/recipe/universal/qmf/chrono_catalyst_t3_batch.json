@@ -1,23 +1,23 @@
 {
   "type": "ufo:universal_multiblock",
-  "energy": 12000000,
+  "energy": 6000000,
   "fluid_inputs": [
     {
-      "amount": 40000,
+      "amount": 10000,
       "fluid": "ufo:transcending_matter"
     }
   ],
   "item_inputs": [
     {
-      "amount": 32,
+      "amount": 16,
       "ingredient": "ufo:chrono_catalyst_t2"
     },
     {
-      "amount": 32,
+      "amount": 8,
       "ingredient": "ufo:pulsar_matter"
     },
     {
-      "amount": 128,
+      "amount": 32,
       "ingredient": "ufo:dimensional_processor"
     }
   ],

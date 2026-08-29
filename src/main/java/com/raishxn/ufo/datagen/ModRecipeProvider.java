@@ -168,7 +168,7 @@ public final class ModRecipeProvider extends RecipeProvider {
         DMARecipeBuilder.create("dma/component/phase_shift")
                 .output(ModItems.PHASE_SHIFT_COMPONENT_MATRIX.get())
                 .inputItem(ModItems.DIMENSIONAL_PROCESSOR.get(), 8)
-                .inputItem(AEItems.CELL_COMPONENT_256K.get(), 256)
+                .inputItem(AEItems.CELL_COMPONENT_256K.get(), 32)
                 .inputItem(AEBlocks.QUARTZ_VIBRANT_GLASS, 8)
                 .inputItem(Items.NETHER_STAR,8)
                 .inputFluid(ModFluids.SOURCE_LIQUID_STARLIGHT_FLUID.get(), 1000)
@@ -319,8 +319,8 @@ public final class ModRecipeProvider extends RecipeProvider {
     private void buildCatalystsDMA(final RecipeOutput c) {
         this.createProgressiveCatalyst(c, ModItems.MATTERFLOW_CATALYST_T1.get(), ModItems.OBSIDIAN_MATRIX.get(), 1, ModItems.WHITE_DWARF_FRAGMENT_DUST.get(), 4, ModItems.PROTO_MATTER.get(), 2, 0, ModFluids.SOURCE_LIQUID_STARLIGHT_FLUID, 1000, 100000, 200);
         this.createProgressiveCatalyst(c, ModItems.MATTERFLOW_CATALYST_T2.get(), ModItems.MATTERFLOW_CATALYST_T1.get(), 2, null, 0, ModItems.CORPOREAL_MATTER.get(), 2, 2, ModFluids.SOURCE_PRIMORDIAL_MATTER_FLUID, 2000, 500000, 400);
-        this.createProgressiveCatalyst(c, ModItems.CHRONO_CATALYST_T1.get(), ModItems.OBSIDIAN_MATRIX.get(), 1, ModItems.NEUTRON_STAR_FRAGMENT_DUST.get(), 4, ModItems.PROTO_MATTER.get(), 2, 0, ModFluids.SOURCE_SPATIAL_FLUID, 1000, 150000, 200);
-        this.createProgressiveCatalyst(c, ModItems.CHRONO_CATALYST_T2.get(), ModItems.CHRONO_CATALYST_T1.get(), 2, null, 0, ModItems.CORPOREAL_MATTER.get(), 2, 2, ModFluids.SOURCE_SPATIAL_FLUID, 2000, 300000, 400);
+        this.createProgressiveCatalyst(c, ModItems.CHRONO_CATALYST_T1.get(), ModItems.OBSIDIAN_MATRIX.get(), 1, ModItems.NEUTRON_STAR_FRAGMENT_DUST.get(), 2, ModItems.PROTO_MATTER.get(), 1, 0, ModFluids.SOURCE_SPATIAL_FLUID, 250, 75000, 200);
+        this.createProgressiveCatalyst(c, ModItems.CHRONO_CATALYST_T2.get(), ModItems.CHRONO_CATALYST_T1.get(), 1, null, 0, ModItems.CORPOREAL_MATTER.get(), 1, 1, ModFluids.SOURCE_SPATIAL_FLUID, 500, 150000, 400);
         this.createProgressiveCatalyst(c, ModItems.OVERFLUX_CATALYST_T1.get(), ModItems.OBSIDIAN_MATRIX.get(), 1, ModItems.PULSAR_FRAGMENT_DUST.get(), 4, ModItems.PROTO_MATTER.get(), 2, 0, ModFluids.SOURCE_RAW_STAR_MATTER_PLASMA_FLUID, 1000, 150000, 200);
         this.createProgressiveCatalyst(c, ModItems.OVERFLUX_CATALYST_T2.get(), ModItems.OVERFLUX_CATALYST_T1.get(), 2, null, 0, ModItems.CORPOREAL_MATTER.get(), 2, 2, ModFluids.SOURCE_RAW_STAR_MATTER_PLASMA_FLUID, 2000, 600000, 400);
         this.createProgressiveCatalyst(c, ModItems.QUANTUM_CATALYST_T1.get(), ModItems.QUANTUM_ANOMALY.get(), 1, ModItems.NUCLEAR_STAR.get(), 1, ModItems.PROTO_MATTER.get(), 2, 0, ModFluids.SOURCE_SPATIAL_FLUID, 1000, 200000, 200);
@@ -768,12 +768,12 @@ public final class ModRecipeProvider extends RecipeProvider {
                 .save(c);
 
         UniversalMultiblockRecipeBuilder.create("universal/qmf/chrono_catalyst_t3_batch", UniversalMultiblockMachineKind.QMF)
-                .inputItem(ModItems.CHRONO_CATALYST_T2.get(), 32)
-                .inputItem(ModItems.PULSAR_MATTER.get(), 32)
-                .inputItem(ModItems.DIMENSIONAL_PROCESSOR.get(), 128)
-                .inputFluid(ModFluids.SOURCE_TRANSCENDING_MATTER_FLUID.get(), 40000)
+                .inputItem(ModItems.CHRONO_CATALYST_T2.get(), 16)
+                .inputItem(ModItems.PULSAR_MATTER.get(), 8)
+                .inputItem(ModItems.DIMENSIONAL_PROCESSOR.get(), 32)
+                .inputFluid(ModFluids.SOURCE_TRANSCENDING_MATTER_FLUID.get(), 10000)
                 .outputItem(ModItems.CHRONO_CATALYST_T3.get(), 16)
-                .energy(12000000)
+                .energy(6000000)
                 .time(1200)
                 .requiredTier(1)
                 .save(c);

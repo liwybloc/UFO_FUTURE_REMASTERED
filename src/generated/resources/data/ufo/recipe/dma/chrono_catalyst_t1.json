@@ -1,9 +1,9 @@
 {
   "type": "ufo:dimensional_assembly",
-  "energy": 150000,
+  "energy": 75000,
   "fluid_inputs": [
     {
-      "amount": 1000,
+      "amount": 250,
       "ingredient": "ufo:source_spatial_fluid"
     }
   ],
@@ -13,11 +13,11 @@
       "ingredient": "ufo:obsidian_matrix"
     },
     {
-      "amount": 2,
+      "amount": 1,
       "ingredient": "ufo:proto_matter"
     },
     {
-      "amount": 4,
+      "amount": 2,
       "ingredient": "ufo:neutron_star_fragment_dust"
     },
     {
